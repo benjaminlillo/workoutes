@@ -1,0 +1,39 @@
+import Foundation
+import SwiftData
+
+@Model
+final class Workout {
+    var name: String
+    @Relationship(deleteRule: .cascade, inverse: \WorkoutExercise.workout)
+    var exercises: [WorkoutExercise]
+    
+    init(name: String, exercises: [WorkoutExercise] = []) {
+        self.name = name
+        self.exercises = exercises
+    }
+}
+
+@Model
+final class WorkoutExercise {
+    var title: String
+    var subtitle: String
+    var details: String
+    var numberOfSets: Int
+    var reps: Int
+    var increaseLoadNextTime: Bool
+    var isDone: Bool
+    var weight: Double
+    
+    var workout: Workout?
+    
+    init(title: String, subtitle: String, details: String, numberOfSets: Int, reps: Int, increaseLoadNextTime: Bool, weight: Double, isDone: Bool = false) {
+        self.title = title
+        self.subtitle = subtitle
+        self.details = details
+        self.numberOfSets = numberOfSets
+        self.reps = reps
+        self.increaseLoadNextTime = increaseLoadNextTime
+        self.weight = weight
+        self.isDone = isDone
+    }
+}
