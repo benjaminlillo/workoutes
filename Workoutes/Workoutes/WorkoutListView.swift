@@ -5,6 +5,7 @@ struct WorkoutListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [Workout]
     @State private var showingAddSheet = false
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     
     var body: some View {
         NavigationStack {
@@ -31,6 +32,7 @@ struct WorkoutListView: View {
                 CreateWorkoutSheet()
             }
         }
+        .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
     }
     
     private func deleteWorkouts(offsets: IndexSet) {

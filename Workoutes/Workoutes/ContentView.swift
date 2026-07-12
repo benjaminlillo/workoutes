@@ -21,7 +21,6 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
         }
-        .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
     }
 }
 

@@ -14,6 +14,20 @@ final class Workout {
 }
 
 @Model
+final class Tag {
+    var name: String
+    var colorHex: String
+    
+    @Relationship(inverse: \WorkoutExercise.tags)
+    var exercises: [WorkoutExercise] = []
+    
+    init(name: String, colorHex: String) {
+        self.name = name
+        self.colorHex = colorHex
+    }
+}
+
+@Model
 final class WorkoutExercise {
     var title: String
     var subtitle: String
@@ -25,6 +39,7 @@ final class WorkoutExercise {
     var weight: Double
     
     var workouts: [Workout] = []
+    var tags: [Tag] = []
     
     init(title: String, subtitle: String, details: String, numberOfSets: Int, reps: Int, increaseLoadNextTime: Bool, weight: Double, isDone: Bool = false) {
         self.title = title

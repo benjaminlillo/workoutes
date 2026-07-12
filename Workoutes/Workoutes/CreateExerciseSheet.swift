@@ -6,6 +6,9 @@ struct CreateExerciseSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     let workout: Workout
+    @Query(sort: \Tag.name) private var allTags: [Tag]
+    
+    @State private var selectedTags: Set<Tag> = []
     @Query(sort: \WorkoutExercise.title) private var allExercises: [WorkoutExercise]
     
     @State private var title = ""
@@ -51,9 +54,32 @@ struct CreateExerciseSheet: View {
                     TextField("Title", text: $title)
                     TextField("Subtitle (Optional)", text: $subtitle)
                     TextField("Details (Optional)", text: $details)
+                    Section(header: Text("Targets")) {
+                        Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
+                        Stepper("Reps: \(reps)", value: $reps, in: 1...100)
+                    }
                     
-                    Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
-                    Stepper("Reps: \(reps)", value: $reps, in: 1...100)
+                    if !allTags.isEmpty {
+                        Section(header: Text("Tags")) {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(allTags) { tag in
+                                        let isSelected = selectedTags.contains(tag)
+                                        Text(tag.name)
+                                            .font(.subheadline)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
+                                            .foregroundColor(isSelected ? .white : .primary)
+                                            .cornerRadius(16)
+                                            .onTapGesture {
+                                                if isSelected { selectedTags.remove(tag) } else { selectedTags.insert(tag) }
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     
                     HStack {
                         Text("Weight")
@@ -99,6 +125,7 @@ struct CreateExerciseSheet: View {
             weight: weight,
             isDone: false
         )
+        exercise.tags = Array(selectedTags)
         modelContext.insert(exercise)
         workout.exercises.append(exercise)
         dismiss()

@@ -3,6 +3,8 @@ import SwiftData
 
 @main
 struct WorkoutesApp: App {
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Workout.self,
@@ -20,6 +22,7 @@ struct WorkoutesApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
         }
         .modelContainer(sharedModelContainer)
     }

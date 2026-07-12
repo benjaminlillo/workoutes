@@ -4,6 +4,9 @@ import SwiftData
 struct CreateGlobalExerciseSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Tag.name) private var allTags: [Tag]
+    
+    @State private var selectedTags: Set<Tag> = []
     
     @State private var title = ""
     @State private var subtitle = ""
@@ -24,6 +27,28 @@ struct CreateGlobalExerciseSheet: View {
                 Section(header: Text("Targets")) {
                     Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
                     Stepper("Reps: \(reps)", value: $reps, in: 1...100)
+                }
+                
+                if !allTags.isEmpty {
+                    Section(header: Text("Tags")) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(allTags) { tag in
+                                    let isSelected = selectedTags.contains(tag)
+                                    Text(tag.name)
+                                        .font(.subheadline)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
+                                        .foregroundColor(isSelected ? .white : .primary)
+                                        .cornerRadius(16)
+                                        .onTapGesture {
+                                            if isSelected { selectedTags.remove(tag) } else { selectedTags.insert(tag) }
+                                        }
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 Section(header: Text("Starting Load")) {
@@ -56,6 +81,7 @@ struct CreateGlobalExerciseSheet: View {
                             weight: weight,
                             isDone: false
                         )
+                        exercise.tags = Array(selectedTags)
                         modelContext.insert(exercise)
                         dismiss()
                     }
