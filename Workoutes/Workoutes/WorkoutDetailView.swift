@@ -33,9 +33,8 @@ struct WorkoutDetailView: View {
     
     private func deleteExercises(offsets: IndexSet) {
         withAnimation {
-            for index in offsets {
-                let exercise = workout.exercises[index]
-                modelContext.delete(exercise)
+            for index in offsets.sorted(by: >) {
+                workout.exercises.remove(at: index)
             }
         }
     }

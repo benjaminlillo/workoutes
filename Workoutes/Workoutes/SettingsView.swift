@@ -35,10 +35,20 @@ struct ShareSheet: UIViewControllerRepresentable {
 struct SettingsView: View {
     @Query private var workouts: [Workout]
     @State private var shareURL: IdentifiableURL?
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     
     var body: some View {
         NavigationStack {
             List {
+                Section(header: Text("Appearance")) {
+                    Picker("Accent Color", selection: $accentColorRawValue) {
+                        ForEach(ThemeColor.allCases) { theme in
+                            Text(theme.name)
+                                .tag(theme.rawValue)
+                        }
+                    }
+                }
+                
                 Section(header: Text("Data")) {
                     Button(action: exportData) {
                         HStack {

@@ -4,7 +4,7 @@ import SwiftData
 @Model
 final class Workout {
     var name: String
-    @Relationship(deleteRule: .cascade, inverse: \WorkoutExercise.workout)
+    @Relationship(inverse: \WorkoutExercise.workouts)
     var exercises: [WorkoutExercise]
     
     init(name: String, exercises: [WorkoutExercise] = []) {
@@ -24,7 +24,7 @@ final class WorkoutExercise {
     var isDone: Bool
     var weight: Double
     
-    var workout: Workout?
+    var workouts: [Workout] = []
     
     init(title: String, subtitle: String, details: String, numberOfSets: Int, reps: Int, increaseLoadNextTime: Bool, weight: Double, isDone: Bool = false) {
         self.title = title
