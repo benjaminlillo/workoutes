@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct ExportDataDTO: Codable {
     var workouts: [WorkoutDTO]
@@ -76,6 +77,14 @@ struct SettingsView: View {
                             Text("Export Data (JSON)")
                             Spacer()
                             Image(systemName: "square.and.arrow.up")
+                        }
+                    }
+                    
+                    NavigationLink(destination: ImportDataView()) {
+                        HStack {
+                            Text("Import Data (JSON)")
+                            Spacer()
+                            Image(systemName: "square.and.arrow.down")
                         }
                     }
                 }
