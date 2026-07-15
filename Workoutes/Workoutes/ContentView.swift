@@ -8,7 +8,7 @@ struct ContentView: View {
         TabView {
             WorkoutListView()
                 .tabItem {
-                    Label("Workouts", systemImage: "list.bullet.clipboard")
+                    Label("Workouts", systemImage: "list.bullet")
                 }
             
             ExerciseListView()
@@ -18,8 +18,24 @@ struct ContentView: View {
             
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape")
+                    Label("Settings", systemImage: "gear")
                 }
+        }
+        .overlay(alignment: .topTrailing) {
+            Button("Test Live Activity") {
+                let attrs = ExerciseAttributes(exerciseID: "test_isolated", title: "Direct Test", subtitle: "Isolated")
+                let state = ExerciseAttributes.ContentState(isDone: false, weight: 100, reps: 5, sets: 5)
+                if #available(iOS 16.2, *) {
+                    do {
+                        let activity = try Activity.request(attributes: attrs, content: ActivityContent(state: state, staleDate: nil))
+                        print("Isolated Activity Started: \(activity.id)")
+                    } catch {
+                        print("Isolated Error: \(error)")
+                    }
+                }
+            }
+            .padding()
+            .buttonStyle(.borderedProminent)
         }
     }
 }

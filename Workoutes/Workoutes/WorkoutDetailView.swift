@@ -8,7 +8,15 @@ struct WorkoutDetailView: View {
     
     var body: some View {
         List {
-            ForEach(workout.exercises) { exercise in
+            if let activeExercise = workout.exercises.first(where: { $0.isActive }) {
+                ExerciseCardView(exercise: activeExercise, workout: workout)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 4)
+            }
+            
+            ForEach(workout.exercises.filter { !$0.isActive }) { exercise in
                 ExerciseCardView(exercise: exercise, workout: workout)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
@@ -39,8 +47,11 @@ struct WorkoutDetailView: View {
     
     private func deleteExercises(offsets: IndexSet) {
         withAnimation {
+            let inactiveExercises = workout.exercises.filter { !$0.isActive }
             for index in offsets.sorted(by: >) {
-                workout.exercises.remove(at: index)
+                if let exerciseIndex = workout.exercises.firstIndex(of: inactiveExercises[index]) {
+                    workout.exercises.remove(at: exerciseIndex)
+                }
             }
         }
     }

@@ -6,14 +6,84 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		006B432A3006FFF500A0AF66 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006B43293006FFF500A0AF66 /* WidgetKit.framework */; };
+		006B432C3006FFF500A0AF66 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006B432B3006FFF500A0AF66 /* SwiftUI.framework */; };
+		006B433D3006FFF600A0AF66 /* WorkoutesWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 006B43273006FFF500A0AF66 /* WorkoutesWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		006B433B3006FFF600A0AF66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00290BA53003F83F004D59FD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 006B43263006FFF500A0AF66;
+			remoteInfo = WorkoutesWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		006B43423006FFF600A0AF66 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				006B433D3006FFF600A0AF66 /* WorkoutesWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		00290BAD3003F83F004D59FD /* Workoutes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Workoutes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		006B43273006FFF500A0AF66 /* WorkoutesWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WorkoutesWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		006B43293006FFF500A0AF66 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		006B432B3006FFF500A0AF66 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0068420030070495001F84C8 /* Exceptions for "Workoutes" folder in "WorkoutesWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LiveActivity/ExerciseActivityWidget.swift,
+				LiveActivity/ExerciseAttributes.swift,
+			);
+			target = 006B43263006FFF500A0AF66 /* WorkoutesWidgetExtension */;
+		};
+		0068420230070D8E001F84C8 /* Exceptions for "Workoutes" folder in "Workoutes" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LiveActivity/ExerciseActivityWidget.swift,
+			);
+			target = 00290BAC3003F83F004D59FD /* Workoutes */;
+		};
+		006B433E3006FFF600A0AF66 /* Exceptions for "WorkoutesWidget" folder in "WorkoutesWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 006B43263006FFF500A0AF66 /* WorkoutesWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		00290BAF3003F83F004D59FD /* Workoutes */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0068420230070D8E001F84C8 /* Exceptions for "Workoutes" folder in "Workoutes" target */,
+				0068420030070495001F84C8 /* Exceptions for "Workoutes" folder in "WorkoutesWidgetExtension" target */,
+			);
 			path = Workoutes;
+			sourceTree = "<group>";
+		};
+		006B432D3006FFF500A0AF66 /* WorkoutesWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				006B433E3006FFF600A0AF66 /* Exceptions for "WorkoutesWidget" folder in "WorkoutesWidgetExtension" target */,
+			);
+			path = WorkoutesWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,6 +96,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		006B43243006FFF500A0AF66 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				006B432C3006FFF500A0AF66 /* SwiftUI.framework in Frameworks */,
+				006B432A3006FFF500A0AF66 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -33,6 +112,8 @@
 			isa = PBXGroup;
 			children = (
 				00290BAF3003F83F004D59FD /* Workoutes */,
+				006B432D3006FFF500A0AF66 /* WorkoutesWidget */,
+				006B43283006FFF500A0AF66 /* Frameworks */,
 				00290BAE3003F83F004D59FD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +122,18 @@
 			isa = PBXGroup;
 			children = (
 				00290BAD3003F83F004D59FD /* Workoutes.app */,
+				006B43273006FFF500A0AF66 /* WorkoutesWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		006B43283006FFF500A0AF66 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				006B43293006FFF500A0AF66 /* WidgetKit.framework */,
+				006B432B3006FFF500A0AF66 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +146,12 @@
 				00290BA93003F83F004D59FD /* Sources */,
 				00290BAA3003F83F004D59FD /* Frameworks */,
 				00290BAB3003F83F004D59FD /* Resources */,
+				006B43423006FFF600A0AF66 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				006B433C3006FFF600A0AF66 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				00290BAF3003F83F004D59FD /* Workoutes */,
@@ -69,6 +162,28 @@
 			productName = Workoutes;
 			productReference = 00290BAD3003F83F004D59FD /* Workoutes.app */;
 			productType = "com.apple.product-type.application";
+		};
+		006B43263006FFF500A0AF66 /* WorkoutesWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 006B433F3006FFF600A0AF66 /* Build configuration list for PBXNativeTarget "WorkoutesWidgetExtension" */;
+			buildPhases = (
+				006B43233006FFF500A0AF66 /* Sources */,
+				006B43243006FFF500A0AF66 /* Frameworks */,
+				006B43253006FFF500A0AF66 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				006B432D3006FFF500A0AF66 /* WorkoutesWidget */,
+			);
+			name = WorkoutesWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = WorkoutesWidgetExtension;
+			productReference = 006B43273006FFF500A0AF66 /* WorkoutesWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +196,9 @@
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					00290BAC3003F83F004D59FD = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					006B43263006FFF500A0AF66 = {
 						CreatedOnToolsVersion = 26.6;
 					};
 				};
@@ -100,12 +218,20 @@
 			projectRoot = "";
 			targets = (
 				00290BAC3003F83F004D59FD /* Workoutes */,
+				006B43263006FFF500A0AF66 /* WorkoutesWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		00290BAB3003F83F004D59FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		006B43253006FFF500A0AF66 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +248,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		006B43233006FFF500A0AF66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		006B433C3006FFF600A0AF66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 006B43263006FFF500A0AF66 /* WorkoutesWidgetExtension */;
+			targetProxy = 006B433B3006FFF600A0AF66 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		00290BB83003F840004D59FD /* Debug */ = {
@@ -256,6 +397,7 @@
 				DEVELOPMENT_TEAM = 5QE8L87FLK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +430,7 @@
 				DEVELOPMENT_TEAM = 5QE8L87FLK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -303,6 +446,66 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		006B43403006FFF600A0AF66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5QE8L87FLK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WorkoutesWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WorkoutesWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = benjaminlillo.Workoutes.WorkoutesWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		006B43413006FFF600A0AF66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5QE8L87FLK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WorkoutesWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WorkoutesWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = benjaminlillo.Workoutes.WorkoutesWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -327,6 +530,15 @@
 			buildConfigurations = (
 				00290BBB3003F840004D59FD /* Debug */,
 				00290BBC3003F840004D59FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		006B433F3006FFF600A0AF66 /* Build configuration list for PBXNativeTarget "WorkoutesWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				006B43403006FFF600A0AF66 /* Debug */,
+				006B43413006FFF600A0AF66 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

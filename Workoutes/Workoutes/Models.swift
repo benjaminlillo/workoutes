@@ -36,12 +36,13 @@ final class WorkoutExercise {
     var reps: Int
     var increaseLoadNextTime: Bool
     var isDone: Bool
+    var isActive: Bool = false
     var weight: Double
     
     var workouts: [Workout] = []
     var tags: [Tag] = []
     
-    init(title: String, subtitle: String, details: String, numberOfSets: Int, reps: Int, increaseLoadNextTime: Bool, weight: Double, isDone: Bool = false) {
+    init(title: String, subtitle: String, details: String, numberOfSets: Int, reps: Int, increaseLoadNextTime: Bool, weight: Double, isDone: Bool = false, isActive: Bool = false) {
         self.title = title
         self.subtitle = subtitle
         self.details = details
@@ -50,5 +51,6 @@ final class WorkoutExercise {
         self.increaseLoadNextTime = increaseLoadNextTime
         self.weight = weight
         self.isDone = isDone
+        self.isActive = isActive
     }
 }

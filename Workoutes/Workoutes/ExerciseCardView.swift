@@ -73,13 +73,29 @@ struct ExerciseCardView: View {
                     .toggleStyle(.button)
                     .tint(exercise.increaseLoadNextTime ? .blue : .gray)
                 
-                Toggle("Done", isOn: $exercise.isDone)
-                    .font(.caption)
-                    .toggleStyle(.button)
-                    .tint(exercise.isDone ? .green : .gray)
+                Toggle("Active", isOn: Binding(
+                    get: { exercise.isActive },
+                    set: { _ in toggleActiveStatus() }
+                ))
+                .font(.caption)
+                .toggleStyle(.button)
+                .tint(exercise.isActive ? .orange : .gray)
+                
+                Toggle("Done", isOn: Binding(
+                    get: { exercise.isDone },
+                    set: { newValue in
+                        exercise.isDone = newValue
+                        updateActivityIfNeeded()
+                    }
+                ))
+                .font(.caption)
+                .toggleStyle(.button)
+                .tint(exercise.isDone ? .green : .gray)
             }
         }
         .padding()
+        .onChange(of: exercise.weight) { _, _ in updateActivityIfNeeded() }
+        .onChange(of: exercise.increaseLoadNextTime) { _, _ in updateActivityIfNeeded() }
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 12))
@@ -117,9 +133,34 @@ struct ExerciseCardView: View {
             titleVisibility: .visible
         ) {
             Button("Delete Permanently", role: .destructive) {
+                if exercise.isActive {
+                    ActivityManager.shared.endActivity()
+                }
                 modelContext.delete(exercise)
             }
             Button("Cancel", role: .cancel) {}
+        }
+    }
+    
+    private func toggleActiveStatus() {
+        if exercise.isActive {
+            exercise.isActive = false
+            ActivityManager.shared.endActivity()
+        } else {
+            let descriptor = FetchDescriptor<WorkoutExercise>(predicate: #Predicate { $0.isActive == true })
+            if let activeExercises = try? modelContext.fetch(descriptor) {
+                for active in activeExercises {
+                    active.isActive = false
+                }
+            }
+            exercise.isActive = true
+            ActivityManager.shared.startActivity(for: exercise)
+        }
+    }
+    
+    private func updateActivityIfNeeded() {
+        if exercise.isActive {
+            ActivityManager.shared.updateActivity(for: exercise)
         }
     }
 }

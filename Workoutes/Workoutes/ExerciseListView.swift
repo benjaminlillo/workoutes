@@ -66,7 +66,15 @@ struct ExerciseListView: View {
                 Divider()
                 
                 List {
-                    ForEach(filteredExercises) { exercise in
+                    if let activeExercise = allExercises.first(where: { $0.isActive }) {
+                        ExerciseCardView(exercise: activeExercise)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .padding(.vertical, 4)
+                    }
+                    
+                    ForEach(filteredExercises.filter { !$0.isActive }) { exercise in
                         ExerciseCardView(exercise: exercise)
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.clear)
@@ -105,8 +113,9 @@ struct ExerciseListView: View {
     
     private func deleteExercises(offsets: IndexSet) {
         withAnimation {
+            let inactiveFiltered = filteredExercises.filter { !$0.isActive }
             for index in offsets {
-                let exercise = filteredExercises[index]
+                let exercise = inactiveFiltered[index]
                 modelContext.delete(exercise)
             }
         }
