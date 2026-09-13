@@ -4,6 +4,8 @@ import SwiftData
 @main
 struct WorkoutesApp: App {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @State private var exerciseBackground = ExerciseBackgroundStore()
+    @State private var exerciseActivity = ExerciseActivityController()
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -22,6 +24,8 @@ struct WorkoutesApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(exerciseActivity)
+                .environment(exerciseBackground)
                 .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
         }
         .modelContainer(sharedModelContainer)

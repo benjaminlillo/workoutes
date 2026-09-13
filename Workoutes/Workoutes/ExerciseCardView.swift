@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct ExerciseCardView: View {
+    @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.modelContext) private var modelContext
     @Bindable var exercise: WorkoutExercise
     var workout: Workout? = nil
@@ -56,6 +57,19 @@ struct ExerciseCardView: View {
             }
             
             Divider()
+
+            Button {
+                exerciseActivity.toggle(exercise, context: modelContext)
+            } label: {
+                Label(
+                    exerciseActivity.isActive(exercise) ? "Active · Stop" : "Start",
+                    systemImage: exerciseActivity.isActive(exercise) ? "stop.circle.fill" : "play.circle.fill"
+                )
+                .font(.subheadline.weight(.semibold))
+            }
+            .buttonStyle(.borderless)
+            .disabled(exerciseActivity.isUpdating)
+            .accessibilityIdentifier("exerciseActivity.\(exercise.title)")
             
             HStack {
                 Text("Weight:")

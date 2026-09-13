@@ -46,5 +46,6 @@ struct WorkoutListView: View {
 
 #Preview {
     WorkoutListView()
+        .environment(ExerciseActivityController())
         .modelContainer(for: Workout.self, inMemory: true)
 }
