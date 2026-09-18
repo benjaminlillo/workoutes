@@ -7,9 +7,11 @@ struct ExerciseListView: View {
     @Query(sort: \WorkoutExercise.title) private var allExercises: [WorkoutExercise]
     @Query(sort: \Tag.name) private var allTags: [Tag]
     
+    @State private var showingBackgroundSheet = false
     @State private var showingAddExerciseSheet = false
     @State private var showingAddTagSheet = false
     @State private var editingTag: Tag?
+    @State private var tagPendingDeletion: Tag?
     
     @State private var selectedTagIDs: Set<PersistentIdentifier> = []
     
@@ -43,26 +45,19 @@ struct ExerciseListView: View {
             .safeAreaInset(edge: .top, spacing: 0) {
                 tagBar
             }
-            .background {
-                if let image = background.image {
-                    GeometryReader { geometry in
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                            .clipped()
-                    }
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-                }
-            }
+            .background { ScreenBackgroundView(background: background).ignoresSafeArea() }
             .navigationTitle("All Exercises")
             .navigationBarTitleDisplayMode(.large)
             .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
                 selectedTagIDs.formIntersection(ids)
             }
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Customize Background", systemImage: "paintpalette") { showingBackgroundSheet = true }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ResetCompletedExercisesButton(exercises: allExercises)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddExerciseSheet = true }) {
                         Label("Add Exercise", systemImage: "plus")
@@ -75,11 +70,31 @@ struct ExerciseListView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingBackgroundSheet) {
+                BackgroundCustomizationSheet(background: background, title: "Exercises Background")
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
             .sheet(isPresented: $showingAddExerciseSheet) {
                 CreateGlobalExerciseSheet()
             }
             .sheet(isPresented: $showingAddTagSheet) {
                 ManageTagSheet()
+            }
+            .confirmationDialog("Delete Tag?", isPresented: Binding(
+                get: { tagPendingDeletion != nil },
+                set: { if !$0 { tagPendingDeletion = nil } }
+            ), titleVisibility: .visible, presenting: tagPendingDeletion) { tag in
+                Button("Delete Tag", role: .destructive) {
+                    withAnimation {
+                        selectedTagIDs.remove(tag.persistentModelID)
+                        modelContext.delete(tag)
+                    }
+                    tagPendingDeletion = nil
+                }
+                Button("Cancel", role: .cancel) { tagPendingDeletion = nil }
+            } message: { tag in
+                Text("Delete \"\(tag.name)\"? Your exercises will be kept.")
             }
             .sheet(item: $editingTag) { tag in
                 ManageTagSheet(editingTag: tag)
@@ -122,14 +137,21 @@ struct ExerciseListView: View {
                         .accessibilityLabel(tag.name)
                         .accessibilityAddTraits(isSelected ? .isSelected : [])
                         .accessibilityValue(isSelected ? "Selected" : "Not selected")
+                        .contentShape(.contextMenuPreview, Capsule())
                         .contextMenu {
                             Button {
                                 editingTag = tag
                             } label: {
                                 Label("Edit Tag", systemImage: "pencil")
                             }
+                            Button(role: .destructive) {
+                                tagPendingDeletion = tag
+                            } label: {
+                                Label("Delete Tag", systemImage: "trash")
+                            }
                         }
                         .accessibilityAction(named: "Edit Tag") { editingTag = tag }
+                        .accessibilityAction(named: "Delete Tag") { tagPendingDeletion = tag }
                     }
 
                     Button(action: { showingAddTagSheet = true }) {

@@ -44,6 +44,19 @@ final class ExerciseActivityController {
         activeExerciseID == exercise.activityID
     }
 
+    /// Cycles the card control through empty, active, completed, and empty.
+    func advanceState(_ exercise: WorkoutExercise, context: ModelContext) {
+        guard !isUpdating, !exercise.isDeleted else { return }
+        if isActive(exercise) {
+            exercise.isDone = true
+            enqueue { await self.finish() }
+        } else if exercise.isDone {
+            exercise.isDone = false
+        } else {
+            toggle(exercise, context: context)
+        }
+    }
+
     func toggle(_ exercise: WorkoutExercise, context: ModelContext) {
         guard !isUpdating else { return }
         if isActive(exercise) {

@@ -63,11 +63,6 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section(header: Text("Appearance")) {
-                    NavigationLink {
-                        ExerciseBackgroundSettingsView()
-                    } label: {
-                        Label("Exercises Background", systemImage: "photo")
-                    }
                     Picker("Accent Color", selection: $accentColorRawValue) {
                         ForEach(ThemeColor.allCases) { theme in
                             Text(theme.name)

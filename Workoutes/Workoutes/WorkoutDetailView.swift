@@ -5,6 +5,9 @@ struct WorkoutDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var workout: Workout
     @State private var showingAddSheet = false
+    @State private var showingBackgroundSheet = false
+    @State private var background: ExerciseBackgroundStore?
+    @State private var backgroundError: String?
     
     var body: some View {
         List {
@@ -18,8 +21,28 @@ struct WorkoutDetailView: View {
             .onDelete(perform: deleteExercises)
         }
         .listStyle(.plain)
+        .scrollContentBackground(background == nil ? .visible : .hidden)
+        .background {
+            if let background { ScreenBackgroundView(background: background).ignoresSafeArea() }
+        }
         .navigationTitle(workout.name)
+        .task {
+            do {
+                if workout.backgroundID == nil { workout.backgroundID = UUID().uuidString }
+                try modelContext.save()
+                if let id = workout.backgroundID {
+                    background = ExerciseBackgroundStore(identifier: "workout-" + id)
+                }
+            } catch { backgroundError = error.localizedDescription }
+        }
         .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Customize Background", systemImage: "paintpalette") { showingBackgroundSheet = true }
+                    .disabled(background == nil)
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                ResetCompletedExercisesButton(exercises: workout.exercises)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingAddSheet = true }) {
                     Label("Add Exercise", systemImage: "plus")
@@ -35,6 +58,18 @@ struct WorkoutDetailView: View {
         .sheet(isPresented: $showingAddSheet) {
             CreateExerciseSheet(workout: workout)
         }
+        .sheet(isPresented: $showingBackgroundSheet) {
+            if let background {
+                BackgroundCustomizationSheet(background: background, title: "Workout Background")
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
+        }
+        .alert("Background", isPresented: Binding(
+            get: { backgroundError != nil }, set: { if !$0 { backgroundError = nil } }
+        )) {
+            Button("OK", role: .cancel) { backgroundError = nil }
+        } message: { Text(backgroundError ?? "") }
     }
     
     private func deleteExercises(offsets: IndexSet) {

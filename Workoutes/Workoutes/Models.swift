@@ -4,6 +4,7 @@ import SwiftData
 @Model
 final class Workout {
     var name: String
+    var backgroundID: String?
     @Relationship(inverse: \WorkoutExercise.workouts)
     var exercises: [WorkoutExercise]
     

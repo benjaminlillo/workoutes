@@ -45,6 +45,35 @@ final class ExerciseActivityTests: XCTestCase {
         XCTAssertEqual(exercise.activityContent.weight, 0)
     }
 
+    func testThreeStateControlStartsCompletesAndResetsExercise() async throws {
+        let container = try makeContainer()
+        let item = exercise("Three State Exercise")
+        container.mainContext.insert(item)
+        let controller = ExerciseActivityController()
+        controller.advanceState(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+        XCTAssertNil(controller.errorMessage)
+        XCTAssertTrue(controller.isActive(item))
+        XCTAssertFalse(item.isDone)
+        let activity = try XCTUnwrap(Activity<ExerciseActivityAttributes>.activities.first {
+            $0.content.state.exerciseID == item.activityID
+        })
+
+        controller.advanceState(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+        XCTAssertTrue(item.isDone)
+        XCTAssertNil(controller.activeExerciseID)
+        for _ in 0..<100 {
+            if activity.activityState == .ended || activity.activityState == .dismissed { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        XCTAssertTrue(activity.activityState == .ended || activity.activityState == .dismissed)
+
+        controller.advanceState(item, context: container.mainContext)
+        XCTAssertFalse(item.isDone)
+        XCTAssertNil(controller.activeExerciseID)
+    }
+
     func testLiveActivityLifecycle() async throws {
         XCTAssertTrue(ActivityAuthorizationInfo().areActivitiesEnabled, "The test device must allow Live Activities")
         let container = try makeContainer()

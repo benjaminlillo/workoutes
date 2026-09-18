@@ -4,12 +4,27 @@ import SwiftData
 struct ExerciseCardView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @Bindable var exercise: WorkoutExercise
     var workout: Workout? = nil
     
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
-    
+
+    private var accentColor: Color {
+        ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
+    }
+
+    private var isPlaying: Bool { exerciseActivity.isActive(exercise) && !exercise.isDone }
+
+    private var stateValue: String {
+        exercise.isDone ? "Completed" : (isPlaying ? "Active" : "Not started")
+    }
+
+    private var stateHint: String {
+        exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop and mark completed" : "Start this exercise")
+    }
+
     let formatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
@@ -58,19 +73,6 @@ struct ExerciseCardView: View {
             
             Divider()
 
-            Button {
-                exerciseActivity.toggle(exercise, context: modelContext)
-            } label: {
-                Label(
-                    exerciseActivity.isActive(exercise) ? "Active · Stop" : "Start",
-                    systemImage: exerciseActivity.isActive(exercise) ? "stop.circle.fill" : "play.circle.fill"
-                )
-                .font(.subheadline.weight(.semibold))
-            }
-            .buttonStyle(.borderless)
-            .disabled(exerciseActivity.isUpdating)
-            .accessibilityIdentifier("exerciseActivity.\(exercise.title)")
-            
             HStack {
                 Text("Weight:")
                     .font(.subheadline)
@@ -87,10 +89,36 @@ struct ExerciseCardView: View {
                     .toggleStyle(.button)
                     .tint(exercise.increaseLoadNextTime ? .blue : .gray)
                 
-                Toggle("Done", isOn: $exercise.isDone)
-                    .font(.caption)
-                    .toggleStyle(.button)
-                    .tint(exercise.isDone ? .green : .gray)
+                Button {
+                    exerciseActivity.advanceState(exercise, context: modelContext)
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(exercise.isDone ? accentColor : .clear)
+                        Circle()
+                            .strokeBorder(exercise.isDone || isPlaying ? accentColor : .gray, lineWidth: 2)
+                        if exercise.isDone {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundStyle(.white)
+                        } else if isPlaying {
+                            Image(systemName: "stop.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(accentColor)
+                        }
+                    }
+                    .frame(width: 28, height: 28)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .disabled(exerciseActivity.isUpdating)
+                .accessibilityLabel("Exercise status")
+                .accessibilityValue(stateValue)
+                .accessibilityHint(stateHint)
+                .accessibilityAddTraits(exercise.isDone || isPlaying ? .isSelected : [])
+                .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
+                .sensoryFeedback(.selection, trigger: stateValue)
             }
         }
         .padding()
