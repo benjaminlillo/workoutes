@@ -14,14 +14,23 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            Tab("Workouts", systemImage: "list.bullet.clipboard") {
+            Tab {
                 WorkoutListView()
+            } label: {
+                Image(systemName: "list.bullet.clipboard")
+                    .accessibilityLabel("Workouts")
             }
-            Tab("Exercises", systemImage: "dumbbell") {
+            Tab {
                 ExerciseListView()
+            } label: {
+                Image(systemName: "dumbbell")
+                    .accessibilityLabel("Exercises")
             }
-            Tab("Settings", systemImage: "gearshape") {
+            Tab {
                 SettingsView()
+            } label: {
+                Image(systemName: "gearshape")
+                    .accessibilityLabel("Settings")
             }
         }
         .background {

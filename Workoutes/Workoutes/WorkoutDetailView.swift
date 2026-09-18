@@ -27,6 +27,8 @@ struct WorkoutDetailView: View {
             .onDelete(perform: deleteExercises)
         }
         .listStyle(.plain)
+        .scrollEdgeEffectStyle(.soft, for: .top)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .scrollContentBackground(background == nil ? .visible : .hidden)
         .background {
             if let background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }

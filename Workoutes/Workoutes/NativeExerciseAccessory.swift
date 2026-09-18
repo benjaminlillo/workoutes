@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 import Observation
 
-/// Lets UIKit animate the accessory surface and tab bar together in both directions.
+/// Keeps the native accessory synchronized without entrance or exit animations.
 struct NativeExerciseAccessory: UIViewControllerRepresentable {
     let content: ExerciseActivityAttributes.ContentState?
     let isUpdating: Bool
@@ -27,8 +27,6 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
         private var accessory: UITabAccessory?
         private var updateScheduled = false
         private var isTornDown = false
-        private var isDismissing = false
-        private var dismissalGeneration = 0
 
         override func loadView() {
             view = UIView()
@@ -53,7 +51,7 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
                 guard let self else { return }
                 self.updateScheduled = false
                 guard !self.isTornDown else { return }
-                self.updateAccessory()
+                UIView.performWithoutAnimation { self.updateAccessory() }
             }
         }
 
@@ -71,27 +69,16 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
             while let parent = root.parent { root = parent }
             guard let tabs = owner ?? findTabController(in: root) else { return }
             owner = tabs
-            let animated = tabs.view.window != nil && !UIAccessibility.isReduceMotionEnabled
-
             guard let content = configuration.content else {
                 host?.view.isUserInteractionEnabled = false
                 if let accessory, tabs.bottomAccessory === accessory {
-                    transition(to: nil, in: tabs, animated: animated)
+                    setAccessory(nil, in: tabs)
                 }
-                if accessory == nil { tabs.tabBarMinimizeBehavior = .never }
-                // Keep the content and its layout stable while UIKit removes the glass.
+                tabs.tabBarMinimizeBehavior = .never
                 return
             }
 
             tabs.tabBarMinimizeBehavior = .onScrollDown
-            host?.state.isDismissing = false
-            if isDismissing {
-                dismissalGeneration += 1
-                isDismissing = false
-                host?.view.layer.removeAllAnimations()
-                host?.view.alpha = 1
-                host?.view.isUserInteractionEnabled = true
-            }
             if let host {
                 host.state.update(content: content, configuration: configuration)
             } else {
@@ -106,51 +93,17 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
 
             if tabs.bottomAccessory !== accessory {
                 host?.view.isUserInteractionEnabled = true
-                transition(to: accessory, in: tabs, animated: animated)
+                setAccessory(accessory, in: tabs)
             }
         }
 
-        private func transition(to accessory: UITabAccessory?, in tabs: UITabBarController, animated: Bool) {
+        private func setAccessory(_ accessory: UITabAccessory?, in tabs: UITabBarController) {
+            tabs.setBottomAccessory(accessory, animated: false)
             tabs.view.layoutIfNeeded()
-            guard animated else {
-                tabs.setBottomAccessory(accessory, animated: false)
-                if accessory == nil { tabs.tabBarMinimizeBehavior = .never }
-                tabs.view.layoutIfNeeded()
-                return
-            }
-            guard let accessory else {
-                guard !isDismissing else { return }
-                isDismissing = true
-                dismissalGeneration += 1
-                let generation = dismissalGeneration
-                host?.state.isDismissing = true
-                // UIKit owns the glass fade and contraction. An outer layout
-                // animation with animated:false removes that glass immediately.
-                CATransaction.begin()
-                CATransaction.setCompletionBlock { [weak self, weak tabs] in
-                    DispatchQueue.main.async {
-                        guard let self, let tabs, !self.isTornDown,
-                              self.dismissalGeneration == generation,
-                              self.configuration?.content == nil else { return }
-                        self.isDismissing = false
-                        tabs.tabBarMinimizeBehavior = .never
-                    }
-                }
-                tabs.setBottomAccessory(nil, animated: true)
-                CATransaction.commit()
-                return
-            }
-            // Only insertion needs an explicit animation around the layout pass.
-            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1,
-                           initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
-                tabs.setBottomAccessory(accessory, animated: true)
-                tabs.view.layoutIfNeeded()
-            }
         }
 
         func tearDown() {
             isTornDown = true
-            dismissalGeneration += 1
             if let accessory, owner?.bottomAccessory === accessory {
                 owner?.setBottomAccessory(nil, animated: false)
             }
@@ -166,7 +119,6 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
     final class AccessoryState {
         var content: ExerciseActivityAttributes.ContentState
         var isCompact = false
-        var isDismissing = false
         var isUpdating: Bool
         var accentColor: Color
         var onStop: () -> Void
@@ -208,7 +160,7 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
         override func viewDidLoad() {
             super.viewDidLoad()
             view.registerForTraitChanges([UITraitTabAccessoryEnvironment.self]) { [weak self] (view: UIView, _) in
-                guard let self, !self.state.isDismissing else { return }
+                guard let self else { return }
                 self.state.isCompact = view.traitCollection.tabAccessoryEnvironment == .inline
             }
         }

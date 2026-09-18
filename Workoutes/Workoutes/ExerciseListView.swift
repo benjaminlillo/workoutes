@@ -42,6 +42,8 @@ struct ExerciseListView: View {
                 .onDelete(perform: deleteExercises)
             }
             .listStyle(.plain)
+            .scrollEdgeEffectStyle(.soft, for: .top)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .scrollContentBackground(.hidden)
             // Keep the List as the primary scroll view so the native large title
             // collapses. The accessory bar follows the navigation safe area.
