@@ -72,7 +72,7 @@ final class NativeExerciseAccessoryTests: XCTestCase {
         }
     }
 
-    func testInsertionAndRemovalNeverRequestAnimation() async {
+    func testInsertionAndRemovalUseOnlyNativeAnimation() async {
         let tabs = RecordingTabController()
         tabs.viewControllers = [UIViewController()]
         let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 874))
@@ -97,7 +97,7 @@ final class NativeExerciseAccessoryTests: XCTestCase {
         await nextMainQueueTurn()
         let accessory = tabs.bottomAccessory
         XCTAssertNotNil(accessory)
-        XCTAssertEqual(tabs.animationRequests, [false])
+        XCTAssertEqual(tabs.animationRequests, [!UIAccessibility.isReduceMotionEnabled])
 
         // Switching exercises updates the existing surface instead of inserting it again.
         bridge.configuration = configuration(content("Second"))
@@ -111,7 +111,7 @@ final class NativeExerciseAccessoryTests: XCTestCase {
         await nextMainQueueTurn()
         try? await Task.sleep(for: .milliseconds(500))
         XCTAssertNil(tabs.bottomAccessory)
-        XCTAssertEqual(tabs.animationRequests, [false, false])
+        XCTAssertEqual(tabs.animationRequests, Array(repeating: !UIAccessibility.isReduceMotionEnabled, count: 2))
 
         bridge.configuration = configuration(content("Third"))
         bridge.scheduleUpdate()

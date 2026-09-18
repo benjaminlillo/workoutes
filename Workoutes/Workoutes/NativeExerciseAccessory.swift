@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 import Observation
 
-/// Keeps the native accessory synchronized without entrance or exit animations.
+/// Keeps the accessory synchronized using only UIKit's native transition.
 struct NativeExerciseAccessory: UIViewControllerRepresentable {
     let content: ExerciseActivityAttributes.ContentState?
     let isUpdating: Bool
@@ -51,7 +51,7 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
                 guard let self else { return }
                 self.updateScheduled = false
                 guard !self.isTornDown else { return }
-                UIView.performWithoutAnimation { self.updateAccessory() }
+                self.updateAccessory()
             }
         }
 
@@ -98,7 +98,8 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
         }
 
         private func setAccessory(_ accessory: UITabAccessory?, in tabs: UITabBarController) {
-            tabs.setBottomAccessory(accessory, animated: false)
+            let animated = tabs.view.window != nil && !UIAccessibility.isReduceMotionEnabled
+            tabs.setBottomAccessory(accessory, animated: animated)
             tabs.view.layoutIfNeeded()
         }
 
