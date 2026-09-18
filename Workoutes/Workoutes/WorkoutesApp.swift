@@ -5,21 +5,9 @@ import SwiftData
 struct WorkoutesApp: App {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @State private var exerciseBackground = ExerciseBackgroundStore()
-    @State private var exerciseActivity = ExerciseActivityController()
+    @State private var exerciseActivity = ExerciseActivityRuntime.shared.controller
     
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Workout.self,
-            WorkoutExercise.self
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    let sharedModelContainer = ExerciseActivityRuntime.shared.container
 
     var body: some Scene {
         WindowGroup {

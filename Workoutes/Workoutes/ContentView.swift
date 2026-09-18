@@ -7,6 +7,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query private var exercises: [WorkoutExercise]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     
     private var activeExercise: WorkoutExercise? {
         exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
@@ -53,6 +54,8 @@ struct ContentView: View {
                 exerciseActivity.synchronize(exercises: exercises)
             }
         }
+        .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
+        .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
         .alert("Live Activity", isPresented: Binding(
             get: { exerciseActivity.errorMessage != nil },
             set: { if !$0 { exerciseActivity.errorMessage = nil } }

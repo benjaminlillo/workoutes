@@ -10,5 +10,17 @@ nonisolated struct ExerciseActivityAttributes: ActivityAttributes {
         var reps: Int
         var weight: Double
         var increaseLoadNextTime: Bool
+        var details: String? = nil
+        var tagColors: [String]? = nil
+        var accentColorHex: String? = nil
+        var displayedWeight: Double? = nil
+        var weightUnitSymbol: String? = nil
+        var status: ExerciseStatus? = nil
     }
+}
+
+nonisolated enum ExerciseStatus: String, Codable {
+    case empty
+    case playing
+    case done
 }

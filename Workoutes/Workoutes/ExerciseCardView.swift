@@ -96,24 +96,8 @@ struct ExerciseCardView: View {
                 Button {
                     exerciseActivity.advanceState(exercise, context: modelContext)
                 } label: {
-                    ZStack {
-                        Circle()
-                            .fill(exercise.isDone ? accentColor : .clear)
-                        Circle()
-                            .strokeBorder(exercise.isDone || isPlaying ? accentColor : .gray, lineWidth: 2)
-                        if exercise.isDone {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 17, weight: .bold))
-                                .foregroundStyle(.white)
-                        } else if isPlaying {
-                            Image(systemName: "stop.fill")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(accentColor)
-                        }
-                    }
-                    .frame(width: 28, height: 28)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
+                    ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
+                                         accentColor: accentColor)
                 }
                 .buttonStyle(.borderless)
                 .disabled(exerciseActivity.isUpdating)

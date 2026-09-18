@@ -1,6 +1,7 @@
 import ActivityKit
 import SwiftData
 import XCTest
+import SwiftUI
 @testable import Workoutes
 
 @MainActor
@@ -137,6 +138,63 @@ final class ExerciseActivityTests: XCTestCase {
         restored.synchronize(exercises: [first])
         await restored.waitForPendingUpdates()
         XCTAssertNil(restored.activeExerciseID)
+    }
+
+    func testLiveActivityActionsPersistAndIgnoreOldExerciseButtons() async throws {
+        let container = try makeContainer()
+        let first = exercise("First")
+        let second = exercise("Second")
+        container.mainContext.insert(first)
+        container.mainContext.insert(second)
+        let controller = ExerciseActivityController()
+        controller.toggle(first, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+        try await controller.performLiveActivityAction(exerciseID: first.activityID, complete: false,
+                                                      context: container.mainContext)
+        XCTAssertTrue(first.increaseLoadNextTime)
+
+        controller.toggle(second, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+        try await controller.performLiveActivityAction(exerciseID: first.activityID, complete: true,
+                                                      context: container.mainContext)
+        XCTAssertFalse(first.isDone)
+        XCTAssertTrue(controller.isActive(second))
+        let activity = try XCTUnwrap(Activity<ExerciseActivityAttributes>.activities.first)
+        try await waitForContent(second.activityContent, in: activity)
+        try await controller.performLiveActivityAction(exerciseID: second.activityID, complete: true,
+                                                      context: container.mainContext)
+        XCTAssertTrue(second.isDone)
+        XCTAssertNil(controller.activeExerciseID)
+        try await waitForContent(second.activityContent, in: activity)
+        XCTAssertEqual(activity.content.state.status, .done)
+    }
+
+    func testOlderActivityPayloadStillDecodes() throws {
+        let data = Data("""
+        {"exerciseID":"legacy","title":"Squat","subtitle":"","numberOfSets":3,"reps":10,"weight":20,"increaseLoadNextTime":false}
+        """.utf8)
+        let state = try JSONDecoder().decode(ExerciseActivityAttributes.ContentState.self, from: data)
+        XCTAssertNil(state.status)
+        XCTAssertNil(state.weightUnitSymbol)
+        XCTAssertEqual(state.weight, 20)
+    }
+
+    func testLiveActivityCardRendersAllControlStates() throws {
+        for status in [ExerciseStatus.empty, .playing, .done] {
+            let state = ExerciseActivityAttributes.ContentState(
+                exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
+                numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
+                details: "Pause at the bottom", tagColors: ["FF8800", "5599FF"],
+                accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: status
+            )
+            let renderer = ImageRenderer(content: ExerciseActivitySummary(state: state)
+                .padding(16).frame(width: 398).background(.black))
+            renderer.scale = 3
+            let image = try XCTUnwrap(renderer.uiImage)
+            XCTAssertGreaterThan(image.size.height, 100)
+            let data = try XCTUnwrap(image.pngData())
+            try data.write(to: URL(fileURLWithPath: "/tmp/workoutes-live-card-\(status.rawValue).png"))
+        }
     }
 
     override func tearDown() async throws {

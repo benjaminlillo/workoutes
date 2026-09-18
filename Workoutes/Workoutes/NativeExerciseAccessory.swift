@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 import Observation
 
-/// Keeps the accessory synchronized using only UIKit's native transition.
+/// Uses UIKit's native layout transition and fades only the exercise content.
 struct NativeExerciseAccessory: UIViewControllerRepresentable {
     let content: ExerciseActivityAttributes.ContentState?
     let isUpdating: Bool
@@ -27,6 +27,8 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
         private var accessory: UITabAccessory?
         private var updateScheduled = false
         private var isTornDown = false
+        private var isFadingOut = false
+        private var fadeGeneration = 0
 
         override func loadView() {
             view = UIView()
@@ -72,13 +74,19 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
             guard let content = configuration.content else {
                 host?.view.isUserInteractionEnabled = false
                 if let accessory, tabs.bottomAccessory === accessory {
-                    setAccessory(nil, in: tabs)
+                    fadeOutAccessory(in: tabs)
+                } else {
+                    tabs.tabBarMinimizeBehavior = .never
                 }
-                tabs.tabBarMinimizeBehavior = .never
                 return
             }
 
             tabs.tabBarMinimizeBehavior = .onScrollDown
+            if isFadingOut {
+                fadeGeneration += 1
+                isFadingOut = false
+                fadeContent(to: 1)
+            }
             if let host {
                 host.state.update(content: content, configuration: configuration)
             } else {
@@ -91,9 +99,37 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
                 accessory = UITabAccessory(contentView: newHost.view)
             }
 
+            host?.view.isUserInteractionEnabled = true
             if tabs.bottomAccessory !== accessory {
-                host?.view.isUserInteractionEnabled = true
+                host?.view.alpha = UIAccessibility.isReduceMotionEnabled ? 1 : 0
                 setAccessory(accessory, in: tabs)
+                fadeContent(to: 1)
+            }
+        }
+
+        private func fadeContent(to alpha: CGFloat) {
+            guard let host else { return }
+            UIView.animate(withDuration: UIAccessibility.isReduceMotionEnabled ? 0 : 0.2,
+                           delay: 0, options: [.beginFromCurrentState, .allowUserInteraction, .curveEaseInOut]) {
+                host.view.alpha = alpha
+            }
+        }
+
+        private func fadeOutAccessory(in tabs: UITabBarController) {
+            guard !isFadingOut, let host else { return }
+            isFadingOut = true
+            fadeGeneration += 1
+            let generation = fadeGeneration
+            UIView.animate(withDuration: UIAccessibility.isReduceMotionEnabled ? 0 : 0.2,
+                           delay: 0, options: [.beginFromCurrentState, .allowUserInteraction, .curveEaseInOut]) {
+                host.view.alpha = 0
+            } completion: { [weak self, weak tabs] _ in
+                guard let self, let tabs, !self.isTornDown,
+                      self.fadeGeneration == generation,
+                      self.configuration?.content == nil else { return }
+                self.isFadingOut = false
+                self.setAccessory(nil, in: tabs)
+                tabs.tabBarMinimizeBehavior = .never
             }
         }
 
@@ -105,6 +141,7 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
 
         func tearDown() {
             isTornDown = true
+            fadeGeneration += 1
             if let accessory, owner?.bottomAccessory === accessory {
                 owner?.setBottomAccessory(nil, animated: false)
             }

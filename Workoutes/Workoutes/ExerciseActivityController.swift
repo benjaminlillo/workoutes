@@ -2,6 +2,7 @@ import ActivityKit
 import Foundation
 import Observation
 import SwiftData
+import SwiftUI
 
 extension WorkoutExercise {
     var activityID: String {
@@ -12,14 +13,23 @@ extension WorkoutExercise {
     }
 
     var activityContent: ExerciseActivityAttributes.ContentState {
-        .init(
+        let unit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .metric
+        let accent = ThemeColor(rawValue: UserDefaults.standard.string(forKey: "appAccentColor") ?? "") ?? .primary
+        let safeWeight = weight.isFinite ? weight : 0
+        return .init(
             exerciseID: activityID,
             title: String(title.prefix(160)),
             subtitle: String(subtitle.prefix(160)),
             numberOfSets: numberOfSets,
             reps: reps,
-            weight: weight.isFinite ? weight : 0,
-            increaseLoadNextTime: increaseLoadNextTime
+            weight: safeWeight,
+            increaseLoadNextTime: increaseLoadNextTime,
+            details: String(details.prefix(200)),
+            tagColors: tags.prefix(12).map { String($0.colorHex.prefix(8)) },
+            accentColorHex: accent.color.toHex(),
+            displayedWeight: unit.displayedWeight(from: safeWeight),
+            weightUnitSymbol: unit.symbol,
+            status: isDone ? .done : .playing
         )
     }
 }
@@ -49,7 +59,7 @@ final class ExerciseActivityController {
         guard !isUpdating, !exercise.isDeleted else { return }
         if isActive(exercise) {
             exercise.isDone = true
-            enqueue { await self.finish() }
+            enqueue { await self.finish(finalState: exercise.activityContent) }
         } else if exercise.isDone {
             exercise.isDone = false
         } else {
@@ -76,7 +86,9 @@ final class ExerciseActivityController {
                 self.errorMessage = "Live Activities are disabled. Enable them for Workoutes in Settings to show your active exercise."
                 return
             }
-            let content = ActivityContent(state: exercise.activityContent, staleDate: nil)
+            var state = exercise.activityContent
+            state.status = .playing
+            let content = ActivityContent(state: state, staleDate: nil)
             do {
                 if let activity = self.activity, self.isRunning(activity) {
                     await activity.update(content)
@@ -101,7 +113,8 @@ final class ExerciseActivityController {
                   let exercise = exercises.first(where: {
                       !$0.isDeleted && $0.activityID == self.activeExerciseID
                   }), !exercise.isDone else {
-                await self.finish()
+                let finalState = exercises.first { !$0.isDeleted && $0.activityID == self.activeExerciseID && $0.isDone }?.activityContent
+                await self.finish(finalState: finalState)
                 return
             }
             let state = exercise.activityContent
@@ -117,6 +130,26 @@ final class ExerciseActivityController {
 
     func waitForPendingUpdates() async {
         await pendingOperation?.value
+    }
+
+    func performLiveActivityAction(exerciseID: String, complete: Bool, context: ModelContext) async throws {
+        await waitForPendingUpdates()
+        guard let data = Data(base64Encoded: exerciseID),
+              let identifier = try? JSONDecoder().decode(PersistentIdentifier.self, from: data),
+              let exercise = context.model(for: identifier) as? WorkoutExercise,
+              !exercise.isDeleted, !exercise.isDone, isActive(exercise) else { return }
+        if complete {
+            exercise.isDone = true
+            do { try context.save() }
+            catch { exercise.isDone = false; throw error }
+            enqueue { await self.finish(finalState: exercise.activityContent) }
+        } else {
+            exercise.increaseLoadNextTime.toggle()
+            do { try context.save() }
+            catch { exercise.increaseLoadNextTime.toggle(); throw error }
+            synchronize(exercises: [exercise])
+        }
+        await waitForPendingUpdates()
     }
 
     private func restoreCurrentActivity() {
@@ -149,12 +182,14 @@ final class ExerciseActivityController {
         }
     }
 
-    private func finish() async {
+    private func finish(finalState: ExerciseActivityAttributes.ContentState? = nil) async {
         let previous = activity
         activity = nil
         activeExerciseID = nil
         stateObservation?.cancel()
-        await previous?.end(nil, dismissalPolicy: .immediate)
+        let finalContent = finalState.map { ActivityContent(state: $0, staleDate: nil) }
+        await previous?.end(finalContent, dismissalPolicy: finalState?.status == .done
+                            ? .after(Date.now.addingTimeInterval(2)) : .immediate)
     }
 
     private func enqueue(_ operation: @escaping @MainActor () async -> Void) {
