@@ -78,10 +78,13 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
                 if let accessory, tabs.bottomAccessory === accessory {
                     transition(to: nil, in: tabs, animated: animated)
                 }
-                // Retain the snapshot-backed host while UIKit animates its removal.
+                if accessory == nil { tabs.tabBarMinimizeBehavior = .never }
+                // Keep the content and its layout stable while UIKit removes the glass.
                 return
             }
 
+            tabs.tabBarMinimizeBehavior = .onScrollDown
+            host?.state.isDismissing = false
             if isDismissing {
                 dismissalGeneration += 1
                 isDismissing = false
@@ -111,6 +114,7 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
             tabs.view.layoutIfNeeded()
             guard animated else {
                 tabs.setBottomAccessory(accessory, animated: false)
+                if accessory == nil { tabs.tabBarMinimizeBehavior = .never }
                 tabs.view.layoutIfNeeded()
                 return
             }
@@ -119,25 +123,21 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
                 isDismissing = true
                 dismissalGeneration += 1
                 let generation = dismissalGeneration
-                UIView.animate(withDuration: 0.15, delay: 0,
-                               options: [.curveEaseInOut, .beginFromCurrentState]) {
-                    self.host?.view.alpha = 0
-                } completion: { [weak self, weak tabs] _ in
-                    guard let self, let tabs, !self.isTornDown,
-                          self.dismissalGeneration == generation,
-                          self.configuration?.content == nil else { return }
-                    // The content is already invisible before its glass container
-                    // is removed, so UIKit cannot clip the text during contraction.
-                    UIView.animate(withDuration: 0.3, delay: 0,
-                                   options: [.curveEaseInOut, .beginFromCurrentState, .allowUserInteraction]) {
-                        tabs.setBottomAccessory(nil, animated: false)
-                        tabs.view.layoutIfNeeded()
-                    } completion: { [weak self] _ in
-                        guard let self, self.dismissalGeneration == generation else { return }
+                host?.state.isDismissing = true
+                // UIKit owns the glass fade and contraction. An outer layout
+                // animation with animated:false removes that glass immediately.
+                CATransaction.begin()
+                CATransaction.setCompletionBlock { [weak self, weak tabs] in
+                    DispatchQueue.main.async {
+                        guard let self, let tabs, !self.isTornDown,
+                              self.dismissalGeneration == generation,
+                              self.configuration?.content == nil else { return }
                         self.isDismissing = false
-                        self.host?.view.alpha = 1
+                        tabs.tabBarMinimizeBehavior = .never
                     }
                 }
+                tabs.setBottomAccessory(nil, animated: true)
+                CATransaction.commit()
                 return
             }
             // Only insertion needs an explicit animation around the layout pass.
@@ -166,6 +166,7 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
     final class AccessoryState {
         var content: ExerciseActivityAttributes.ContentState
         var isCompact = false
+        var isDismissing = false
         var isUpdating: Bool
         var accentColor: Color
         var onStop: () -> Void
@@ -207,7 +208,8 @@ struct NativeExerciseAccessory: UIViewControllerRepresentable {
         override func viewDidLoad() {
             super.viewDidLoad()
             view.registerForTraitChanges([UITraitTabAccessoryEnvironment.self]) { [weak self] (view: UIView, _) in
-                self?.state.isCompact = view.traitCollection.tabAccessoryEnvironment == .inline
+                guard let self, !self.state.isDismissing else { return }
+                self.state.isCompact = view.traitCollection.tabAccessoryEnvironment == .inline
             }
         }
     }

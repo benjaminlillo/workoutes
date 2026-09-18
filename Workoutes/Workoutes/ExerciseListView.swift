@@ -14,6 +14,9 @@ struct ExerciseListView: View {
     @State private var tagPendingDeletion: Tag?
     
     @State private var selectedTagIDs: Set<PersistentIdentifier> = []
+    private var backgroundTagColors: [String] {
+        allTags.filter { selectedTagIDs.contains($0.persistentModelID) }.map(\.colorHex)
+    }
     
     var filteredExercises: [WorkoutExercise] {
         if selectedTagIDs.isEmpty {
@@ -34,7 +37,7 @@ struct ExerciseListView: View {
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 10)
                 }
                 .onDelete(perform: deleteExercises)
             }
@@ -45,7 +48,7 @@ struct ExerciseListView: View {
             .safeAreaInset(edge: .top, spacing: 0) {
                 tagBar
             }
-            .background { ScreenBackgroundView(background: background).ignoresSafeArea() }
+            .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
             .navigationTitle("All Exercises")
             .navigationBarTitleDisplayMode(.large)
             .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
@@ -71,7 +74,7 @@ struct ExerciseListView: View {
                 }
             }
             .sheet(isPresented: $showingBackgroundSheet) {
-                BackgroundCustomizationSheet(background: background, title: "Exercises Background")
+                BackgroundCustomizationSheet(background: background, title: "Exercises Background", tagColors: backgroundTagColors)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }

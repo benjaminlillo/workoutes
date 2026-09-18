@@ -116,6 +116,11 @@ final class ExerciseActivityTests: XCTestCase {
         restored.synchronize(exercises: [first, second])
         await restored.waitForPendingUpdates()
         XCTAssertNil(restored.activeExerciseID)
+        // ActivityKit reports the final state asynchronously after end() returns.
+        for _ in 0..<100 {
+            if initial.activityState == .ended || initial.activityState == .dismissed { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
         XCTAssertTrue(initial.activityState == .ended || initial.activityState == .dismissed)
 
         restored.toggle(first, context: container.mainContext)

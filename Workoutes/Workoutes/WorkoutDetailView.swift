@@ -8,6 +8,12 @@ struct WorkoutDetailView: View {
     @State private var showingBackgroundSheet = false
     @State private var background: ExerciseBackgroundStore?
     @State private var backgroundError: String?
+    private var backgroundTagColors: [String] {
+        var seen = Set<PersistentIdentifier>()
+        return workout.exercises.flatMap(\.tags)
+            .filter { seen.insert($0.persistentModelID).inserted }
+            .sorted { $0.name < $1.name }.map(\.colorHex)
+    }
     
     var body: some View {
         List {
@@ -16,14 +22,14 @@ struct WorkoutDetailView: View {
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 10)
             }
             .onDelete(perform: deleteExercises)
         }
         .listStyle(.plain)
         .scrollContentBackground(background == nil ? .visible : .hidden)
         .background {
-            if let background { ScreenBackgroundView(background: background).ignoresSafeArea() }
+            if let background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
         }
         .navigationTitle(workout.name)
         .task {
@@ -60,7 +66,7 @@ struct WorkoutDetailView: View {
         }
         .sheet(isPresented: $showingBackgroundSheet) {
             if let background {
-                BackgroundCustomizationSheet(background: background, title: "Workout Background")
+                BackgroundCustomizationSheet(background: background, title: "Workout Background", tagColors: backgroundTagColors)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }

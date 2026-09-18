@@ -58,6 +58,7 @@ struct SettingsView: View {
     @Query private var tags: [Tag]
     @State private var shareURL: IdentifiableURL?
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     
     var body: some View {
         NavigationStack {
@@ -71,6 +72,14 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section("Units") {
+                    Picker("Weight Unit", selection: $weightUnit) {
+                        ForEach(WeightUnit.allCases) { unit in
+                            Text(unit.name).tag(unit)
+                        }
+                    }
+                }
+
                 Section(header: Text("Data")) {
                     Button(action: exportData) {
                         HStack {

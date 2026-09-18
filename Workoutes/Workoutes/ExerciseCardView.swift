@@ -5,11 +5,13 @@ struct ExerciseCardView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.modelContext) private var modelContext
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @Bindable var exercise: WorkoutExercise
     var workout: Workout? = nil
     
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
+    @State private var showingWeightSheet = false
 
     private var accentColor: Color {
         ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
@@ -25,13 +27,6 @@ struct ExerciseCardView: View {
         exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop and mark completed" : "Start this exercise")
     }
 
-    let formatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 2
-        return formatter
-    }()
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
@@ -74,13 +69,22 @@ struct ExerciseCardView: View {
             Divider()
 
             HStack {
-                Text("Weight:")
-                    .font(.subheadline)
-                
-                TextField("Weight", value: $exercise.weight, formatter: formatter)
-                    .keyboardType(.decimalPad)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 80)
+                Button { showingWeightSheet = true } label: {
+                    HStack(spacing: 5) {
+                        Text(weightUnit.label(for: exercise.weight))
+                            .font(.subheadline.weight(.semibold))
+                        Image(systemName: "chevron.down")
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .foregroundStyle(accentColor)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("Weight")
+                .accessibilityValue("\(weightUnit.displayedWeight(from: exercise.weight).formatted()) \(weightUnit.accessibilityName)")
+                .accessibilityHint("Opens the weight selector")
+                .accessibilityIdentifier("exerciseWeight.\(exercise.title)")
                 
                 Spacer()
                 
@@ -123,8 +127,8 @@ struct ExerciseCardView: View {
         }
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
             Button {
                 showingEditSheet = true
@@ -152,6 +156,12 @@ struct ExerciseCardView: View {
         .padding(.horizontal)
         .sheet(isPresented: $showingEditSheet) {
             EditExerciseSheet(exercise: exercise)
+        }
+        .sheet(isPresented: $showingWeightSheet) {
+            ExerciseWeightSheet(exercise: exercise, unit: weightUnit)
+                .tint(accentColor)
+                .presentationDetents([.height(330)])
+                .presentationDragIndicator(.visible)
         }
         .confirmationDialog(
             "Are you sure you want to delete this exercise permanently? This will remove it from all workouts.",

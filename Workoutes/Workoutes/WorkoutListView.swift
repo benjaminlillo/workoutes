@@ -17,9 +17,20 @@ struct WorkoutListView: View {
                         Text(workout.name)
                             .font(.headline)
                     }
+                    .listRowInsets(EdgeInsets(top: 26, leading: 32, bottom: 26, trailing: 32))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(Color(UIColor.secondarySystemGroupedBackground))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                    )
                 }
                 .onDelete(perform: deleteWorkouts)
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Workouts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

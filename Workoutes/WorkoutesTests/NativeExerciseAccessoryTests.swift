@@ -35,15 +35,19 @@ final class NativeExerciseAccessoryTests: XCTestCase {
 
         try await Task.sleep(for: .milliseconds(500))
         state.content = nil
-        try await Task.sleep(for: .milliseconds(220))
+        try await Task.sleep(for: .milliseconds(80))
         if !UIAccessibility.isReduceMotionEnabled {
             XCTAssertTrue(hasGeometryInFlight(in: actualTabs.tabBar.layer), "Removal must interpolate tab bar geometry")
+            XCTAssertEqual(actualTabs.tabBarMinimizeBehavior, .onScrollDown,
+                           "Do not reset the tab bar layout while dismissal is animating")
         }
         for _ in 0..<100 {
             if actualTabs.bottomAccessory == nil { break }
             try await Task.sleep(for: .milliseconds(20))
         }
         XCTAssertNil(actualTabs.bottomAccessory)
+        try await Task.sleep(for: .milliseconds(500))
+        XCTAssertEqual(actualTabs.tabBarMinimizeBehavior, .never)
     }
 
     private func hasGeometryInFlight(in layer: CALayer) -> Bool {
@@ -93,7 +97,7 @@ final class NativeExerciseAccessoryTests: XCTestCase {
         await nextMainQueueTurn()
         try? await Task.sleep(for: .milliseconds(500))
         XCTAssertNil(tabs.bottomAccessory)
-        XCTAssertEqual(tabs.animationRequests, [!UIAccessibility.isReduceMotionEnabled, false])
+        XCTAssertEqual(tabs.animationRequests, Array(repeating: !UIAccessibility.isReduceMotionEnabled, count: 2))
 
         bridge.configuration = configuration(content("Third"))
         bridge.scheduleUpdate()
@@ -133,7 +137,6 @@ final class NativeExerciseAccessoryTests: XCTestCase {
                 Tab("First", systemImage: "1.circle") { Text("First") }
                 Tab("Second", systemImage: "2.circle") { Text("Second") }
             }
-            .tabBarMinimizeBehavior(state.content == nil ? .never : .onScrollDown)
             .background {
                 NativeExerciseAccessory(content: state.content, isUpdating: false,
                                         accentColor: .blue, onStop: {})

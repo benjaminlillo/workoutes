@@ -24,7 +24,6 @@ struct ContentView: View {
                 SettingsView()
             }
         }
-        .tabBarMinimizeBehavior(activeExercise == nil ? .never : .onScrollDown)
         .background {
             NativeExerciseAccessory(
                 content: activeExercise?.activityContent,

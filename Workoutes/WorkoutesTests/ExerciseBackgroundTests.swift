@@ -4,6 +4,20 @@ import XCTest
 
 @MainActor
 final class ExerciseBackgroundTests: XCTestCase {
+    func testAutomaticGradientPersistsPerScreenAndUsesCurrentTags() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = ExerciseBackgroundStore(directory: directory)
+        try store.setAutomaticGradient()
+        XCTAssertTrue(ExerciseBackgroundStore(directory: directory).usesAutomaticGradient)
+        XCTAssertFalse(ExerciseBackgroundStore(directory: directory, identifier: "workout-other").usesAutomaticGradient)
+        XCTAssertEqual(ExerciseBackgroundStore.automaticColors(from: ["FF0000", "00FF00"]), ["FF0000", "00FF00"])
+        XCTAssertEqual(ExerciseBackgroundStore.automaticColors(from: ["0000FF"]), ["0000FF"])
+        XCTAssertEqual(ExerciseBackgroundStore.automaticColors(from: []), ExerciseBackgroundStore.defaultGradientColors)
+        try store.saveGradient(colors: ["123456"])
+        XCTAssertFalse(ExerciseBackgroundStore(directory: directory).usesAutomaticGradient)
+    }
+
     func testGradientsPersistAndRemainIsolatedPerScreen() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -15,11 +29,12 @@ final class ExerciseBackgroundTests: XCTestCase {
         XCTAssertEqual(ExerciseBackgroundStore(directory: directory).gradientColors, ["AABBCC"])
         XCTAssertEqual(ExerciseBackgroundStore(directory: directory, identifier: "workout-first").gradientColors,
                        ["112233", "445566", "778899"])
-        XCTAssertTrue(secondWorkout.gradientColors.isEmpty)
+        XCTAssertEqual(secondWorkout.gradientColors, ExerciseBackgroundStore.defaultGradientColors)
         XCTAssertThrowsError(try firstWorkout.saveGradient(colors: []))
         XCTAssertThrowsError(try firstWorkout.saveGradient(colors: ["1", "2", "3", "4"]))
         try firstWorkout.remove()
-        XCTAssertTrue(ExerciseBackgroundStore(directory: directory, identifier: "workout-first").gradientColors.isEmpty)
+        XCTAssertEqual(ExerciseBackgroundStore(directory: directory, identifier: "workout-first").gradientColors,
+                       ExerciseBackgroundStore.defaultGradientColors)
         XCTAssertEqual(exercises.gradientColors, ["AABBCC"])
     }
 
@@ -38,10 +53,14 @@ final class ExerciseBackgroundTests: XCTestCase {
         XCTAssertTrue(reopened.gradientColors.isEmpty)
         try reopened.saveGradient(colors: ["ABCDEF"])
         XCTAssertEqual(ExerciseBackgroundStore(directory: directory).gradientColors, ["ABCDEF"])
+        let photoData = try XCTUnwrap(reopened.image?.pngData())
+        try reopened.useWallpaper()
+        XCTAssertTrue(ExerciseBackgroundStore(directory: directory).gradientColors.isEmpty)
+        XCTAssertEqual(reopened.image?.pngData(), photoData)
         try reopened.remove()
         let cleared = ExerciseBackgroundStore(directory: directory)
         XCTAssertNil(cleared.image)
-        XCTAssertTrue(cleared.gradientColors.isEmpty)
+        XCTAssertEqual(cleared.gradientColors, ExerciseBackgroundStore.defaultGradientColors)
     }
 
     func testBackgroundSurvivesReloadAndCanBeRemoved() throws {
