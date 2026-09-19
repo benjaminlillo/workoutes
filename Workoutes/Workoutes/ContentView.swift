@@ -3,17 +3,40 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
-    @Environment(\.modelContext) private var modelContext
+    @Environment(SessionController.self) private var session
     @Environment(\.scenePhase) private var scenePhase
     @Query private var exercises: [WorkoutExercise]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     
-    private var activeExercise: WorkoutExercise? {
-        exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
+    var body: some View {
+        tabs
+            .background { sessionAccessory }
+            .onChange(of: exerciseSnapshots, initial: true) {
+                exerciseActivity.synchronize(exercises: exercises)
+                session.refreshPresentation()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    exerciseActivity.restore()
+                    exerciseActivity.synchronize(exercises: exercises)
+                }
+                session.setSceneActive(phase == .active)
+            }
+            .onChange(of: accentColorRawValue) {
+                exerciseActivity.synchronize(exercises: exercises)
+                session.refreshPresentation()
+            }
+            .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
+            .alert("Exercise", isPresented: exerciseAlertPresented) {
+                Button("OK", role: .cancel) { exerciseActivity.errorMessage = nil }
+            } message: { Text(exerciseActivity.errorMessage ?? "") }
+            .alert("Session", isPresented: sessionAlertPresented) { sessionAlertActions } message: {
+                Text(session.errorMessage ?? "Enable notifications in Settings to be alerted when a rest block finishes. The session will continue without them.")
+            }
     }
 
-    var body: some View {
+    private var tabs: some View {
         TabView {
             Tab {
                 WorkoutListView()
@@ -28,53 +51,68 @@ struct ContentView: View {
                     .accessibilityLabel("Exercises")
             }
             Tab {
+                SessionHistoryView()
+            } label: {
+                Image(systemName: "clock.arrow.circlepath")
+                    .accessibilityLabel("History")
+            }
+            Tab {
                 SettingsView()
             } label: {
                 Image(systemName: "gearshape")
                     .accessibilityLabel("Settings")
             }
         }
-        .background {
-            NativeExerciseAccessory(
-                content: activeExercise?.activityContent,
-                isUpdating: exerciseActivity.isUpdating,
-                accentColor: ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
-            ) {
-                if let exercise = activeExercise {
-                    exerciseActivity.toggle(exercise, context: modelContext)
-                }
-            }
-        }
-        .onChange(of: exercises.map { ExerciseSnapshot(content: $0.activityContent, isDone: $0.isDone) }, initial: true) {
-            exerciseActivity.synchronize(exercises: exercises)
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active {
-                exerciseActivity.restore()
-                exerciseActivity.synchronize(exercises: exercises)
-            }
-        }
-        .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
-        .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
-        .alert("Live Activity", isPresented: Binding(
+    }
+
+    private var sessionAccessory: some View {
+        NativeSessionAccessory(
+            content: session.currentContent,
+            isUpdating: session.isUpdating,
+            accentColor: ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint,
+            onAdvance: { session.advance() }
+        )
+    }
+
+    private var exerciseSnapshots: [ExerciseSnapshot] {
+        exercises.map { ExerciseSnapshot(title: $0.title, isActive: $0.isActive, isDone: $0.isDone) }
+    }
+
+    private var exerciseAlertPresented: Binding<Bool> {
+        Binding(
             get: { exerciseActivity.errorMessage != nil },
             set: { if !$0 { exerciseActivity.errorMessage = nil } }
-        )) {
-            Button("OK", role: .cancel) { exerciseActivity.errorMessage = nil }
-        } message: {
-            Text(exerciseActivity.errorMessage ?? "")
+        )
+    }
+
+    private var sessionAlertPresented: Binding<Bool> {
+        Binding(
+            get: { session.errorMessage != nil || session.notificationsUnavailable },
+            set: {
+                if !$0 {
+                    session.errorMessage = nil
+                    session.notificationsUnavailable = false
+                }
+            }
+        )
+    }
+
+    @ViewBuilder private var sessionAlertActions: some View {
+        if session.notificationsUnavailable {
+            Button("Open Settings") {
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                session.notificationsUnavailable = false
+            }
+        }
+        Button("OK", role: .cancel) {
+            session.errorMessage = nil
+            session.notificationsUnavailable = false
         }
     }
 }
 
 private struct ExerciseSnapshot: Equatable {
-    let content: ExerciseActivityAttributes.ContentState
+    let title: String
+    let isActive: Bool
     let isDone: Bool
-}
-
-#Preview {
-    ContentView()
-        .environment(ExerciseBackgroundStore())
-        .environment(ExerciseActivityController())
-        .modelContainer(for: Workout.self, inMemory: true)
 }

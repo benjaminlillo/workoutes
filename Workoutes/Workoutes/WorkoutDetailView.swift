@@ -45,6 +45,10 @@ struct WorkoutDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
+                SessionToolbarButton()
+            }
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Customize Background", systemImage: "paintpalette") { showingBackgroundSheet = true }
                     .disabled(background == nil)
             }

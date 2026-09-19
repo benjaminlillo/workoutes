@@ -497,7 +497,7 @@
 				DEVELOPMENT_TEAM = 5QE8L87FLK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutesLiveActivity/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Active Exercise";
+				INFOPLIST_KEY_CFBundleDisplayName = "Flexible Session";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -522,7 +522,7 @@
 				DEVELOPMENT_TEAM = 5QE8L87FLK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutesLiveActivity/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Active Exercise";
+				INFOPLIST_KEY_CFBundleDisplayName = "Flexible Session";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

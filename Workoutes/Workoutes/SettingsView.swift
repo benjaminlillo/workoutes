@@ -80,6 +80,12 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Training") {
+                    NavigationLink("Flexible Session") {
+                        SessionTemplateEditorView()
+                    }
+                }
+
                 Section(header: Text("Data")) {
                     Button(action: exportData) {
                         HStack {
