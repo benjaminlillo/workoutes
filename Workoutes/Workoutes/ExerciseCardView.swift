@@ -31,18 +31,9 @@ struct ExerciseCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(exercise.title)
-                            .font(.headline)
-                        
-                        if !exercise.tags.isEmpty {
-                            ForEach(exercise.tags) { tag in
-                                Circle()
-                                    .fill(Color(hex: tag.colorHex))
-                                    .frame(width: 8, height: 8)
-                            }
-                        }
-                    }
+                    Text(exercise.title)
+                        .font(.headline)
+
                     
                     if !exercise.subtitle.isEmpty {
                         Text(exercise.subtitle)
@@ -108,6 +99,13 @@ struct ExerciseCardView: View {
                 .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
                 .sensoryFeedback(.selection, trigger: stateValue)
             }
+
+            if !exercise.tags.isEmpty {
+                HStack {
+                    tagBars
+                    Spacer(minLength: 0)
+                }
+            }
         }
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -157,5 +155,18 @@ struct ExerciseCardView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+    }
+
+    private var tagBars: some View {
+        HStack(spacing: 5) {
+            ForEach(exercise.tags) { tag in
+                Capsule()
+                    .fill(Color(hex: tag.colorHex))
+                    .frame(maxWidth: 24)
+                    .frame(height: 4)
+                    .accessibilityLabel("Tag: \(tag.name)")
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
