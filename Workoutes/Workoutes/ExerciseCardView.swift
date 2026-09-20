@@ -12,6 +12,7 @@ struct ExerciseCardView: View {
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
     @State private var showingWeightSheet = false
+    @State private var selectedCountMetric: ExerciseCountMetric?
 
     private var accentColor: Color {
         ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
@@ -102,19 +103,39 @@ struct ExerciseCardView: View {
 
                 metricDivider
 
-                ExerciseMetricView(
-                    systemImage: "square.stack.3d.up.fill",
-                    value: "\(exercise.numberOfSets) sets",
-                    label: "Sets"
-                )
+                Button { selectedCountMetric = .sets } label: {
+                    ExerciseMetricView(
+                        systemImage: "square.stack.3d.up.fill",
+                        value: "\(exercise.numberOfSets) sets",
+                        label: "Sets"
+                    )
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+                .accessibilityLabel("Sets")
+                .accessibilityValue("\(exercise.numberOfSets)")
+                .accessibilityHint("Opens the sets selector")
+                .accessibilityIdentifier("exerciseSets.\(exercise.title)")
 
                 metricDivider
 
-                ExerciseMetricView(
-                    systemImage: "repeat",
-                    value: "\(exercise.reps) reps",
-                    label: "Repetitions"
-                )
+                Button { selectedCountMetric = .repetitions } label: {
+                    ExerciseMetricView(
+                        systemImage: "repeat",
+                        value: "\(exercise.reps) reps",
+                        label: "Repetitions"
+                    )
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+                .accessibilityLabel("Repetitions")
+                .accessibilityValue("\(exercise.reps)")
+                .accessibilityHint("Opens the repetitions selector")
+                .accessibilityIdentifier("exerciseRepetitions.\(exercise.title)")
             }
 
         }
@@ -161,6 +182,12 @@ struct ExerciseCardView: View {
         }
         .sheet(isPresented: $showingWeightSheet) {
             ExerciseWeightSheet(exercise: exercise, unit: weightUnit)
+                .tint(accentColor)
+                .presentationDetents([.height(330)])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $selectedCountMetric) { metric in
+            ExerciseCountSheet(exercise: exercise, metric: metric)
                 .tint(accentColor)
                 .presentationDetents([.height(330)])
                 .presentationDragIndicator(.visible)
