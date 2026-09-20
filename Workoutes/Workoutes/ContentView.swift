@@ -11,10 +11,9 @@ struct ContentView: View {
     
     var body: some View {
         tabs
-            .background { sessionAccessory }
             .onChange(of: exerciseSnapshots, initial: true) {
                 exerciseActivity.synchronize(exercises: exercises)
-                session.refreshPresentation()
+                session.reconcileActiveExercise()
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
@@ -63,13 +62,17 @@ struct ContentView: View {
                     .accessibilityLabel("Settings")
             }
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewBottomAccessory {
+            sessionAccessory
+        }
     }
 
     private var sessionAccessory: some View {
         NativeSessionAccessory(
             content: session.currentContent,
             isUpdating: session.isUpdating,
-            accentColor: ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint,
+            onStart: { session.start() },
             onAdvance: { session.advance() }
         )
     }

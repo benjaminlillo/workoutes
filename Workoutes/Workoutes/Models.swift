@@ -60,6 +60,26 @@ enum SessionBlockKind: String, Codable, CaseIterable {
     case rest
 }
 
+struct SessionTemplateSnapshotBlock: Codable, Hashable, Identifiable {
+    let id: UUID
+    let order: Int
+    let name: String
+    let kindRawValue: String
+    let duration: TimeInterval
+
+    var kind: SessionBlockKind {
+        SessionBlockKind(rawValue: kindRawValue) ?? .exercise
+    }
+
+    init(block: SessionTemplateBlock) {
+        id = block.id
+        order = block.order
+        name = block.name
+        kindRawValue = block.kindRawValue
+        duration = block.restDuration
+    }
+}
+
 @Model
 final class SessionTemplate {
     var id: UUID = UUID()
@@ -100,8 +120,19 @@ final class TrainingSession {
     var startedAt: Date
     var endedAt: Date?
     var endedEarly: Bool = false
+    var templateSnapshotData: Data?
     @Relationship(deleteRule: .cascade, inverse: \SessionBlockRecord.session)
     var blocks: [SessionBlockRecord] = []
+
+    var templateSnapshot: [SessionTemplateSnapshotBlock] {
+        get {
+            guard let templateSnapshotData else { return [] }
+            return (try? JSONDecoder().decode([SessionTemplateSnapshotBlock].self, from: templateSnapshotData)) ?? []
+        }
+        set {
+            templateSnapshotData = try? JSONEncoder().encode(newValue)
+        }
+    }
 
     init(templateName: String, startedAt: Date = Date()) {
         self.templateName = templateName
@@ -119,6 +150,13 @@ final class SessionBlockRecord {
     var plannedRestDuration: TimeInterval
     var startedAt: Date?
     var endedAt: Date?
+    var sourceTemplateBlockID: UUID?
+    var exerciseIdentifierData: Data?
+    var exerciseTitle: String?
+    var exerciseGroupID: UUID?
+    var setIndex: Int?
+    var setCount: Int?
+    var isInterSetRestValue: Bool?
     var session: TrainingSession?
 
     var kind: SessionBlockKind {
@@ -131,10 +169,21 @@ final class SessionBlockRecord {
         return max(0, endedAt.timeIntervalSince(startedAt))
     }
 
-    init(order: Int, configuredName: String, kind: SessionBlockKind, plannedRestDuration: TimeInterval) {
+    var isInterSetRest: Bool { isInterSetRestValue == true }
+
+    var isExerciseGroupBlock: Bool { exerciseGroupID != nil }
+
+    init(
+        order: Int,
+        configuredName: String,
+        kind: SessionBlockKind,
+        plannedRestDuration: TimeInterval,
+        sourceTemplateBlockID: UUID? = nil
+    ) {
         self.order = order
         self.configuredName = configuredName
         kindRawValue = kind.rawValue
         self.plannedRestDuration = plannedRestDuration
+        self.sourceTemplateBlockID = sourceTemplateBlockID
     }
 }

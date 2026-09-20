@@ -52,9 +52,16 @@ final class ExerciseActivityController {
 
     func completeActive(context: ModelContext) {
         guard let exercise = activeExercise(in: context) else { return }
+        complete(exercise, context: context)
+    }
+
+    func complete(_ exercise: WorkoutExercise, context: ModelContext) {
+        guard !exercise.isDeleted else { return }
         exercise.isActive = false
         exercise.isDone = true
-        activeExerciseID = nil
+        if activeExerciseID == exercise.persistentModelID {
+            activeExerciseID = nil
+        }
         save(context)
     }
 

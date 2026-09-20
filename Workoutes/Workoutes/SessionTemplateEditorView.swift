@@ -19,16 +19,18 @@ struct SessionTemplateEditorView: View {
                             HStack {
                                 Label(block.name, systemImage: block.kind == .exercise ? "figure.strengthtraining.traditional" : "timer")
                                 Spacer()
-                                if block.kind == .rest {
-                                    Text(shortDuration(block.restDuration)).foregroundStyle(.secondary)
-                                }
+                                Text(block.kind == .rest
+                                     ? shortDuration(block.restDuration)
+                                     : "\(shortDuration(block.restDuration)) between sets")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
                     .onMove { source, destination in move(source, destination, in: template) }
                     .onDelete { offsets in delete(offsets, from: template) }
                 } footer: {
-                    Text("Exercise blocks count upward. Rest blocks advance automatically while the app is open and send a local notification in the background.")
+                    Text("When an exercise becomes active, its sets and the configured rest between them are added to the current exercise block. Rest blocks advance automatically.")
                 }
             } else {
                 ProgressView()
@@ -53,7 +55,7 @@ struct SessionTemplateEditorView: View {
             order: template.blocks.count,
             name: kind == .exercise ? "Exercise" : "Rest",
             kind: kind,
-            restDuration: kind == .rest ? 60 : 0
+            restDuration: 60
         )
         template.blocks.append(block)
         try? modelContext.save()
@@ -113,21 +115,19 @@ struct SessionBlockEditorView: View {
             TextField("Block Name", text: $block.name)
                 .onSubmit { try? modelContext.save() }
             LabeledContent("Type", value: block.kind == .exercise ? "Exercise" : "Rest")
-            if block.kind == .rest {
-                Section("Duration") {
-                    HStack {
-                        Picker("Minutes", selection: minutes) {
-                            ForEach(0...60, id: \.self) { Text("\($0) min").tag($0) }
-                        }
-                        .pickerStyle(.wheel)
-                        Picker("Seconds", selection: seconds) {
-                            ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { Text("\($0) sec").tag($0) }
-                        }
-                        .pickerStyle(.wheel)
-                        .disabled(minutes.wrappedValue == 60)
+            Section(block.kind == .exercise ? "Rest Between Sets" : "Duration") {
+                HStack {
+                    Picker("Minutes", selection: minutes) {
+                        ForEach(0...60, id: \.self) { Text("\($0) min").tag($0) }
                     }
-                    .frame(height: 180)
+                    .pickerStyle(.wheel)
+                    Picker("Seconds", selection: seconds) {
+                        ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { Text("\($0) sec").tag($0) }
+                    }
+                    .pickerStyle(.wheel)
+                    .disabled(minutes.wrappedValue == 60)
                 }
+                .frame(height: 180)
             }
         }
         .navigationTitle("Edit Block")
