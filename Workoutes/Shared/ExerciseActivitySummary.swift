@@ -38,18 +38,17 @@ struct ExerciseActivitySummary: View {
                 VStack(spacing: 3) {
                     statusControl
 
-                    HStack(spacing: 3) {
+                    HStack(spacing: 4) {
                         ForEach(Array((state.tagColors ?? []).enumerated()), id: \.offset) { _, hex in
                             Circle().fill(color(hex: hex)).frame(width: 7, height: 7)
                         }
+                        if state.increaseLoadNextTime {
+                            ExerciseBumpBadge(color: .white)
+                        }
                     }
                     .fixedSize()
-
-                    if state.increaseLoadNextTime {
-                        ExerciseBumpBadge(color: .white)
-                    }
                 }
-                .frame(width: 68)
+                .frame(minWidth: 44)
             }
 
             Rectangle().fill(.white.opacity(0.2)).frame(height: 0.5)

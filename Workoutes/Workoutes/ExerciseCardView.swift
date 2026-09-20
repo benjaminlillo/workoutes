@@ -69,15 +69,16 @@ struct ExerciseCardView: View {
                     .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
                     .sensoryFeedback(.selection, trigger: stateValue)
 
-                    if !exercise.tags.isEmpty {
-                        tagBars
-                    }
-
-                    if exercise.increaseLoadNextTime {
-                        ExerciseBumpBadge(color: accentColor)
+                    if !exercise.tags.isEmpty || exercise.increaseLoadNextTime {
+                        HStack(spacing: 4) {
+                            tagBars
+                            if exercise.increaseLoadNextTime {
+                                ExerciseBumpBadge(color: accentColor)
+                            }
+                        }
                     }
                 }
-                .frame(width: 68)
+                .frame(minWidth: 44)
             }
 
             Divider()

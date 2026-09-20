@@ -33,13 +33,11 @@ struct ExerciseBumpBadge: View {
     let color: Color
 
     var body: some View {
-        Label("Bump", systemImage: "arrow.up.right.circle")
-            .font(.system(size: 10, weight: .semibold))
+        Image(systemName: "arrow.up.right.circle")
+            .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(color)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 4)
-            .background(color.opacity(0.14), in: Capsule())
-            .fixedSize()
+            .frame(width: 26, height: 26)
+            .background(color.opacity(0.14), in: Circle())
             .accessibilityLabel("Bump enabled")
     }
 }
