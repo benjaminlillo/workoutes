@@ -93,7 +93,7 @@ struct ExerciseCardView: View {
                     )
                 }
                 .buttonStyle(.borderless)
-                .foregroundStyle(accentColor)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
                 .accessibilityLabel("Weight")
