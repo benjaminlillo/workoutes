@@ -28,84 +28,98 @@ struct ExerciseCardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(exercise.title)
-                        .font(.headline)
+                        .font(.title3.weight(.bold))
 
-                    
                     if !exercise.subtitle.isEmpty {
                         Text(exercise.subtitle)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
-                    
+
                     if !exercise.details.isEmpty {
-                        Text(exercise.details)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        HStack(alignment: .firstTextBaseline, spacing: 7) {
+                            Image(systemName: "doc.text")
+                            Text(exercise.details)
+                                .lineLimit(2)
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
                     }
                 }
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(exercise.numberOfSets) Sets")
-                        .font(.subheadline.bold())
-                    Text("\(exercise.reps) Reps")
-                        .font(.subheadline.bold())
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(spacing: 5) {
+                    Button {
+                        exerciseActivity.advanceState(exercise, context: modelContext)
+                    } label: {
+                        ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
+                                             accentColor: accentColor)
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(exerciseActivity.isUpdating)
+                    .accessibilityLabel("Exercise status")
+                    .accessibilityValue(stateValue)
+                    .accessibilityHint(stateHint)
+                    .accessibilityAddTraits(exercise.isDone || isPlaying ? .isSelected : [])
+                    .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
+                    .sensoryFeedback(.selection, trigger: stateValue)
+
+                    if !exercise.tags.isEmpty {
+                        tagBars
+                    }
                 }
+                .frame(width: 48)
             }
-            
+
             Divider()
 
-            HStack {
+            HStack(spacing: 0) {
                 Button { showingWeightSheet = true } label: {
-                    HStack(spacing: 5) {
-                        Text(weightUnit.label(for: exercise.weight))
-                            .font(.subheadline.weight(.semibold))
-                        Image(systemName: "chevron.down")
-                            .font(.caption2.weight(.semibold))
-                    }
-                    .foregroundStyle(accentColor)
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
+                    ExerciseMetricView(
+                        systemImage: "dumbbell.fill",
+                        value: weightUnit.label(for: exercise.weight),
+                        label: "Weight"
+                    )
                 }
                 .buttonStyle(.borderless)
+                .foregroundStyle(accentColor)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
                 .accessibilityLabel("Weight")
                 .accessibilityValue("\(weightUnit.displayedWeight(from: exercise.weight).formatted()) \(weightUnit.accessibilityName)")
                 .accessibilityHint("Opens the weight selector")
                 .accessibilityIdentifier("exerciseWeight.\(exercise.title)")
-                
-                Spacer()
-                
-                Toggle("Increase Next", isOn: $exercise.increaseLoadNextTime)
-                    .font(.caption)
-                    .toggleStyle(.button)
-                    .tint(exercise.increaseLoadNextTime ? .blue : .gray)
-                
-                Button {
-                    exerciseActivity.advanceState(exercise, context: modelContext)
-                } label: {
-                    ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
-                                         accentColor: accentColor)
-                }
-                .buttonStyle(.borderless)
-                .disabled(exerciseActivity.isUpdating)
-                .accessibilityLabel("Exercise status")
-                .accessibilityValue(stateValue)
-                .accessibilityHint(stateHint)
-                .accessibilityAddTraits(exercise.isDone || isPlaying ? .isSelected : [])
-                .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
-                .sensoryFeedback(.selection, trigger: stateValue)
+
+                metricDivider
+
+                ExerciseMetricView(
+                    systemImage: "square.stack.3d.up.fill",
+                    value: "\(exercise.numberOfSets) sets",
+                    label: "Sets"
+                )
+
+                metricDivider
+
+                ExerciseMetricView(
+                    systemImage: "repeat",
+                    value: "\(exercise.reps) reps",
+                    label: "Repetitions"
+                )
             }
 
-            if !exercise.tags.isEmpty {
-                HStack {
-                    tagBars
-                    Spacer(minLength: 0)
-                }
+            Toggle(isOn: $exercise.increaseLoadNextTime) {
+                Label("Increase weight next time", systemImage: "arrow.up.right.circle")
+                    .font(.caption.weight(.semibold))
             }
+            .toggleStyle(.button)
+            .buttonStyle(.borderless)
+            .tint(exercise.increaseLoadNextTime ? accentColor : .secondary)
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -158,15 +172,20 @@ struct ExerciseCardView: View {
     }
 
     private var tagBars: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 3) {
             ForEach(exercise.tags) { tag in
-                Capsule()
+                Circle()
                     .fill(Color(hex: tag.colorHex))
-                    .frame(maxWidth: 24)
-                    .frame(height: 4)
+                    .frame(width: 7, height: 7)
                     .accessibilityLabel("Tag: \(tag.name)")
             }
         }
-        .fixedSize(horizontal: false, vertical: true)
+        .fixedSize()
+    }
+
+    private var metricDivider: some View {
+        Rectangle()
+            .fill(Color.secondary.opacity(0.2))
+            .frame(width: 1, height: 42)
     }
 }

@@ -10,16 +10,12 @@ struct ExerciseActivitySummary: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(state.title)
-                            .font(.headline)
-                            .lineLimit(2)
-                        ForEach(Array((state.tagColors ?? []).enumerated()), id: \.offset) { _, hex in
-                            Circle().fill(color(hex: hex)).frame(width: 8, height: 8)
-                        }
-                    }
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(state.title)
+                        .font(.headline.weight(.bold))
+                        .lineLimit(2)
+
                     if !state.subtitle.isEmpty {
                         Text(state.subtitle)
                             .font(.subheadline)
@@ -27,57 +23,96 @@ struct ExerciseActivitySummary: View {
                             .lineLimit(1)
                     }
                     if let details = state.details, !details.isEmpty {
-                        Text(details)
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Image(systemName: "doc.text")
+                            Text(details)
+                                .lineLimit(2)
+                        }
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.7))
-                            .lineLimit(2)
+                            .padding(.top, 2)
                     }
                 }
                 Spacer(minLength: 8)
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(state.numberOfSets) Sets")
-                    Text("\(state.reps) Reps")
+
+                VStack(spacing: 3) {
+                    statusControl
+
+                    HStack(spacing: 3) {
+                        ForEach(Array((state.tagColors ?? []).enumerated()), id: \.offset) { _, hex in
+                            Circle().fill(color(hex: hex)).frame(width: 7, height: 7)
+                        }
+                    }
+                    .fixedSize()
                 }
-                .font(.subheadline.bold())
-                .fixedSize()
+                .frame(width: 48)
             }
 
             Rectangle().fill(.white.opacity(0.2)).frame(height: 0.5)
 
-            HStack {
-                Text("\((state.displayedWeight ?? state.weight).formatted(.number.precision(.fractionLength(0...2)))) \(state.weightUnitSymbol ?? "kg")")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .accessibilityLabel("Weight")
-                    .accessibilityValue("\((state.displayedWeight ?? state.weight).formatted()) \(state.weightUnitSymbol ?? "kg")")
-                Spacer(minLength: 8)
-                Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, complete: false)) {
-                    Text("Increase Next")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(state.increaseLoadNextTime ? 1 : 0.6))
-                        .frame(minHeight: 44)
-                }
-                .buttonStyle(.plain)
-                .disabled(status != .playing)
-                .accessibilityValue(state.increaseLoadNextTime ? "On" : "Off")
-                .accessibilityAddTraits(state.increaseLoadNextTime ? .isSelected : [])
+            HStack(spacing: 0) {
+                ExerciseMetricView(
+                    systemImage: "dumbbell.fill",
+                    value: "\((state.displayedWeight ?? state.weight).formatted(.number.precision(.fractionLength(0...2)))) \(state.weightUnitSymbol ?? "kg")",
+                    label: "Weight"
+                )
 
-                if status == .playing {
-                    Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, complete: true)) {
-                        ExerciseStatusSymbol(status: status, accentColor: accentColor)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Complete active exercise")
-                    .accessibilityValue(status.rawValue)
-                } else {
-                    ExerciseStatusSymbol(status: status, accentColor: accentColor)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(status == .done ? "Exercise completed" : "Exercise not started")
-                }
+                metricDivider
+
+                ExerciseMetricView(
+                    systemImage: "square.stack.3d.up.fill",
+                    value: "\(state.numberOfSets) sets",
+                    label: "Sets"
+                )
+
+                metricDivider
+
+                ExerciseMetricView(
+                    systemImage: "repeat",
+                    value: "\(state.reps) reps",
+                    label: "Repetitions"
+                )
             }
+
+            Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, complete: false)) {
+                HStack(spacing: 5) {
+                    Image(systemName: "arrow.up.right.circle")
+                    Text("Increase weight next time")
+                    Image(systemName: state.increaseLoadNextTime ? "checkmark.circle.fill" : "circle")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(status == .playing ? 1 : 0.45))
+                .frame(maxWidth: .infinity, minHeight: 32, alignment: .trailing)
+            }
+            .buttonStyle(.plain)
+            .disabled(status != .playing)
+            .accessibilityValue(state.increaseLoadNextTime ? "On" : "Off")
+            .accessibilityAddTraits(state.increaseLoadNextTime ? .isSelected : [])
         }
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private var statusControl: some View {
+        if status == .playing {
+            Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, complete: true)) {
+                ExerciseStatusSymbol(status: status, accentColor: accentColor)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Complete active exercise")
+            .accessibilityValue(status.rawValue)
+        } else {
+            ExerciseStatusSymbol(status: status, accentColor: accentColor)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(status == .done ? "Exercise completed" : "Exercise not started")
+        }
+    }
+
+    private var metricDivider: some View {
+        Rectangle()
+            .fill(.white.opacity(0.2))
+            .frame(width: 1, height: 38)
     }
 
     private func color(hex: String) -> Color {

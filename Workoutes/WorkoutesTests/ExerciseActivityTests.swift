@@ -197,6 +197,37 @@ final class ExerciseActivityTests: XCTestCase {
         }
     }
 
+    func testExerciseCardRendersReferenceLayout() throws {
+        let container = try makeContainer()
+        let item = WorkoutExercise(
+            title: "Bench Press",
+            subtitle: "Chest · Strength",
+            details: "Control the descent",
+            numberOfSets: 4,
+            reps: 10,
+            increaseLoadNextTime: true,
+            weight: 60
+        )
+        let chest = Tag(name: "Chest", colorHex: "FF8800")
+        let strength = Tag(name: "Strength", colorHex: "5599FF")
+        item.tags = [chest, strength]
+        container.mainContext.insert(item)
+
+        let renderer = ImageRenderer(
+            content: ExerciseCardView(exercise: item)
+                .environment(ExerciseActivityController())
+                .modelContainer(container)
+                .padding(.vertical, 16)
+                .frame(width: 398)
+                .background(Color(uiColor: .systemGroupedBackground))
+        )
+        renderer.scale = 3
+        let image = try XCTUnwrap(renderer.uiImage)
+        XCTAssertGreaterThan(image.size.height, 180)
+        let data = try XCTUnwrap(image.pngData())
+        try data.write(to: URL(fileURLWithPath: "/tmp/workoutes-exercise-card-reference.png"))
+    }
+
     override func tearDown() async throws {
         for activity in Activity<ExerciseActivityAttributes>.activities {
             await activity.end(nil, dismissalPolicy: .immediate)
