@@ -54,20 +54,14 @@ struct SessionCurrentTimeText: View {
 
     var body: some View {
         if state.blockKind == .rest, let end = state.restEndsAt {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                Text(format(remaining: end.timeIntervalSince(context.date)))
+            let now = Date.now
+            if end > now {
+                Text(timerInterval: now...end, countsDown: true)
+            } else {
+                Text("0:00")
             }
         } else {
             Text(timerInterval: state.blockStartedAt...Date.distantFuture, countsDown: false)
         }
-    }
-
-    private func format(remaining: TimeInterval) -> String {
-        let value = Int(abs(remaining).rounded(.down))
-        let hours = value / 3600
-        let text = hours > 0
-            ? String(format: "%d:%02d:%02d", hours, (value % 3600) / 60, value % 60)
-            : String(format: "%d:%02d", value / 60, value % 60)
-        return remaining < 0 ? "+\(text)" : text
     }
 }
