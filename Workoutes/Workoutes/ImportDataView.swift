@@ -73,6 +73,7 @@ struct ImportDataView: View {
                 }
             }
         }
+        .transparentNavigationChrome()
         .navigationTitle("Import Data")
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(

@@ -97,6 +97,7 @@ struct CreateExerciseSheet: View {
                     .foregroundColor(title.isEmpty ? .gray : .blue)
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle("Add Exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -61,6 +61,7 @@ struct CreateGlobalExerciseSheet: View {
                     }
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle("New Exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

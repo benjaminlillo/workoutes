@@ -42,6 +42,7 @@ struct CreateWorkoutSheet: View {
                     }
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle("New Workout")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

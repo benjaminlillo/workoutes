@@ -27,6 +27,7 @@ struct ManageTagSheet: View {
                     }
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle(editingTag == nil ? "New Tag" : "Edit Tag")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

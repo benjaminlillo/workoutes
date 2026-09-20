@@ -34,7 +34,8 @@ struct ContentView: View {
                     .accessibilityLabel("Settings")
             }
         }
-        .background {
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewBottomAccessory {
             NativeExerciseAccessory(
                 content: activeExercise?.activityContent,
                 isUpdating: exerciseActivity.isUpdating,

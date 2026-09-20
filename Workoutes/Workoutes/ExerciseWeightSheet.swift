@@ -38,6 +38,7 @@ struct ExerciseWeightSheet: View {
                 }
             }
             .padding(.horizontal)
+            .transparentNavigationChrome()
             .navigationTitle("Weight")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -46,6 +46,7 @@ struct EditExerciseSheet: View {
                     }
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle("Edit Exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

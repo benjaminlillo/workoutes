@@ -29,8 +29,7 @@ struct WorkoutListView: View {
                 .onDelete(perform: deleteWorkouts)
             }
             .listStyle(.plain)
-            .scrollEdgeEffectStyle(.soft, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .transparentNavigationChrome()
             .scrollContentBackground(.hidden)
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Workouts")

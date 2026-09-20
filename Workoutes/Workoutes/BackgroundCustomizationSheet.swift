@@ -121,6 +121,7 @@ struct BackgroundCustomizationSheet: View {
                     }
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle(title)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

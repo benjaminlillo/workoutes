@@ -98,6 +98,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .transparentNavigationChrome()
             .navigationTitle("Settings")
             .sheet(item: $shareURL) { identifiableURL in
                 ShareSheet(items: [identifiableURL.url])

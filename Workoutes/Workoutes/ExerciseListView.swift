@@ -32,6 +32,11 @@ struct ExerciseListView: View {
     var body: some View {
         NavigationStack {
             List {
+                tagBar
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+
                 ForEach(filteredExercises) { exercise in
                     ExerciseCardView(exercise: exercise)
                         .listRowInsets(EdgeInsets())
@@ -42,14 +47,8 @@ struct ExerciseListView: View {
                 .onDelete(perform: deleteExercises)
             }
             .listStyle(.plain)
-            .scrollEdgeEffectStyle(.soft, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .transparentNavigationChrome()
             .scrollContentBackground(.hidden)
-            // Keep the List as the primary scroll view so the native large title
-            // collapses. The accessory bar follows the navigation safe area.
-            .safeAreaInset(edge: .top, spacing: 0) {
-                tagBar
-            }
             .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
             .navigationTitle("All Exercises")
             .navigationBarTitleDisplayMode(.large)
