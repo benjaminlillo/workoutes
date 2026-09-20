@@ -44,8 +44,12 @@ struct ExerciseActivitySummary: View {
                         }
                     }
                     .fixedSize()
+
+                    if state.increaseLoadNextTime {
+                        ExerciseBumpBadge(color: .white)
+                    }
                 }
-                .frame(width: 48)
+                .frame(width: 68)
             }
 
             Rectangle().fill(.white.opacity(0.2)).frame(height: 0.5)
@@ -74,20 +78,6 @@ struct ExerciseActivitySummary: View {
                 )
             }
 
-            Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, complete: false)) {
-                HStack(spacing: 5) {
-                    Image(systemName: "arrow.up.right.circle")
-                    Text("Increase weight next time")
-                    Image(systemName: state.increaseLoadNextTime ? "checkmark.circle.fill" : "circle")
-                }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(status == .playing ? 1 : 0.45))
-                .frame(maxWidth: .infinity, minHeight: 32, alignment: .trailing)
-            }
-            .buttonStyle(.plain)
-            .disabled(status != .playing)
-            .accessibilityValue(state.increaseLoadNextTime ? "On" : "Off")
-            .accessibilityAddTraits(state.increaseLoadNextTime ? .isSelected : [])
         }
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, alignment: .leading)

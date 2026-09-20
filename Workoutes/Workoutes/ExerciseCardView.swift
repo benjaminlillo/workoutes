@@ -72,8 +72,12 @@ struct ExerciseCardView: View {
                     if !exercise.tags.isEmpty {
                         tagBars
                     }
+
+                    if exercise.increaseLoadNextTime {
+                        ExerciseBumpBadge(color: accentColor)
+                    }
                 }
-                .frame(width: 48)
+                .frame(width: 68)
             }
 
             Divider()
@@ -112,14 +116,6 @@ struct ExerciseCardView: View {
                 )
             }
 
-            Toggle(isOn: $exercise.increaseLoadNextTime) {
-                Label("Increase weight next time", systemImage: "arrow.up.right.circle")
-                    .font(.caption.weight(.semibold))
-            }
-            .toggleStyle(.button)
-            .buttonStyle(.borderless)
-            .tint(exercise.increaseLoadNextTime ? accentColor : .secondary)
-            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -150,6 +146,15 @@ struct ExerciseCardView: View {
         }
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         .padding(.horizontal)
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                exercise.increaseLoadNextTime.toggle()
+            } label: {
+                Label("Bump", systemImage: "arrow.up.right.circle")
+            }
+            .tint(accentColor)
+            .accessibilityHint(exercise.increaseLoadNextTime ? "Disables bump" : "Enables bump")
+        }
         .sheet(isPresented: $showingEditSheet) {
             EditExerciseSheet(exercise: exercise)
         }
