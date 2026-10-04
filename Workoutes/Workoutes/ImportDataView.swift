@@ -42,15 +42,18 @@ struct ImportDataView: View {
                 Text("To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                    .subtleFormRowBorder(.first)
                 Text("Reimporting a file updates catalog items by ID without creating duplicates. Exercise history is imported automatically when included.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                    .subtleFormRowBorder(.last)
             }
             
             Section(header: Text("AI Assistant Prompt")) {
                 Text("Copy this prompt and send it to ChatGPT, Claude, or Gemini along with your text-based routines. The AI will format your routines into the exact JSON format required by Workoutes.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                    .subtleFormRowBorder(.first)
                 
                 Button(action: {
                     UIPasteboard.general.string = aiPrompt
@@ -65,6 +68,7 @@ struct ImportDataView: View {
                 .alert("Prompt Copied!", isPresented: $showCopiedAlert) {
                     Button("OK", role: .cancel) { }
                 }
+                .subtleFormRowBorder(.last)
             }
             
             Section {
@@ -75,6 +79,7 @@ struct ImportDataView: View {
                         Image(systemName: "folder")
                     }
                 }
+                .subtleFormRowBorder()
             }
         }
         .transparentNavigationChrome()

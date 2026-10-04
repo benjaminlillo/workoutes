@@ -22,6 +22,7 @@ struct WorkoutListView: View {
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
                             .fill(Color(UIColor.secondarySystemGroupedBackground))
+                            .subtleCardBorder()
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                     )

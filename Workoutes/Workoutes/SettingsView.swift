@@ -29,19 +29,23 @@ struct SettingsView: View {
                     Picker("Accent Color", selection: $accentColorRawValue) {
                         ForEach(ThemeColor.allCases) { theme in Text(theme.name).tag(theme.rawValue) }
                     }
+                    .subtleFormRowBorder()
                 }
                 Section("Units") {
                     Picker("Weight Unit", selection: $weightUnit) {
                         ForEach(WeightUnit.allCases) { unit in Text(unit.name).tag(unit) }
                     }
+                    .subtleFormRowBorder()
                 }
                 Section("Data") {
                     Button { showingExportOptions = true } label: {
                         HStack { Text("Export Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.up") }
                     }
+                    .subtleFormRowBorder(.first)
                     NavigationLink(destination: ImportDataView()) {
                         HStack { Text("Import Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.down") }
                     }
+                    .subtleFormRowBorder(.last)
                 }
             }
             .transparentNavigationChrome()
