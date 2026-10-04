@@ -39,24 +39,34 @@ struct WeeklySummary {
 }
 
 struct SummaryView: View {
+    var pull: Binding<MotivationalPullState>? = nil
+    @State private var localPull = MotivationalPullState()
+
     var body: some View {
         NavigationStack {
             // Refreshes after midnight/time-zone changes, including when this tab stays open.
             TimelineView(.periodic(from: .now, by: 60)) { timeline in
-                SummaryWeekView(date: timeline.date)
+                SummaryWeekView(date: timeline.date, pull: pull ?? $localPull)
             }
             .transparentNavigationChrome()
             .navigationTitle("Summary")
+        }
+        .overlay {
+            if pull == nil {
+                MotivationalPullOverlay(pull: localPull)
+            }
         }
     }
 }
 
 private struct SummaryWeekView: View {
     let date: Date
+    @Binding var pull: MotivationalPullState
     @Query private var completions: [ExerciseCompletion]
 
-    init(date: Date) {
+    init(date: Date, pull: Binding<MotivationalPullState>) {
         self.date = date
+        _pull = pull
         let interval = WeeklySummary.interval(containing: date)
         let start = interval.start
         let end = interval.end
@@ -65,7 +75,7 @@ private struct SummaryWeekView: View {
     }
 
     var body: some View {
-        ScrollView {
+        MotivationalScrollView(pull: $pull) {
             SummaryDashboard(summary: WeeklySummary(completions: completions, date: date), today: date)
                 .padding(16)
         }

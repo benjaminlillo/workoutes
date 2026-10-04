@@ -8,6 +8,7 @@ struct ContentView: View {
     @Query private var exercises: [WorkoutExercise]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
+    @State private var motivationalPull = MotivationalPullState()
     
     private var activeExercise: WorkoutExercise? {
         exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
@@ -16,7 +17,7 @@ struct ContentView: View {
     var body: some View {
         TabView {
             Tab {
-                SummaryView()
+                SummaryView(pull: $motivationalPull)
             } label: {
                 Image(systemName: "house.fill")
                     .accessibilityLabel("Summary")
@@ -51,6 +52,9 @@ struct ContentView: View {
                     exerciseActivity.toggle(exercise, context: modelContext)
                 }
             }
+        }
+        .overlay {
+            MotivationalPullOverlay(pull: motivationalPull)
         }
         .onChange(of: exercises.map { ExerciseSnapshot(content: $0.activityContent, isDone: $0.isDone) }, initial: true) {
             exerciseActivity.synchronize(exercises: exercises)

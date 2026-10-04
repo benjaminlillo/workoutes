@@ -235,6 +235,47 @@ final class SummaryTests: XCTestCase {
         }
     }
 
+    func testMotivationalOverlayRendersAcrossNativeChrome() async throws {
+        let store = try container()
+        let controller = ExerciseActivityController(context: store.mainContext, liveActivitiesEnabled: false)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+
+        for (name, distance, delay) in [("pull", CGFloat(110), 0.2), ("burst", CGFloat(121), 1.3)] {
+            var pull = MotivationalPullState()
+            pull.beginGesture()
+            pull.updateDistance(distance)
+            if name == "burst" {
+                pull.endGesture()
+                pull.updateDistance(0)
+            }
+            // Seed a visual snapshot while preserving the real TabView and its native bars.
+            let root = UIHostingController(rootView: ContentView()
+                .overlay { MotivationalPullOverlay(pull: pull) }
+                .environment(controller).environment(ExerciseBackgroundStore()).modelContainer(store))
+            let window = UIWindow(windowScene: scene)
+            window.rootViewController = root
+            window.overrideUserInterfaceStyle = .light
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+            try await Task.sleep(for: .milliseconds(100))
+
+            func findScroll(_ view: UIView) -> UIScrollView? {
+                if let scroll = view as? UIScrollView { return scroll }
+                return view.subviews.compactMap { findScroll($0) }.first
+            }
+            let scroll = try XCTUnwrap(findScroll(root.view))
+            if name == "pull" {
+                scroll.setContentOffset(CGPoint(x: 0, y: -scroll.adjustedContentInset.top - distance), animated: false)
+            }
+            try await Task.sleep(for: .seconds(delay))
+            window.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-motivational-\(name).png"))
+        }
+    }
+
     func testSummaryRendersEmptyPopulatedAndAccessibleLayouts() throws {
         let date = Date.now
         let week = WeeklySummary.interval(containing: date)
