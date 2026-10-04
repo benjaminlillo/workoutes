@@ -37,6 +37,16 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         }
     }
 
+    var alternateIconName: String? {
+        switch self {
+        case .primary: nil
+        case .indigo: "WorkoutesIcon-majorelle-blue"
+        case .mint: "WorkoutesIcon-frozen-water"
+        case .purple: "WorkoutesIcon-midnight-violet"
+        case .orange: "WorkoutesIcon-blazing-flame"
+        }
+    }
+
     var color: Color {
         let light = UIColor(Color(hex: hex(for: .light)))
         let dark = UIColor(Color(hex: hex(for: .dark)))

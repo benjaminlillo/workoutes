@@ -6,7 +6,7 @@ import XCTest
 
 @MainActor
 final class ThemeColorTests: XCTestCase {
-    func testVisibleSettingsPickerLabelsFollowEveryAccentChange() async throws {
+    func testVisibleSettingsValuesFollowEveryAccentChange() async throws {
         let defaults = UserDefaults.standard
         let previous = defaults.object(forKey: "appAccentColor")
         defer {
@@ -45,7 +45,7 @@ final class ThemeColorTests: XCTestCase {
                 context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
                 let rgb = try XCTUnwrap(UInt32(theme.hex(for: scheme), radix: 16))
                 let target = [Int(rgb >> 16), Int((rgb >> 8) & 255), Int(rgb & 255)]
-                // These bands contain the two menu pickers; the gradient and faint border
+                // These bands contain the theme value and weight picker; the gradient and faint border
                 // cannot match the solid accent used by the selected value and arrows.
                 for band in [140.0...220.0, 250.0...330.0] {
                     var matches = 0
@@ -59,7 +59,7 @@ final class ThemeColorTests: XCTestCase {
                             if (0..<3).allSatisfy({ abs(Int(pixels[index + $0]) - target[$0]) <= 2 }) { matches += 1 }
                         }
                     }
-                    XCTAssertGreaterThan(matches, 150, "Picker label did not update to \(theme.name) in \(scheme)")
+                    XCTAssertGreaterThan(matches, 150, "Settings value did not update to \(theme.name) in \(scheme)")
                 }
                 try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-settings-live-accent-\(theme.rawValue)-\(scheme).png"))
             }

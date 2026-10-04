@@ -27,11 +27,6 @@ struct SettingsView: View {
         ThemeColor.resolve(accentColorRawValue).color
     }
 
-    private var selectedTheme: Binding<ThemeColor> {
-        Binding(get: { ThemeColor.resolve(accentColorRawValue) },
-                set: { accentColorRawValue = $0.rawValue })
-    }
-
     private var pickerStyleID: String {
         ThemeColor.resolve(accentColorRawValue).rawValue + (colorScheme == .dark ? "-dark" : "-light")
     }
@@ -40,17 +35,15 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section("Appearance") {
-                    Picker(selection: selectedTheme) {
-                        ForEach(ThemeColor.allCases) { theme in
-                            Text(theme.name).foregroundStyle(accentColor).tag(theme)
+                    NavigationLink(destination: ThemeSelectionView()) {
+                        HStack {
+                            Text("Theme").foregroundStyle(Color.primary)
+                            Spacer()
+                            Text(ThemeColor.resolve(accentColorRawValue).name)
+                                .foregroundStyle(accentColor)
                         }
-                    } label: {
-                        Text("Theme").foregroundStyle(Color.primary)
                     }
-                    .foregroundStyle(accentColor)
-                    .tint(accentColor)
-                    // The native menu picker caches its selected-label style.
-                    .id(pickerStyleID)
+                    .accessibilityIdentifier("settingsTheme")
                     .subtleFormRowBorder()
                 }
                 Section("Units") {
@@ -63,6 +56,7 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
+                    // The native menu picker caches its selected-label style.
                     .id(pickerStyleID)
                     .subtleFormRowBorder()
                 }
