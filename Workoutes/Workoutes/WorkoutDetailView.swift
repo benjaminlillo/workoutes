@@ -28,9 +28,16 @@ struct WorkoutDetailView: View {
         }
         .listStyle(.plain)
         .transparentNavigationChrome()
-        .scrollContentBackground(background == nil ? .visible : .hidden)
+        .scrollContentBackground(.hidden)
         .background {
-            if let background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
+            Group {
+                if let background {
+                    ScreenBackgroundView(background: background, tagColors: backgroundTagColors)
+                } else {
+                    DefaultScreenBackground()
+                }
+            }
+            .ignoresSafeArea()
         }
         .navigationTitle(workout.name)
         .task {

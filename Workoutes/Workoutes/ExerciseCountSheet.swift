@@ -72,6 +72,8 @@ struct ExerciseCountSheet: View {
                 }
             }
             .padding(.horizontal)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .defaultScreenBackground()
             .transparentNavigationChrome()
             .navigationTitle(metric.title)
             .navigationBarTitleDisplayMode(.inline)

@@ -26,6 +26,14 @@ struct ActiveExerciseBar: View {
             .accessibilityElement(children: .combine)
 
             if exercise != nil {
+                if let startedAt = exercise?.startedAt {
+                    Text(startedAt, style: .timer)
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60, alignment: .trailing)
+                        .accessibilityLabel("Elapsed exercise time")
+                }
                 Button(action: onStop) {
                     Image(systemName: "stop.fill")
                         .font(.body)
@@ -53,6 +61,6 @@ struct ActiveExerciseBar: View {
         if isCompact {
             return "\(exercise.numberOfSets) sets × \(exercise.reps) reps"
         }
-        return "\(exercise.numberOfSets) sets × \(exercise.reps) reps · Increase Next: \(exercise.increaseLoadNextTime ? "Yes" : "No")"
+        return "\(exercise.numberOfSets) sets × \(exercise.reps) reps"
     }
 }

@@ -16,6 +16,9 @@ nonisolated struct ExerciseActivityAttributes: ActivityAttributes {
         var displayedWeight: Double? = nil
         var weightUnitSymbol: String? = nil
         var status: ExerciseStatus? = nil
+        var sessionID: String? = nil
+        var startedAt: Date? = nil
+        var elapsedSeconds: Double? = nil
     }
 }
 

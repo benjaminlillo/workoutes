@@ -1,37 +1,32 @@
 {
   "fill" : {
-    "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
+    "linear-gradient" : [
+      "srgb:0.72157,0.84706,0.97255,1.00000",
+      "display-p3:0.84706,0.76471,0.94118,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 1
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0
+      }
+    }
   },
   "groups" : [
     {
       "layers" : [
         {
-          "blend-mode" : "normal",
-          "fill" : {
-            "solid" : "display-p3:0.19608,0.40784,0.51765,1.00000"
-          },
-          "image-name" : "dumbbell-svgrepo-com.svg",
-          "name" : "dumbbell-svgrepo-com",
+          "fill" : "automatic",
+          "image-name" : "09-barra-ez-w-contornos.svg",
+          "name" : "09-barra-ez-w-contornos",
           "position" : {
-            "scale" : 1.16,
+            "scale" : 1,
             "translation-in-points" : [
               0,
               0
-            ]
-          }
-        },
-        {
-          "fill" : {
-            "solid" : "display-p3:0.14512,0.23418,0.29541,0.23339"
-          },
-          "image-name" : "notepad-svgrepo-com-cropped.svg",
-          "name" : "notepad-svgrepo-com-cropped",
-          "opacity" : 1,
-          "position" : {
-            "scale" : 26.5,
-            "translation-in-points" : [
-              2.9794963882371803,
-              -1.386348874218129
             ]
           }
         }

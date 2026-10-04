@@ -30,8 +30,7 @@ struct WorkoutListView: View {
             }
             .listStyle(.plain)
             .transparentNavigationChrome()
-            .scrollContentBackground(.hidden)
-            .background(Color(UIColor.systemGroupedBackground))
+            .defaultScreenBackground()
             .navigationTitle("Workouts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

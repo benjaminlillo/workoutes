@@ -98,6 +98,7 @@ struct CreateExerciseSheet: View {
                 }
             }
             .transparentNavigationChrome()
+            .defaultScreenBackground()
             .navigationTitle("Add Exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
