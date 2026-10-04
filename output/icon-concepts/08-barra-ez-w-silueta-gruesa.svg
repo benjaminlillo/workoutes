@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512" fill="none">
+  <title>Workoutes — barra EZ con forma de W</title>
+  <g fill="#FAF9F6">
+    <rect x="40" y="120" width="48" height="272" rx="20"/>
+    <rect x="104" y="48" width="100" height="416" rx="30"/>
+    <rect x="820" y="48" width="100" height="416" rx="30"/>
+    <rect x="936" y="120" width="48" height="272" rx="20"/>
+  </g>
+  <path d="M 190 256 H 280 C 322 256 348 334 400 334 C 443 334 471 256 512 256 C 553 256 581 334 624 334 C 676 334 702 256 744 256 H 834" stroke="#FAF9F6" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

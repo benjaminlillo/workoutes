@@ -8,6 +8,7 @@ struct ImportDataView: View {
     @State private var showingFileImporter = false
     @State private var showCopiedAlert = false
     @State private var showingSuccessAlert = false
+    @State private var importError: String?
     
     let aiPrompt = """
     Please convert the provided workout exercises into a JSON format strictly following this structure:
@@ -41,12 +42,18 @@ struct ImportDataView: View {
                 Text("To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                    .subtleFormRowBorder(.first)
+                Text("Reimporting a file updates catalog items by ID without creating duplicates. Exercise history is imported automatically when included.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .subtleFormRowBorder(.last)
             }
             
             Section(header: Text("AI Assistant Prompt")) {
                 Text("Copy this prompt and send it to ChatGPT, Claude, or Gemini along with your text-based routines. The AI will format your routines into the exact JSON format required by Workoutes.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                    .subtleFormRowBorder(.first)
                 
                 Button(action: {
                     UIPasteboard.general.string = aiPrompt
@@ -61,6 +68,7 @@ struct ImportDataView: View {
                 .alert("Prompt Copied!", isPresented: $showCopiedAlert) {
                     Button("OK", role: .cancel) { }
                 }
+                .subtleFormRowBorder(.last)
             }
             
             Section {
@@ -71,9 +79,11 @@ struct ImportDataView: View {
                         Image(systemName: "folder")
                     }
                 }
+                .subtleFormRowBorder()
             }
         }
         .transparentNavigationChrome()
+        .defaultScreenBackground()
         .navigationTitle("Import Data")
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(
@@ -86,7 +96,7 @@ struct ImportDataView: View {
                 guard let url = urls.first else { return }
                 importData(from: url)
             case .failure(let error):
-                print("Error selecting file: \(error.localizedDescription)")
+                importError = error.localizedDescription
             }
         }
         .alert("Import Successful", isPresented: $showingSuccessAlert) {
@@ -96,63 +106,21 @@ struct ImportDataView: View {
         } message: {
             Text("Your data has been successfully imported.")
         }
+        .alert("Import Failed", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
+            Button("OK", role: .cancel) { importError = nil }
+        } message: { Text(importError ?? "") }
     }
     
     private func importData(from url: URL) {
-        guard url.startAccessingSecurityScopedResource() else {
-            print("Permission denied to access file.")
-            return
-        }
-        defer { url.stopAccessingSecurityScopedResource() }
+        let hasAccess = url.startAccessingSecurityScopedResource()
+        defer { if hasAccess { url.stopAccessingSecurityScopedResource() } }
         
         do {
             let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            let importedData = try decoder.decode(ExportDataDTO.self, from: data)
-            
-            var workoutIDMap: [String: Workout] = [:]
-            var tagIDMap: [String: Tag] = [:]
-            
-            for wDTO in importedData.workouts {
-                let workout = Workout(name: wDTO.name)
-                modelContext.insert(workout)
-                workoutIDMap[wDTO.id] = workout
-            }
-            
-            for tDTO in importedData.tags {
-                let tag = Tag(name: tDTO.name, colorHex: tDTO.colorHex)
-                modelContext.insert(tag)
-                tagIDMap[tDTO.id] = tag
-            }
-            
-            for exDTO in importedData.exercises {
-                let exercise = WorkoutExercise(
-                    title: exDTO.title,
-                    subtitle: exDTO.subtitle,
-                    details: exDTO.details,
-                    numberOfSets: exDTO.numberOfSets,
-                    reps: exDTO.reps,
-                    increaseLoadNextTime: exDTO.increaseLoadNextTime,
-                    weight: exDTO.weight,
-                    isDone: exDTO.isDone
-                )
-                
-                let exerciseWorkouts = exDTO.workouts.compactMap { ref in
-                    workoutIDMap[ref.id]
-                }
-                exercise.workouts = exerciseWorkouts
-                
-                let exerciseTags = exDTO.tags.compactMap { ref in
-                    tagIDMap[ref.id]
-                }
-                exercise.tags = exerciseTags
-                
-                modelContext.insert(exercise)
-            }
-            
+            try DataBackup.importData(data, into: modelContext)
             showingSuccessAlert = true
         } catch {
-            print("Error importing JSON: \(error)")
+            importError = error.localizedDescription
         }
     }
 }

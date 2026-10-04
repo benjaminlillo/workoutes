@@ -15,7 +15,9 @@ struct ManageTagSheet: View {
             Form {
                 Section(header: Text("Tag Details")) {
                     TextField("Name", text: $name)
+                        .subtleFormRowBorder(.first)
                     ColorPicker("Color", selection: $color)
+                        .subtleFormRowBorder(.last)
                 }
                 
                 if let editingTag = editingTag {
@@ -24,6 +26,7 @@ struct ManageTagSheet: View {
                             modelContext.delete(editingTag)
                             dismiss()
                         }
+                        .subtleFormRowBorder()
                     }
                 }
             }

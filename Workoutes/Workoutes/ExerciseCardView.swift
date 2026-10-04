@@ -15,7 +15,7 @@ struct ExerciseCardView: View {
     @State private var selectedCountMetric: ExerciseCountMetric?
 
     private var accentColor: Color {
-        ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
+        ThemeColor.resolve(accentColorRawValue).color
     }
 
     private var isPlaying: Bool { exerciseActivity.isActive(exercise) && !exercise.isDone }
@@ -25,7 +25,7 @@ struct ExerciseCardView: View {
     }
 
     private var stateHint: String {
-        exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop and mark completed" : "Start this exercise")
+        exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop: completes after more than 10 seconds, otherwise cancels" : "Start this exercise")
     }
 
     var body: some View {
@@ -142,6 +142,7 @@ struct ExerciseCardView: View {
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .subtleCardBorder()
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
             Button {

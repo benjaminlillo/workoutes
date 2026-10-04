@@ -8,6 +8,7 @@ struct ContentView: View {
     @Query private var exercises: [WorkoutExercise]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
+    @State private var motivationalPull = MotivationalPullState()
     
     private var activeExercise: WorkoutExercise? {
         exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
@@ -15,6 +16,12 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
+            Tab {
+                SummaryView(pull: $motivationalPull)
+            } label: {
+                Image(systemName: "house.fill")
+                    .accessibilityLabel("Summary")
+            }
             Tab {
                 WorkoutListView()
             } label: {
@@ -37,14 +44,17 @@ struct ContentView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory {
             NativeExerciseAccessory(
-                content: activeExercise?.activityContent,
+                content: activeExercise.map { exerciseActivity.content(for: $0) },
                 isUpdating: exerciseActivity.isUpdating,
-                accentColor: ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
+                accentColor: ThemeColor.resolve(accentColorRawValue).color
             ) {
                 if let exercise = activeExercise {
                     exerciseActivity.toggle(exercise, context: modelContext)
                 }
             }
+        }
+        .overlay {
+            MotivationalPullOverlay(pull: motivationalPull)
         }
         .onChange(of: exercises.map { ExerciseSnapshot(content: $0.activityContent, isDone: $0.isDone) }, initial: true) {
             exerciseActivity.synchronize(exercises: exercises)
@@ -57,7 +67,7 @@ struct ContentView: View {
         }
         .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
         .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
-        .alert("Live Activity", isPresented: Binding(
+        .alert("Exercise Session", isPresented: Binding(
             get: { exerciseActivity.errorMessage != nil },
             set: { if !$0 { exerciseActivity.errorMessage = nil } }
         )) {

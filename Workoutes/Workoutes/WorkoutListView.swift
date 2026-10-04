@@ -22,6 +22,7 @@ struct WorkoutListView: View {
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
                             .fill(Color(UIColor.secondarySystemGroupedBackground))
+                            .subtleCardBorder()
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                     )
@@ -30,8 +31,7 @@ struct WorkoutListView: View {
             }
             .listStyle(.plain)
             .transparentNavigationChrome()
-            .scrollContentBackground(.hidden)
-            .background(Color(UIColor.systemGroupedBackground))
+            .defaultScreenBackground()
             .navigationTitle("Workouts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -44,7 +44,7 @@ struct WorkoutListView: View {
                 CreateWorkoutSheet()
             }
         }
-        .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
+        .tint(ThemeColor.resolve(accentColorRawValue).color)
     }
     
     private func deleteWorkouts(offsets: IndexSet) {

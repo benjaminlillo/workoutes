@@ -13,7 +13,9 @@ struct BackgroundCustomizationSheet: View {
     let background: ExerciseBackgroundStore
     let title: String
     let tagColors: [String]
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var colors: [String] = ExerciseBackgroundStore.defaultGradientColors
     @Environment(\.openURL) private var openURL
     @State private var selectedPhoto: PhotosPickerItem?
@@ -23,6 +25,11 @@ struct BackgroundCustomizationSheet: View {
     @State private var errorMessage: String?
     @State private var showCameraSettings = false
     @State private var mode: BackgroundMode
+
+    private var displayedColors: [String] {
+        colors == ExerciseBackgroundStore.defaultGradientColors
+            ? ThemeColor.resolve(accentColorRawValue).defaultGradientColors(for: colorScheme) : colors
+    }
 
     init(background: ExerciseBackgroundStore, title: String, tagColors: [String] = []) {
         self.background = background
@@ -45,12 +52,14 @@ struct BackgroundCustomizationSheet: View {
                     }
                     .pickerStyle(.segmented)
                     .disabled(isLoading)
+                    .subtleFormRowBorder()
                 }
 
                 Section("Preview") {
                     preview
                         .frame(height: 140)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .subtleFormRowBorder()
                 }
 
                 if mode == .wallpaper {
@@ -58,14 +67,17 @@ struct BackgroundCustomizationSheet: View {
                         PhotosPicker(selection: $selectedPhoto, matching: .images, preferredItemEncoding: .compatible) {
                             Label("Choose from Photos", systemImage: "photo.on.rectangle")
                         }
+                        .subtleFormRowBorder(.first)
                         Button {
                             Task { await openCamera() }
                         } label: {
                             Label("Take Photo", systemImage: "camera")
                         }
                         .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+                        .subtleFormRowBorder(isLoading ? .middle : .last)
                         if isLoading {
                             ProgressView("Saving background…")
+                                .subtleFormRowBorder(.last)
                         }
                     } footer: {
                         Text(UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -76,34 +88,48 @@ struct BackgroundCustomizationSheet: View {
                 } else if mode == .gradient {
 
                     Section {
-                        ForEach(colors.indices, id: \.self) { index in
+                        ForEach(displayedColors.indices, id: \.self) { index in
                             HStack {
                                 ColorPicker("Color \(index + 1)", selection: Binding(
-                                    get: { Color(hex: colors.indices.contains(index) ? colors[index] : "FFFFFF") },
-                                    set: { if colors.indices.contains(index) { colors[index] = $0.toHex() } }
+                                    get: { Color(hex: displayedColors.indices.contains(index) ? displayedColors[index] : "FFFFFF") },
+                                    set: { if displayedColors.indices.contains(index) {
+                                        var edited = displayedColors
+                                        edited[index] = $0.toHex()
+                                        colors = edited
+                                    } }
                                 ), supportsOpacity: false)
                                 if colors.count > 1 {
-                                    Button(role: .destructive) { colors.remove(at: index) } label: {
+                                    Button(role: .destructive) {
+                                        var edited = displayedColors
+                                        edited.remove(at: index)
+                                        colors = edited
+                                    } label: {
                                         Image(systemName: "minus.circle")
                                     }
                                     .buttonStyle(.borderless)
                                     .accessibilityLabel("Remove color \(index + 1)")
                                 }
                             }
+                            .subtleFormRowBorder(.row(at: index, count: colors.count + (colors.count < 3 ? 1 : 0)))
                         }
                         if colors.count < 3 {
-                            Button("Add Color", systemImage: "plus") { colors.append("F4D8BD") }
+                            Button("Add Color", systemImage: "plus") { colors = displayedColors + ["F4D8BD"] }
+                                .subtleFormRowBorder(.last)
                         }
                     } header: {
                         Text("Soft Gradient")
                     } footer: {
                         Text("Choose up to three colors. A soft white overlay keeps the background subtle.")
+                        if colors == ExerciseBackgroundStore.defaultGradientColors {
+                            Text("The default gradient follows your theme. Editing these colors customizes only this screen.")
+                        }
                     }
                     .disabled(isLoading)
                 } else {
                     Section {
                         Text("The gradient follows the colors of the selected tags. Without tags, it uses the default gradient.")
                             .foregroundStyle(.secondary)
+                            .subtleFormRowBorder()
                     }
                 }
 
@@ -118,6 +144,7 @@ struct BackgroundCustomizationSheet: View {
                             catch { errorMessage = error.localizedDescription }
                         }
                         .disabled(isLoading)
+                        .subtleFormRowBorder()
                     }
                 }
             }
@@ -190,9 +217,17 @@ struct BackgroundCustomizationSheet: View {
     @ViewBuilder
     private var preview: some View {
         if mode == .automatic {
-            SoftBackgroundGradient(colors: ExerciseBackgroundStore.automaticColors(from: tagColors))
+            if tagColors.isEmpty {
+                DefaultScreenBackground()
+            } else {
+                SoftBackgroundGradient(colors: tagColors)
+            }
         } else if mode == .gradient {
-            SoftBackgroundGradient(colors: colors)
+            if colors == ExerciseBackgroundStore.defaultGradientColors {
+                DefaultScreenBackground()
+            } else {
+                SoftBackgroundGradient(colors: colors)
+            }
         } else if let image = background.image {
             GeometryReader { geometry in
                 Image(uiImage: image)

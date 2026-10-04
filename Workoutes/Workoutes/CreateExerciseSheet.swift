@@ -27,7 +27,7 @@ struct CreateExerciseSheet: View {
             Form {
                 if !availableExercises.isEmpty {
                     Section(header: Text("Add Existing Exercise")) {
-                        ForEach(availableExercises) { exercise in
+                        ForEach(Array(availableExercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
                             Button(action: {
                                 addExistingExercise(exercise)
                             }) {
@@ -46,21 +46,29 @@ struct CreateExerciseSheet: View {
                                         .foregroundColor(.blue)
                                 }
                             }
+                            .subtleFormRowBorder(.row(at: index, count: availableExercises.count))
                         }
                     }
                 }
                 
                 Section(header: Text("Create New Exercise")) {
                     TextField("Title", text: $title)
+                        .subtleFormRowBorder(.first)
                     TextField("Subtitle (Optional)", text: $subtitle)
+                        .subtleFormRowBorder(.middle)
                     TextField("Details (Optional)", text: $details)
-                    Section(header: Text("Targets")) {
-                        Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
-                        Stepper("Reps: \(reps)", value: $reps, in: 1...100)
-                    }
+                        .subtleFormRowBorder(.middle)
+                    Text("Targets")
+                        .subtleFormRowBorder(.middle)
+                    Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
+                        .subtleFormRowBorder(.middle)
+                    Stepper("Reps: \(reps)", value: $reps, in: 1...100)
+                        .subtleFormRowBorder(.middle)
                     
                     if !allTags.isEmpty {
-                        Section(header: Text("Tags")) {
+                        Text("Tags")
+                            .subtleFormRowBorder(.middle)
+                        Group {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
                                     ForEach(allTags) { tag in
@@ -78,6 +86,7 @@ struct CreateExerciseSheet: View {
                                     }
                                 }
                             }
+                            .subtleFormRowBorder(.middle)
                         }
                     }
                     
@@ -88,6 +97,7 @@ struct CreateExerciseSheet: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
+                    .subtleFormRowBorder(.middle)
                     
                     Button("Create and Add") {
                         createNewExercise()
@@ -95,6 +105,7 @@ struct CreateExerciseSheet: View {
                     .disabled(title.isEmpty)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(title.isEmpty ? .gray : .blue)
+                    .subtleFormRowBorder(.last)
                 }
             }
             .transparentNavigationChrome()

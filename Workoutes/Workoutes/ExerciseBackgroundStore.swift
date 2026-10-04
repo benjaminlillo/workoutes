@@ -6,10 +6,15 @@ import UIKit
 @MainActor
 @Observable
 final class ExerciseBackgroundStore {
+    // Keep the legacy palette as the persisted marker for the app's default background.
+    // Its displayed colors now come from the selected accent, without rewriting saved files.
     static let defaultGradientColors = ["B8D8F8", "D8C3F0"]
     private(set) var image: UIImage?
     private(set) var gradientColors: [String] = []
     private(set) var usesAutomaticGradient = false
+    var usesDefaultGradient: Bool {
+        !usesAutomaticGradient && gradientColors == Self.defaultGradientColors
+    }
     private let fileURL: URL
     private let colorsURL: URL
     private let automaticURL: URL
