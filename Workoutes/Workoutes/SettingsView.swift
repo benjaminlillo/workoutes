@@ -22,19 +22,31 @@ struct SettingsView: View {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
 
+    private var accentColor: Color {
+        (ThemeColor(rawValue: accentColorRawValue) ?? .primary).color
+    }
+
     var body: some View {
         NavigationStack {
             List {
                 Section("Appearance") {
                     Picker("Accent Color", selection: $accentColorRawValue) {
-                        ForEach(ThemeColor.allCases) { theme in Text(theme.name).tag(theme.rawValue) }
+                        ForEach(ThemeColor.allCases) { theme in
+                            Text(theme.name).foregroundStyle(accentColor).tag(theme.rawValue)
+                        }
                     }
+                    .foregroundStyle(accentColor)
+                    .tint(accentColor)
                     .subtleFormRowBorder()
                 }
                 Section("Units") {
                     Picker("Weight Unit", selection: $weightUnit) {
-                        ForEach(WeightUnit.allCases) { unit in Text(unit.name).tag(unit) }
+                        ForEach(WeightUnit.allCases) { unit in
+                            Text(unit.name).foregroundStyle(accentColor).tag(unit)
+                        }
                     }
+                    .foregroundStyle(accentColor)
+                    .tint(accentColor)
                     .subtleFormRowBorder()
                 }
                 Section("Data") {
