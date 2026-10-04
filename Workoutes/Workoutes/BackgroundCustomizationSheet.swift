@@ -27,7 +27,7 @@ struct BackgroundCustomizationSheet: View {
 
     private var displayedColors: [String] {
         colors == ExerciseBackgroundStore.defaultGradientColors
-            ? (ThemeColor(rawValue: accentColorRawValue) ?? .primary).defaultGradientColors : colors
+            ? ThemeColor.resolve(accentColorRawValue).defaultGradientColors : colors
     }
 
     init(background: ExerciseBackgroundStore, title: String, tagColors: [String] = []) {

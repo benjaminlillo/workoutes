@@ -16,7 +16,7 @@ struct SubtleCardBorder<S: InsettableShape>: View {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
 
     private var accentColor: Color {
-        ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
+        ThemeColor.resolve(accentColorRawValue).color
     }
 
     var body: some View {

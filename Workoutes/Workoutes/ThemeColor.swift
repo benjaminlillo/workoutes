@@ -2,25 +2,41 @@ import SwiftUI
 import UIKit
 
 enum ThemeColor: String, CaseIterable, Identifiable {
-    case primary, mint, blue, purple, orange, green, red, indigo
+    // Preserve the stored identifiers for existing selections.
+    case primary, indigo, mint, purple, orange
     
     var id: Self { self }
     
-    var color: Color {
+    var hex: String {
         switch self {
-        case .primary: return Color(red: 50/255, green: 104/255, blue: 132/255)
-        case .mint: return .mint
-        case .blue: return .blue
-        case .purple: return .purple
-        case .orange: return .orange
-        case .green: return .green
-        case .red: return .red
-        case .indigo: return .indigo
+        case .primary: "326884"
+        case .indigo: "6155F5"
+        case .mint: "D2F1E4"
+        case .purple: "42213D"
+        case .orange: "F15025"
         }
     }
+
+    var color: Color { Color(hex: hex) }
     
     var name: String {
-        self.rawValue.capitalized
+        switch self {
+        case .primary: "Blue Slate"
+        case .indigo: "Majorelle Blue"
+        case .mint: "Frozen Water"
+        case .purple: "Midnight Violet"
+        case .orange: "Blazing Flame"
+        }
+    }
+
+    static func resolve(_ rawValue: String?) -> Self {
+        if let rawValue, let theme = Self(rawValue: rawValue) { return theme }
+        switch rawValue {
+        case "blue": return .indigo
+        case "green": return .mint
+        case "red": return .orange
+        default: return .primary
+        }
     }
 
     /// Two pastel shades of the accent, softened again by the background renderer.

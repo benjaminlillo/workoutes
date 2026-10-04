@@ -37,7 +37,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
     func testDefaultIsIndependentOfSavedScreenCustomization() throws {
         let previous = UserDefaults.standard.object(forKey: "appAccentColor")
         defer { restoreAccent(previous) }
-        UserDefaults.standard.set(ThemeColor.blue.rawValue, forKey: "appAccentColor")
+        UserDefaults.standard.set(ThemeColor.indigo.rawValue, forKey: "appAccentColor")
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
         let custom = ExerciseBackgroundStore(directory: directory)
@@ -68,7 +68,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         // Older versions persisted this palette when resetting the background.
         try background.saveGradient(colors: ExerciseBackgroundStore.defaultGradientColors)
         let reopened = ExerciseBackgroundStore(directory: directory)
-        for theme in [ThemeColor.blue, .orange] {
+        for theme in [ThemeColor.indigo, .orange] {
             UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
             let expected = try render(DefaultScreenBackground())
             XCTAssertEqual(try render(ScreenBackgroundView(background: reopened)), expected)
@@ -96,7 +96,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         window.makeKeyAndVisible()
         defer { window.isHidden = true }
         var snapshots = Set<Data>()
-        for theme in [ThemeColor.blue, .orange, .mint] {
+        for theme in ThemeColor.allCases {
             UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
             try await Task.sleep(for: .milliseconds(300))
             window.layoutIfNeeded()
@@ -107,7 +107,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             snapshots.insert(data)
             try data.write(to: URL(fileURLWithPath: "/tmp/workoutes-accent-background-\(theme.rawValue).png"))
         }
-        XCTAssertEqual(snapshots.count, 3)
+        XCTAssertEqual(snapshots.count, ThemeColor.allCases.count)
     }
 
     func testAllAppScreensRenderWithDefaultOrCustomizedBackgrounds() async throws {

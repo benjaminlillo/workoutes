@@ -5,7 +5,7 @@ struct DefaultScreenBackground: View {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
 
     var body: some View {
-        SoftBackgroundGradient(colors: (ThemeColor(rawValue: accentColorRawValue) ?? .primary).defaultGradientColors)
+        SoftBackgroundGradient(colors: ThemeColor.resolve(accentColorRawValue).defaultGradientColors)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
     }

@@ -23,16 +23,21 @@ struct SettingsView: View {
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
 
     private var accentColor: Color {
-        (ThemeColor(rawValue: accentColorRawValue) ?? .primary).color
+        ThemeColor.resolve(accentColorRawValue).color
+    }
+
+    private var selectedAccent: Binding<ThemeColor> {
+        Binding(get: { ThemeColor.resolve(accentColorRawValue) },
+                set: { accentColorRawValue = $0.rawValue })
     }
 
     var body: some View {
         NavigationStack {
             List {
                 Section("Appearance") {
-                    Picker(selection: $accentColorRawValue) {
+                    Picker(selection: selectedAccent) {
                         ForEach(ThemeColor.allCases) { theme in
-                            Text(theme.name).foregroundStyle(accentColor).tag(theme.rawValue)
+                            Text(theme.name).foregroundStyle(accentColor).tag(theme)
                         }
                     } label: {
                         Text("Accent Color").foregroundStyle(Color.primary)
