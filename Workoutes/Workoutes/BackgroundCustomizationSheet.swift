@@ -15,6 +15,7 @@ struct BackgroundCustomizationSheet: View {
     let tagColors: [String]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var colors: [String] = ExerciseBackgroundStore.defaultGradientColors
     @Environment(\.openURL) private var openURL
     @State private var selectedPhoto: PhotosPickerItem?
@@ -27,7 +28,7 @@ struct BackgroundCustomizationSheet: View {
 
     private var displayedColors: [String] {
         colors == ExerciseBackgroundStore.defaultGradientColors
-            ? ThemeColor.resolve(accentColorRawValue).defaultGradientColors : colors
+            ? ThemeColor.resolve(accentColorRawValue).defaultGradientColors(for: colorScheme) : colors
     }
 
     init(background: ExerciseBackgroundStore, title: String, tagColors: [String] = []) {

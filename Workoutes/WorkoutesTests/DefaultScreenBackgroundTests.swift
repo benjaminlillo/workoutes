@@ -27,7 +27,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             for theme in ThemeColor.allCases {
                 UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
                 let rendered = try render(DefaultScreenBackground(), scheme: scheme)
-                XCTAssertEqual(rendered, try render(SoftBackgroundGradient(colors: theme.defaultGradientColors), scheme: scheme))
+                XCTAssertEqual(rendered, try render(SoftBackgroundGradient(colors: theme.defaultGradientColors(for: scheme)), scheme: scheme))
                 backgrounds.insert(rendered)
             }
             XCTAssertEqual(backgrounds.count, ThemeColor.allCases.count)
@@ -80,7 +80,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         }
         UserDefaults.standard.set("unknown-color", forKey: "appAccentColor")
         XCTAssertEqual(try render(DefaultScreenBackground()),
-                       try render(SoftBackgroundGradient(colors: ThemeColor.primary.defaultGradientColors)))
+                       try render(SoftBackgroundGradient(colors: ThemeColor.primary.defaultGradientColors(for: .light))))
     }
 
     func testVisibleHomeUpdatesWhenAccentChanges() async throws {

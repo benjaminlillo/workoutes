@@ -16,6 +16,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @State private var shareURL: IdentifiableURL?
     @State private var showingExportOptions = false
     @State private var exportError: String?
@@ -29,6 +30,10 @@ struct SettingsView: View {
     private var selectedAccent: Binding<ThemeColor> {
         Binding(get: { ThemeColor.resolve(accentColorRawValue) },
                 set: { accentColorRawValue = $0.rawValue })
+    }
+
+    private var pickerStyleID: String {
+        ThemeColor.resolve(accentColorRawValue).rawValue + (colorScheme == .dark ? "-dark" : "-light")
     }
 
     var body: some View {
@@ -45,7 +50,7 @@ struct SettingsView: View {
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
                     // The native menu picker caches its selected-label style.
-                    .id(ThemeColor.resolve(accentColorRawValue))
+                    .id(pickerStyleID)
                     .subtleFormRowBorder()
                 }
                 Section("Units") {
@@ -58,7 +63,7 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
-                    .id(ThemeColor.resolve(accentColorRawValue))
+                    .id(pickerStyleID)
                     .subtleFormRowBorder()
                 }
                 Section("Data") {

@@ -11,13 +11,28 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         switch self {
         case .primary: "326884"
         case .indigo: "6155F5"
-        case .mint: "D2F1E4"
+        case .mint: "92DDBE"
         case .purple: "42213D"
         case .orange: "F15025"
         }
     }
 
-    var color: Color { Color(hex: hex) }
+    func hex(for scheme: ColorScheme) -> String {
+        guard scheme == .dark else { return hex }
+        switch self {
+        case .mint: return "D2F1E4"
+        case .purple: return "88447E"
+        default: return hex
+        }
+    }
+
+    var color: Color {
+        let light = UIColor(Color(hex: hex(for: .light)))
+        let dark = UIColor(Color(hex: hex(for: .dark)))
+        return Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? dark : light
+        })
+    }
     
     var name: String {
         switch self {
@@ -40,13 +55,13 @@ enum ThemeColor: String, CaseIterable, Identifiable {
     }
 
     /// Two pastel shades of the accent, softened again by the background renderer.
-    var defaultGradientColors: [String] {
-        let accent = UIColor(color).resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
+    func defaultGradientColors(for scheme: ColorScheme) -> [String] {
+        let accent = UIColor(Color(hex: hex(for: scheme)))
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         guard accent.getRed(&red, green: &green, blue: &blue, alpha: nil) else {
-            return [color.toHex()]
+            return [hex(for: scheme)]
         }
         return [0.35, 0.5].map { strength in
             Color(red: 1 - Double(1 - red) * strength,
