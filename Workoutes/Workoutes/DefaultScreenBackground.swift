@@ -1,9 +1,11 @@
 import SwiftUI
 
-/// Uses the built-in palette, independently of any screen's saved customization.
+/// Follows the app accent, independently of any screen's saved customization.
 struct DefaultScreenBackground: View {
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+
     var body: some View {
-        SoftBackgroundGradient(colors: ExerciseBackgroundStore.defaultGradientColors)
+        SoftBackgroundGradient(colors: (ThemeColor(rawValue: accentColorRawValue) ?? .primary).defaultGradientColors)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
     }
