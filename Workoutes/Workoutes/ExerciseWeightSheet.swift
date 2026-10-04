@@ -38,8 +38,6 @@ struct ExerciseWeightSheet: View {
                 }
             }
             .padding(.horizontal)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .defaultScreenBackground()
             .transparentNavigationChrome()
             .navigationTitle("Weight")
             .navigationBarTitleDisplayMode(.inline)
