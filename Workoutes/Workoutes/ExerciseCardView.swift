@@ -142,6 +142,7 @@ struct ExerciseCardView: View {
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .subtleCardBorder()
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
             Button {

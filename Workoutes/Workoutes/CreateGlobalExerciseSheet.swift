@@ -20,13 +20,18 @@ struct CreateGlobalExerciseSheet: View {
             Form {
                 Section(header: Text("Basic Info")) {
                     TextField("Title", text: $title)
+                        .subtleFormRowBorder(.first)
                     TextField("Subtitle (Optional)", text: $subtitle)
+                        .subtleFormRowBorder(.middle)
                     TextField("Details (Optional)", text: $details)
+                        .subtleFormRowBorder(.last)
                 }
                 
                 Section(header: Text("Targets")) {
                     Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
+                        .subtleFormRowBorder(.first)
                     Stepper("Reps: \(reps)", value: $reps, in: 1...100)
+                        .subtleFormRowBorder(.last)
                 }
                 
                 if !allTags.isEmpty {
@@ -48,6 +53,7 @@ struct CreateGlobalExerciseSheet: View {
                                 }
                             }
                         }
+                        .subtleFormRowBorder()
                     }
                 }
                 
@@ -59,6 +65,7 @@ struct CreateGlobalExerciseSheet: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
+                    .subtleFormRowBorder()
                 }
             }
             .transparentNavigationChrome()

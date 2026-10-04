@@ -45,12 +45,14 @@ struct BackgroundCustomizationSheet: View {
                     }
                     .pickerStyle(.segmented)
                     .disabled(isLoading)
+                    .subtleFormRowBorder()
                 }
 
                 Section("Preview") {
                     preview
                         .frame(height: 140)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .subtleFormRowBorder()
                 }
 
                 if mode == .wallpaper {
@@ -58,14 +60,17 @@ struct BackgroundCustomizationSheet: View {
                         PhotosPicker(selection: $selectedPhoto, matching: .images, preferredItemEncoding: .compatible) {
                             Label("Choose from Photos", systemImage: "photo.on.rectangle")
                         }
+                        .subtleFormRowBorder(.first)
                         Button {
                             Task { await openCamera() }
                         } label: {
                             Label("Take Photo", systemImage: "camera")
                         }
                         .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+                        .subtleFormRowBorder(isLoading ? .middle : .last)
                         if isLoading {
                             ProgressView("Saving background…")
+                                .subtleFormRowBorder(.last)
                         }
                     } footer: {
                         Text(UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -90,9 +95,11 @@ struct BackgroundCustomizationSheet: View {
                                     .accessibilityLabel("Remove color \(index + 1)")
                                 }
                             }
+                            .subtleFormRowBorder(.row(at: index, count: colors.count + (colors.count < 3 ? 1 : 0)))
                         }
                         if colors.count < 3 {
                             Button("Add Color", systemImage: "plus") { colors.append("F4D8BD") }
+                                .subtleFormRowBorder(.last)
                         }
                     } header: {
                         Text("Soft Gradient")
@@ -104,6 +111,7 @@ struct BackgroundCustomizationSheet: View {
                     Section {
                         Text("The gradient follows the colors of the selected tags. Without tags, it uses the default gradient.")
                             .foregroundStyle(.secondary)
+                            .subtleFormRowBorder()
                     }
                 }
 
@@ -118,6 +126,7 @@ struct BackgroundCustomizationSheet: View {
                             catch { errorMessage = error.localizedDescription }
                         }
                         .disabled(isLoading)
+                        .subtleFormRowBorder()
                     }
                 }
             }
