@@ -3,29 +3,64 @@ import SwiftUI
 struct ThemeSelectionView: View {
     @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.primary.rawValue
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var centeredTheme: ThemeColor?
 
     private var selectedTheme: ThemeColor { ThemeColor.resolve(accentColorRawValue) }
 
     var body: some View {
-        List {
-            Section("Themes") {
+        GeometryReader { geometry in
+            let labelSpace: CGFloat = dynamicTypeSize.isAccessibilitySize ? 130 : 80
+            let width = max(80, min(geometry.size.width * 0.72,
+                                    (geometry.size.height - labelSpace - 64) * 140 / 272))
+            let height = width * 272 / 140
+
+            VStack(spacing: 12) {
+                Spacer(minLength: 16)
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
-                        HStack(alignment: .top, spacing: 16) {
+                        HStack(alignment: .top, spacing: -width * 0.22) {
                             ForEach(ThemeColor.allCases) { theme in
-                                themeOption(theme)
-                                    .id(theme.id)
+                                themeOption(theme, width: width) {
+                                    withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.86)) {
+                                        accentColorRawValue = theme.rawValue
+                                        centeredTheme = theme
+                                        proxy.scrollTo(theme.id, anchor: .center)
+                                    }
+                                }
+                                .scrollTransition(reduceMotion ? .identity : .interactive.threshold(.centered), axis: .horizontal) { content, phase in
+                                    content.scaleEffect(phase.isIdentity ? 1 : 0.86)
+                                }
+                                .zIndex(theme == centeredTheme ? 1 : 0)
+                                .id(theme.id)
                             }
                         }
                         .scrollTargetLayout()
-                        .padding(16)
+                        .padding(.vertical, 16)
                     }
+                    .contentMargins(.horizontal, (geometry.size.width - width) / 2, for: .scrollContent)
                     .scrollIndicators(.hidden)
-                    .scrollTargetBehavior(.viewAligned)
-                    .onAppear { proxy.scrollTo(selectedTheme.id, anchor: .center) }
+                    .scrollTargetBehavior(.viewAligned(limitBehavior: .alwaysByOne, anchor: .center))
+                    .scrollPosition(id: $centeredTheme, anchor: .center)
+                    .frame(height: height + labelSpace)
+                    .onScrollGeometryChange(for: CGSize.self) { $0.contentSize } action: { _, size in
+                        // Wait for measured scroll targets before positioning the active theme.
+                        guard size.width > 0 else { return }
+                        centeredTheme = selectedTheme
+                        proxy.scrollTo(selectedTheme.id, anchor: .center)
+                    }
                 }
-                .listRowInsets(EdgeInsets())
-                .subtleFormRowBorder()
+
+                HStack(spacing: 8) {
+                    ForEach(ThemeColor.allCases) { theme in
+                        Circle()
+                            .fill(theme == centeredTheme ? Color.primary.opacity(0.7) : Color.primary.opacity(0.18))
+                            .frame(width: 6, height: 6)
+                    }
+                }
+                .accessibilityHidden(true)
+                Spacer(minLength: 24)
             }
         }
         .transparentNavigationChrome()
@@ -34,34 +69,34 @@ struct ThemeSelectionView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func themeOption(_ theme: ThemeColor) -> some View {
+    private func themeOption(_ theme: ThemeColor, width: CGFloat, select: @escaping () -> Void) -> some View {
         let isSelected = theme == selectedTheme
         let accent = Color(hex: theme.hex(for: colorScheme))
-        return Button {
-            accentColorRawValue = theme.rawValue
-        } label: {
-            VStack(spacing: 12) {
+        return Button(action: select) {
+            VStack(spacing: 16) {
                 ThemeExercisePreview(theme: theme)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .scaleEffect((width - 8) / 140)
+                    .frame(width: width - 8, height: (width - 8) * 272 / 140)
+                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                    .shadow(color: .black.opacity(colorScheme == .dark ? 0.25 : 0.12), radius: 12, y: 6)
                     .padding(4)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        RoundedRectangle(cornerRadius: 34, style: .continuous)
                             .strokeBorder(isSelected ? accent : Color.primary.opacity(0.1),
                                           lineWidth: isSelected ? 2.5 : 1)
                     }
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    if isSelected {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(accent)
-                    }
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(accent)
+                        .opacity(isSelected ? 1 : 0)
                     Text(theme.name)
                         .foregroundStyle(Color.primary)
                 }
-                .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                .font(.title3.weight(isSelected ? .semibold : .regular))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             }
-            .frame(width: 148)
+            .frame(width: width)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
