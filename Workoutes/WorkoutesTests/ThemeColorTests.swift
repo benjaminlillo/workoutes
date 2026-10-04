@@ -70,6 +70,8 @@ final class ThemeColorTests: XCTestCase {
         let light = ["326884", "6155F5", "92DDBE", "42213D", "F15025"]
         let dark = ["326884", "6155F5", "D2F1E4", "88447E", "F15025"]
         XCTAssertEqual(ThemeColor.allCases.map(\.hex), light)
+        XCTAssertEqual(ThemeColor.allCases.map(\.secondaryHex),
+                       ["63B7AF", "AB78DD", "83C8DB", "C27D98", "F5B84B"])
         XCTAssertEqual(ThemeColor.allCases.map(\.name),
                        ["Blue Slate", "Majorelle Blue", "Frozen Water", "Midnight Violet", "Blazing Flame"])
         for style in [UIUserInterfaceStyle.light, .dark] {

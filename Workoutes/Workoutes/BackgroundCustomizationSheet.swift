@@ -121,7 +121,7 @@ struct BackgroundCustomizationSheet: View {
                     } footer: {
                         Text("Choose up to three colors. A soft white overlay keeps the background subtle.")
                         if colors == ExerciseBackgroundStore.defaultGradientColors {
-                            Text("The default gradient follows your accent color. Editing these colors customizes only this screen.")
+                            Text("The default gradient follows your theme. Editing these colors customizes only this screen.")
                         }
                     }
                     .disabled(isLoading)

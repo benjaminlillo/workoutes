@@ -26,6 +26,17 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Used only as the second color of the theme's default background gradient.
+    var secondaryHex: String {
+        switch self {
+        case .primary: "63B7AF"
+        case .indigo: "AB78DD"
+        case .mint: "83C8DB"
+        case .purple: "C27D98"
+        case .orange: "F5B84B"
+        }
+    }
+
     var color: Color {
         let light = UIColor(Color(hex: hex(for: .light)))
         let dark = UIColor(Color(hex: hex(for: .dark)))
@@ -54,19 +65,17 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Two pastel shades of the accent, softened again by the background renderer.
+    /// Pastel versions of the theme's primary and secondary colors.
     func defaultGradientColors(for scheme: ColorScheme) -> [String] {
-        let accent = UIColor(Color(hex: hex(for: scheme)))
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        guard accent.getRed(&red, green: &green, blue: &blue, alpha: nil) else {
-            return [hex(for: scheme)]
-        }
-        return [0.35, 0.5].map { strength in
-            Color(red: 1 - Double(1 - red) * strength,
-                  green: 1 - Double(1 - green) * strength,
-                  blue: 1 - Double(1 - blue) * strength).toHex()
+        zip([hex(for: scheme), secondaryHex], [0.35, 0.5]).map { hex, strength in
+            let color = UIColor(Color(hex: hex))
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            guard color.getRed(&red, green: &green, blue: &blue, alpha: nil) else { return hex }
+            return Color(red: 1 - Double(1 - red) * strength,
+                         green: 1 - Double(1 - green) * strength,
+                         blue: 1 - Double(1 - blue) * strength).toHex()
         }
     }
 }

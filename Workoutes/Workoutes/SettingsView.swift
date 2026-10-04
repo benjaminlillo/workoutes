@@ -27,7 +27,7 @@ struct SettingsView: View {
         ThemeColor.resolve(accentColorRawValue).color
     }
 
-    private var selectedAccent: Binding<ThemeColor> {
+    private var selectedTheme: Binding<ThemeColor> {
         Binding(get: { ThemeColor.resolve(accentColorRawValue) },
                 set: { accentColorRawValue = $0.rawValue })
     }
@@ -40,12 +40,12 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section("Appearance") {
-                    Picker(selection: selectedAccent) {
+                    Picker(selection: selectedTheme) {
                         ForEach(ThemeColor.allCases) { theme in
                             Text(theme.name).foregroundStyle(accentColor).tag(theme)
                         }
                     } label: {
-                        Text("Accent Color").foregroundStyle(Color.primary)
+                        Text("Theme").foregroundStyle(Color.primary)
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
