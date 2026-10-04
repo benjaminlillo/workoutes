@@ -44,6 +44,8 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
+                    // The native menu picker caches its selected-label style.
+                    .id(ThemeColor.resolve(accentColorRawValue))
                     .subtleFormRowBorder()
                 }
                 Section("Units") {
@@ -56,6 +58,7 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
+                    .id(ThemeColor.resolve(accentColorRawValue))
                     .subtleFormRowBorder()
                 }
                 Section("Data") {
