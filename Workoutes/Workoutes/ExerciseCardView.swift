@@ -15,7 +15,7 @@ struct ExerciseCardView: View {
     @State private var selectedCountMetric: ExerciseCountMetric?
 
     private var accentColor: Color {
-        ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
+        ThemeColor.resolve(accentColorRawValue).color
     }
 
     private var isPlaying: Bool { exerciseActivity.isActive(exercise) && !exercise.isDone }

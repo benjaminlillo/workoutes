@@ -46,7 +46,7 @@ struct ContentView: View {
             NativeExerciseAccessory(
                 content: activeExercise.map { exerciseActivity.content(for: $0) },
                 isUpdating: exerciseActivity.isUpdating,
-                accentColor: ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
+                accentColor: ThemeColor.resolve(accentColorRawValue).color
             ) {
                 if let exercise = activeExercise {
                     exerciseActivity.toggle(exercise, context: modelContext)

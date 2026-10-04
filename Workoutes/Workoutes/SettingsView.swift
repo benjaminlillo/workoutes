@@ -16,25 +16,54 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @State private var shareURL: IdentifiableURL?
     @State private var showingExportOptions = false
     @State private var exportError: String?
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
 
+    private var accentColor: Color {
+        ThemeColor.resolve(accentColorRawValue).color
+    }
+
+    private var selectedTheme: Binding<ThemeColor> {
+        Binding(get: { ThemeColor.resolve(accentColorRawValue) },
+                set: { accentColorRawValue = $0.rawValue })
+    }
+
+    private var pickerStyleID: String {
+        ThemeColor.resolve(accentColorRawValue).rawValue + (colorScheme == .dark ? "-dark" : "-light")
+    }
+
     var body: some View {
         NavigationStack {
             List {
                 Section("Appearance") {
-                    Picker("Accent Color", selection: $accentColorRawValue) {
-                        ForEach(ThemeColor.allCases) { theme in Text(theme.name).tag(theme.rawValue) }
+                    Picker(selection: selectedTheme) {
+                        ForEach(ThemeColor.allCases) { theme in
+                            Text(theme.name).foregroundStyle(accentColor).tag(theme)
+                        }
+                    } label: {
+                        Text("Theme").foregroundStyle(Color.primary)
                     }
+                    .foregroundStyle(accentColor)
+                    .tint(accentColor)
+                    // The native menu picker caches its selected-label style.
+                    .id(pickerStyleID)
                     .subtleFormRowBorder()
                 }
                 Section("Units") {
-                    Picker("Weight Unit", selection: $weightUnit) {
-                        ForEach(WeightUnit.allCases) { unit in Text(unit.name).tag(unit) }
+                    Picker(selection: $weightUnit) {
+                        ForEach(WeightUnit.allCases) { unit in
+                            Text(unit.name).foregroundStyle(accentColor).tag(unit)
+                        }
+                    } label: {
+                        Text("Weight Unit").foregroundStyle(Color.primary)
                     }
+                    .foregroundStyle(accentColor)
+                    .tint(accentColor)
+                    .id(pickerStyleID)
                     .subtleFormRowBorder()
                 }
                 Section("Data") {

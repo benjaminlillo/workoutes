@@ -7,7 +7,13 @@ struct ScreenBackgroundView: View {
     var body: some View {
         Group {
             if background.usesAutomaticGradient {
-                SoftBackgroundGradient(colors: ExerciseBackgroundStore.automaticColors(from: tagColors))
+                if tagColors.isEmpty {
+                    DefaultScreenBackground()
+                } else {
+                    SoftBackgroundGradient(colors: tagColors)
+                }
+            } else if background.usesDefaultGradient {
+                DefaultScreenBackground()
             } else if !background.gradientColors.isEmpty {
                 SoftBackgroundGradient(colors: background.gradientColors)
             } else if let image = background.image {

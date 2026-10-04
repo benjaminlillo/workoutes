@@ -44,7 +44,7 @@ struct WorkoutListView: View {
                 CreateWorkoutSheet()
             }
         }
-        .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
+        .tint(ThemeColor.resolve(accentColorRawValue).color)
     }
     
     private func deleteWorkouts(offsets: IndexSet) {
