@@ -2,12 +2,21 @@ import SwiftUI
 
 /// Spreads the selected theme across the screen, independently of saved customization.
 struct DefaultScreenBackground: View {
-    @Environment(\.colorScheme) private var colorScheme
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
 
     var body: some View {
+        ThemeBackgroundGradient(theme: ThemeColor.resolve(accentColorRawValue))
+    }
+}
+
+/// The same background renderer is used for app screens and independent theme previews.
+struct ThemeBackgroundGradient: View {
+    let theme: ThemeColor
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
         LinearGradient(
-            colors: ThemeColor.resolve(accentColorRawValue).defaultGradientColors(for: colorScheme).map { Color(hex: $0) },
+            colors: theme.defaultGradientColors(for: colorScheme).map { Color(hex: $0) },
             startPoint: .topLeading, endPoint: .bottomTrailing
         )
             .opacity(colorScheme == .dark ? 0.5 : 0.4)

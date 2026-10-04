@@ -55,6 +55,25 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         }
     }
 
+    func testThemePreviewsStayIndependentOfSelectedThemeInBothAppearances() throws {
+        let previous = UserDefaults.standard.object(forKey: "appAccentColor")
+        defer { restoreAccent(previous) }
+        for scheme in [ColorScheme.light, .dark] {
+            var previews = Set<Data>()
+            for theme in ThemeColor.allCases {
+                UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
+                // Every tile must use the actual app renderer, including dark-mode opacity.
+                XCTAssertEqual(try render(ThemeBackgroundGradient(theme: theme), scheme: scheme),
+                               try render(DefaultScreenBackground(), scheme: scheme))
+                let before = try render(ThemeExercisePreview(theme: theme), scheme: scheme)
+                UserDefaults.standard.set(theme == .orange ? "primary" : "orange", forKey: "appAccentColor")
+                XCTAssertEqual(try render(ThemeExercisePreview(theme: theme), scheme: scheme), before)
+                previews.insert(before)
+            }
+            XCTAssertEqual(previews.count, ThemeColor.allCases.count)
+        }
+    }
+
     func testDefaultIsIndependentOfSavedScreenCustomization() throws {
         let previous = UserDefaults.standard.object(forKey: "appAccentColor")
         defer { restoreAccent(previous) }
@@ -150,6 +169,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             ("summary", AnyView(SummaryView())),
             ("workouts", AnyView(WorkoutListView())),
             ("settings", AnyView(SettingsView())),
+            ("theme-selection", AnyView(NavigationStack { ThemeSelectionView() })),
             ("import", AnyView(NavigationStack { ImportDataView() })),
             ("create-workout", AnyView(CreateWorkoutSheet())),
             ("create-exercise", AnyView(CreateGlobalExerciseSheet())),
