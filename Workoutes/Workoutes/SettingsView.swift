@@ -30,20 +30,24 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section("Appearance") {
-                    Picker("Accent Color", selection: $accentColorRawValue) {
+                    Picker(selection: $accentColorRawValue) {
                         ForEach(ThemeColor.allCases) { theme in
                             Text(theme.name).foregroundStyle(accentColor).tag(theme.rawValue)
                         }
+                    } label: {
+                        Text("Accent Color").foregroundStyle(Color.primary)
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
                     .subtleFormRowBorder()
                 }
                 Section("Units") {
-                    Picker("Weight Unit", selection: $weightUnit) {
+                    Picker(selection: $weightUnit) {
                         ForEach(WeightUnit.allCases) { unit in
                             Text(unit.name).foregroundStyle(accentColor).tag(unit)
                         }
+                    } label: {
+                        Text("Weight Unit").foregroundStyle(Color.primary)
                     }
                     .foregroundStyle(accentColor)
                     .tint(accentColor)
