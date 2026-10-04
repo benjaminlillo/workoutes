@@ -14,7 +14,11 @@ struct WorkoutesApp: App {
             ContentView()
                 .environment(exerciseActivity)
                 .environment(exerciseBackground)
-                .tint(ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint)
+                .tint(ThemeColor.resolve(accentColorRawValue).color)
+                .onChange(of: accentColorRawValue, initial: true) {
+                    let resolved = ThemeColor.resolve(accentColorRawValue).rawValue
+                    if accentColorRawValue != resolved { accentColorRawValue = resolved }
+                }
         }
         .modelContainer(sharedModelContainer)
     }

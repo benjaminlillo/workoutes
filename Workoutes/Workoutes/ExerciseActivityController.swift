@@ -11,7 +11,7 @@ extension WorkoutExercise {
 
     var activityContent: ExerciseActivityAttributes.ContentState {
         let unit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .metric
-        let accent = ThemeColor(rawValue: UserDefaults.standard.string(forKey: "appAccentColor") ?? "") ?? .primary
+        let accent = ThemeColor.resolve(UserDefaults.standard.string(forKey: "appAccentColor"))
         let safeWeight = weight.isFinite ? weight : 0
         return .init(
             exerciseID: activityID,
@@ -23,7 +23,8 @@ extension WorkoutExercise {
             increaseLoadNextTime: increaseLoadNextTime,
             details: String(details.prefix(200)),
             tagColors: tags.prefix(12).map { String($0.colorHex.prefix(8)) },
-            accentColorHex: accent.color.toHex(),
+            // Live Activities and the Dynamic Island use a fixed dark surface.
+            accentColorHex: accent.hex(for: .dark),
             displayedWeight: unit.displayedWeight(from: safeWeight),
             weightUnitSymbol: unit.symbol,
             status: isDone ? .done : .playing
