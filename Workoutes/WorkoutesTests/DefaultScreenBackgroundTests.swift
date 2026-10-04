@@ -19,7 +19,20 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         }
     }
 
-    func testDefaultFollowsEachAccentInBothColorSchemes() throws {
+    private func pixelRGB(_ data: Data, x: Int, y: Int) throws -> [Int] {
+        let image = try XCTUnwrap(UIImage(data: data)?.cgImage)
+        let pixel = try XCTUnwrap(image.cropping(to: CGRect(x: x, y: y, width: 1, height: 1)))
+        var bytes = [UInt8](repeating: 0, count: 4)
+        try bytes.withUnsafeMutableBytes { buffer in
+            let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 1, height: 1,
+                bitsPerComponent: 8, bytesPerRow: 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.draw(pixel, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+        }
+        return bytes.prefix(3).map { Int($0) }
+    }
+
+    func testDefaultDistributesEachThemeAcrossTheScreenInBothColorSchemes() throws {
         let previous = UserDefaults.standard.object(forKey: "appAccentColor")
         defer { restoreAccent(previous) }
         for scheme in [ColorScheme.light, .dark] {
@@ -27,7 +40,15 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             for theme in ThemeColor.allCases {
                 UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
                 let rendered = try render(DefaultScreenBackground(), scheme: scheme)
-                XCTAssertEqual(rendered, try render(SoftBackgroundGradient(colors: theme.defaultGradientColors(for: scheme)), scheme: scheme))
+                let top = try pixelRGB(rendered, x: 8, y: 8)
+                let center = try pixelRGB(rendered, x: 199, y: 422)
+                let bottom = try pixelRGB(rendered, x: 389, y: 835)
+                XCTAssertGreaterThan(zip(top, bottom).map { abs($0 - $1) }.reduce(0, +), 5)
+                for channel in 0..<3 {
+                    // The center must sit between the ends, rather than form a bright radial hotspot.
+                    XCTAssertGreaterThanOrEqual(center[channel], min(top[channel], bottom[channel]) - 2)
+                    XCTAssertLessThanOrEqual(center[channel], max(top[channel], bottom[channel]) + 2)
+                }
                 backgrounds.insert(rendered)
             }
             XCTAssertEqual(backgrounds.count, ThemeColor.allCases.count)
@@ -78,9 +99,10 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             try reopened.remove()
             XCTAssertEqual(try render(ScreenBackgroundView(background: ExerciseBackgroundStore(directory: directory))), expected)
         }
+        UserDefaults.standard.set(ThemeColor.primary.rawValue, forKey: "appAccentColor")
+        let primaryBackground = try render(DefaultScreenBackground())
         UserDefaults.standard.set("unknown-color", forKey: "appAccentColor")
-        XCTAssertEqual(try render(DefaultScreenBackground()),
-                       try render(SoftBackgroundGradient(colors: ThemeColor.primary.defaultGradientColors(for: .light))))
+        XCTAssertEqual(try render(DefaultScreenBackground()), primaryBackground)
     }
 
     func testVisibleHomeUpdatesWhenAccentChanges() async throws {
