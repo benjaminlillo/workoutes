@@ -27,9 +27,10 @@ struct ExerciseLiveActivity: Widget {
                 Image(systemName: "dumbbell.fill")
                     .foregroundStyle(.white)
             } compactTrailing: {
-                Text("\(context.state.numberOfSets) x \((context.state.displayedWeight ?? context.state.weight).formatted(.number.precision(.fractionLength(0...2))))\(context.state.weightUnitSymbol ?? "kg")")
+                Text("\(context.state.numberOfSets) x \(context.state.reps) • \((context.state.displayedWeight ?? context.state.weight).formatted(.number.precision(.fractionLength(0...2))))\(context.state.weightUnitSymbol ?? "kg")")
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .foregroundStyle(.white)
             } minimal: {
                 Image(systemName: "dumbbell.fill")
