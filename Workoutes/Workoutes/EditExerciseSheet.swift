@@ -53,7 +53,6 @@ struct EditExerciseSheet: View {
                 }
             }
             .transparentNavigationChrome()
-            .defaultScreenBackground()
             .navigationTitle("Edit Exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
