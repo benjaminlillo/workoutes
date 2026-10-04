@@ -16,6 +16,12 @@ struct ContentView: View {
     var body: some View {
         TabView {
             Tab {
+                SummaryView()
+            } label: {
+                Image(systemName: "house.fill")
+                    .accessibilityLabel("Summary")
+            }
+            Tab {
                 WorkoutListView()
             } label: {
                 Image(systemName: "list.bullet.clipboard")
@@ -37,7 +43,7 @@ struct ContentView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory {
             NativeExerciseAccessory(
-                content: activeExercise?.activityContent,
+                content: activeExercise.map { exerciseActivity.content(for: $0) },
                 isUpdating: exerciseActivity.isUpdating,
                 accentColor: ThemeColor(rawValue: accentColorRawValue)?.color ?? .mint
             ) {
@@ -57,7 +63,7 @@ struct ContentView: View {
         }
         .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
         .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
-        .alert("Live Activity", isPresented: Binding(
+        .alert("Exercise Session", isPresented: Binding(
             get: { exerciseActivity.errorMessage != nil },
             set: { if !$0 { exerciseActivity.errorMessage = nil } }
         )) {

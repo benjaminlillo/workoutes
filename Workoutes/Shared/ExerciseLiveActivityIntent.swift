@@ -7,10 +7,12 @@ struct ExerciseLiveActivityIntent: LiveActivityIntent {
 
     @Parameter(title: "Exercise ID") var exerciseID: String
     @Parameter(title: "Complete Exercise") var complete: Bool
+    @Parameter(title: "Session ID") var sessionID: String?
 
     init() {}
-    init(exerciseID: String, complete: Bool) {
+    init(exerciseID: String, sessionID: String? = nil, complete: Bool) {
         self.exerciseID = exerciseID
+        self.sessionID = sessionID
         self.complete = complete
     }
 
@@ -19,7 +21,7 @@ struct ExerciseLiveActivityIntent: LiveActivityIntent {
         #if !WIDGET_EXTENSION
         let runtime = ExerciseActivityRuntime.shared
         try await runtime.controller.performLiveActivityAction(
-            exerciseID: exerciseID, complete: complete, context: runtime.container.mainContext
+            exerciseID: exerciseID, sessionID: sessionID, complete: complete, context: runtime.container.mainContext
         )
         #endif
         return .result()

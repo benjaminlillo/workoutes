@@ -85,11 +85,11 @@ struct ExerciseActivitySummary: View {
     @ViewBuilder
     private var statusControl: some View {
         if status == .playing {
-            Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, complete: true)) {
+            Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, sessionID: state.sessionID, complete: true)) {
                 ExerciseStatusSymbol(status: status, accentColor: accentColor)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Complete active exercise")
+            .accessibilityLabel("Stop active exercise")
             .accessibilityValue(status.rawValue)
         } else {
             ExerciseStatusSymbol(status: status, accentColor: accentColor)

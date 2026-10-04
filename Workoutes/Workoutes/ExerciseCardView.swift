@@ -25,7 +25,7 @@ struct ExerciseCardView: View {
     }
 
     private var stateHint: String {
-        exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop and mark completed" : "Start this exercise")
+        exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop: completes after more than 10 seconds, otherwise cancels" : "Start this exercise")
     }
 
     var body: some View {

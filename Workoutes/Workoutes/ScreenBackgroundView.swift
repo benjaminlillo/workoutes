@@ -19,7 +19,7 @@ struct ScreenBackgroundView: View {
                         .clipped()
                 }
             } else {
-                Color(uiColor: .systemGroupedBackground)
+                DefaultScreenBackground()
             }
         }
         .allowsHitTesting(false)

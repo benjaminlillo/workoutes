@@ -39,8 +39,8 @@ final class ExerciseActivityTests: XCTestCase {
         let state = exercise.activityContent
         XCTAssertEqual(state.title.count, 160)
         XCTAssertEqual(state.exerciseID, exercise.activityID)
-        let identifierData = try XCTUnwrap(Data(base64Encoded: state.exerciseID))
-        XCTAssertEqual(try JSONDecoder().decode(PersistentIdentifier.self, from: identifierData), exercise.persistentModelID)
+        XCTAssertEqual(state.exerciseID, exercise.stableID)
+        XCTAssertNotNil(UUID(uuidString: state.exerciseID))
         XCTAssertLessThan(try JSONEncoder().encode(state).count, 4_096)
         exercise.weight = .infinity
         XCTAssertEqual(exercise.activityContent.weight, 0)
@@ -50,7 +50,8 @@ final class ExerciseActivityTests: XCTestCase {
         let container = try makeContainer()
         let item = exercise("Three State Exercise")
         container.mainContext.insert(item)
-        let controller = ExerciseActivityController()
+        var now = Date.now
+        let controller = ExerciseActivityController(context: container.mainContext, now: { now })
         controller.advanceState(item, context: container.mainContext)
         await controller.waitForPendingUpdates()
         XCTAssertNil(controller.errorMessage)
@@ -60,6 +61,7 @@ final class ExerciseActivityTests: XCTestCase {
             $0.content.state.exerciseID == item.activityID
         })
 
+        now = now.addingTimeInterval(11)
         controller.advanceState(item, context: container.mainContext)
         await controller.waitForPendingUpdates()
         XCTAssertTrue(item.isDone)
@@ -83,7 +85,7 @@ final class ExerciseActivityTests: XCTestCase {
         container.mainContext.insert(first)
         container.mainContext.insert(second)
         try container.mainContext.save()
-        let controller = ExerciseActivityController()
+        let controller = ExerciseActivityController(context: container.mainContext)
         // The host app has no pre-existing activity on the dedicated test simulator.
         controller.toggle(first, context: container.mainContext)
         await controller.waitForPendingUpdates()
@@ -99,7 +101,7 @@ final class ExerciseActivityTests: XCTestCase {
         first.increaseLoadNextTime = true
         controller.synchronize(exercises: [first, second])
         await controller.waitForPendingUpdates()
-        try await waitForContent(first.activityContent, in: initial)
+        try await waitForContent(controller.content(for: first), in: initial)
 
         // Switching updates the same card instead of leaving a second activity behind.
         second.isDone = true
@@ -108,10 +110,10 @@ final class ExerciseActivityTests: XCTestCase {
         XCTAssertTrue(controller.isActive(second))
         XCTAssertFalse(controller.isActive(first))
         XCTAssertFalse(second.isDone)
-        try await waitForContent(second.activityContent, in: initial)
+        try await waitForContent(controller.content(for: second), in: initial)
         XCTAssertEqual(Activity<ExerciseActivityAttributes>.activities.count, 1)
 
-        let restored = ExerciseActivityController()
+        let restored = ExerciseActivityController(context: container.mainContext)
         XCTAssertTrue(restored.isActive(second))
         second.isDone = true
         restored.synchronize(exercises: [first, second])
@@ -146,26 +148,32 @@ final class ExerciseActivityTests: XCTestCase {
         let second = exercise("Second")
         container.mainContext.insert(first)
         container.mainContext.insert(second)
-        let controller = ExerciseActivityController()
+        var now = Date.now
+        let controller = ExerciseActivityController(context: container.mainContext, now: { now })
         controller.toggle(first, context: container.mainContext)
         await controller.waitForPendingUpdates()
-        try await controller.performLiveActivityAction(exerciseID: first.activityID, complete: false,
+        try await controller.performLiveActivityAction(exerciseID: first.activityID, sessionID: controller.activeSessionID, complete: false,
                                                       context: container.mainContext)
         XCTAssertTrue(first.increaseLoadNextTime)
 
         controller.toggle(second, context: container.mainContext)
         await controller.waitForPendingUpdates()
-        try await controller.performLiveActivityAction(exerciseID: first.activityID, complete: true,
+        try await controller.performLiveActivityAction(exerciseID: first.activityID, sessionID: controller.activeSessionID, complete: true,
                                                       context: container.mainContext)
         XCTAssertFalse(first.isDone)
         XCTAssertTrue(controller.isActive(second))
         let activity = try XCTUnwrap(Activity<ExerciseActivityAttributes>.activities.first)
-        try await waitForContent(second.activityContent, in: activity)
-        try await controller.performLiveActivityAction(exerciseID: second.activityID, complete: true,
+        try await waitForContent(controller.content(for: second), in: activity)
+        var finalState = controller.content(for: second)
+        finalState.status = .done
+        finalState.startedAt = nil
+        finalState.elapsedSeconds = 11
+        now = now.addingTimeInterval(11)
+        try await controller.performLiveActivityAction(exerciseID: second.activityID, sessionID: controller.activeSessionID, complete: true,
                                                       context: container.mainContext)
         XCTAssertTrue(second.isDone)
         XCTAssertNil(controller.activeExerciseID)
-        try await waitForContent(second.activityContent, in: activity)
+        try await waitForContent(finalState, in: activity)
         XCTAssertEqual(activity.content.state.status, .done)
     }
 
@@ -176,6 +184,8 @@ final class ExerciseActivityTests: XCTestCase {
         let state = try JSONDecoder().decode(ExerciseActivityAttributes.ContentState.self, from: data)
         XCTAssertNil(state.status)
         XCTAssertNil(state.weightUnitSymbol)
+        XCTAssertNil(state.startedAt)
+        XCTAssertNil(state.sessionID)
         XCTAssertEqual(state.weight, 20)
     }
 
@@ -185,7 +195,8 @@ final class ExerciseActivityTests: XCTestCase {
                 exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
                 numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
                 details: "Pause at the bottom", tagColors: ["FF8800", "5599FF"],
-                accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: status
+                accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: status,
+                sessionID: "preview-session", startedAt: status == .playing ? .now.addingTimeInterval(-125) : nil
             )
             let renderer = ImageRenderer(content: ExerciseActivitySummary(state: state)
                 .padding(16).frame(width: 398).background(.black))
