@@ -7,6 +7,18 @@ enum ContainerBorderStyle {
 enum CardRowPosition {
     case single, first, middle, last
 
+    var backgroundShape: UnevenRoundedRectangle {
+        let topRadius: CGFloat = self == .single || self == .first ? 26 : 0
+        let bottomRadius: CGFloat = self == .single || self == .last ? 26 : 0
+        return UnevenRoundedRectangle(
+            topLeadingRadius: topRadius,
+            bottomLeadingRadius: bottomRadius,
+            bottomTrailingRadius: bottomRadius,
+            topTrailingRadius: topRadius,
+            style: .continuous
+        )
+    }
+
     static func row(at index: Int, count: Int) -> Self {
         if count == 1 { return .single }
         if index == 0 { return .first }
@@ -34,7 +46,8 @@ extension View {
 
     func subtleFormRowBorder(_ position: CardRowPosition = .single) -> some View {
         listRowBackground(
-            Color(uiColor: .secondarySystemGroupedBackground)
+            position.backgroundShape
+                .fill(Color(uiColor: .secondarySystemGroupedBackground))
                 .overlay { SubtleCardBorder(shape: FormRowOutline(position: position)) }
         )
     }
@@ -61,15 +74,7 @@ private struct FormRowOutline: InsettableShape {
             width: rect.width - insetAmount * 2,
             height: rect.height - topInset - bottomInset
         )
-        let topRadius: CGFloat = position == .single || position == .first ? 26 : 0
-        let bottomRadius: CGFloat = position == .single || position == .last ? 26 : 0
-        let outline = UnevenRoundedRectangle(
-            topLeadingRadius: topRadius,
-            bottomLeadingRadius: bottomRadius,
-            bottomTrailingRadius: bottomRadius,
-            topTrailingRadius: topRadius,
-            style: .continuous
-        ).path(in: bounds)
+        let outline = position.backgroundShape.path(in: bounds)
         if position == .single { return outline }
 
         var result = Path()
