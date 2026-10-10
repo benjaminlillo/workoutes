@@ -61,10 +61,15 @@ struct SettingsView: View {
                     .subtleFormRowBorder()
                 }
                 Section("Data") {
+                    NavigationLink(destination: ExerciseHistoryView()) {
+                        HStack { Text("Exercise History"); Spacer(); Image(systemName: "clock.arrow.circlepath") }
+                    }
+                    .accessibilityIdentifier("settingsExerciseHistory")
+                    .subtleFormRowBorder(.first)
                     Button { showingExportOptions = true } label: {
                         HStack { Text("Export Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.up") }
                     }
-                    .subtleFormRowBorder(.first)
+                    .subtleFormRowBorder(.middle)
                     NavigationLink(destination: ImportDataView()) {
                         HStack { Text("Import Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.down") }
                     }
