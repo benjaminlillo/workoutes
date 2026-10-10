@@ -8,6 +8,7 @@ struct ExerciseCardView: View {
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @Bindable var exercise: WorkoutExercise
     var workout: Workout? = nil
+    var revealHighlight: UUID? = nil
     
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
@@ -143,6 +144,9 @@ struct ExerciseCardView: View {
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .subtleCardBorder()
+        .overlay {
+            ExerciseRevealBorder(color: accentColor, trigger: revealHighlight)
+        }
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
             Button {

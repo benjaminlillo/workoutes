@@ -84,6 +84,7 @@ final class NativeExerciseAccessoryTests: XCTestCase {
                     content: state.content,
                     isUpdating: false,
                     accentColor: .blue,
+                    onShow: {},
                     onStop: {}
                 )
             }

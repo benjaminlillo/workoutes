@@ -7,6 +7,7 @@ struct NativeExerciseAccessory: View {
     let content: ExerciseActivityAttributes.ContentState?
     let isUpdating: Bool
     let accentColor: Color
+    let onShow: () -> Void
     let onStop: () -> Void
 
     var body: some View {
@@ -14,6 +15,7 @@ struct NativeExerciseAccessory: View {
             exercise: content,
             isCompact: placement == .inline,
             isUpdating: isUpdating,
+            onShow: onShow,
             onStop: onStop
         )
         .tint(accentColor)

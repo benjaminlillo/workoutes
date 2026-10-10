@@ -9,32 +9,33 @@ struct ContentView: View {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @State private var motivationalPull = MotivationalPullState()
+    @State var navigation = ExerciseNavigation()
     
     private var activeExercise: WorkoutExercise? {
         exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
     }
 
     var body: some View {
-        TabView {
-            Tab {
+        TabView(selection: $navigation.selectedTab) {
+            Tab(value: AppTab.summary) {
                 SummaryView(pull: $motivationalPull)
             } label: {
                 Image(systemName: "house.fill")
                     .accessibilityLabel("Summary")
             }
-            Tab {
+            Tab(value: AppTab.workouts) {
                 WorkoutListView()
             } label: {
                 Image(systemName: "list.bullet.clipboard")
                     .accessibilityLabel("Workouts")
             }
-            Tab {
-                ExerciseListView()
+            Tab(value: AppTab.exercises) {
+                ExerciseListView(navigation: navigation)
             } label: {
                 Image(systemName: "dumbbell")
                     .accessibilityLabel("Exercises")
             }
-            Tab {
+            Tab(value: AppTab.settings) {
                 SettingsView()
             } label: {
                 Image(systemName: "gearshape")
@@ -46,7 +47,12 @@ struct ContentView: View {
             NativeExerciseAccessory(
                 content: activeExercise.map { exerciseActivity.content(for: $0) },
                 isUpdating: exerciseActivity.isUpdating,
-                accentColor: ThemeColor.resolve(accentColorRawValue).color
+                accentColor: ThemeColor.resolve(accentColorRawValue).color,
+                onShow: {
+                    if let exercise = activeExercise {
+                        navigation.reveal(exercise)
+                    }
+                }
             ) {
                 if let exercise = activeExercise {
                     exerciseActivity.toggle(exercise, context: modelContext)

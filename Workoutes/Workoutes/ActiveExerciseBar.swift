@@ -4,9 +4,44 @@ struct ActiveExerciseBar: View {
     let exercise: ExerciseActivityAttributes.ContentState?
     let isCompact: Bool
     let isUpdating: Bool
+    let onShow: () -> Void
     let onStop: () -> Void
 
     var body: some View {
+        HStack(spacing: 10) {
+            Button(action: onShow) {
+                exerciseDetails
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(exercise == nil)
+            .accessibilityHint(exercise == nil ? "" : "Shows this exercise in the Exercises tab")
+            .accessibilityIdentifier("showActiveExercise")
+
+            if exercise != nil {
+                Button(action: onStop) {
+                    Image(systemName: "stop.fill")
+                        .font(.body)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(isUpdating)
+                .accessibilityLabel("Stop active exercise")
+            } else {
+                Color.clear
+                    .frame(width: 44, height: 44)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.leading, isCompact ? 8 : 16)
+        .padding(.trailing, 8)
+        .padding(.vertical, isCompact ? 0 : 4)
+        .accessibilityIdentifier("activeExerciseBar")
+        // UITabBarController supplies the Liquid Glass surface and the expanded/inline transition.
+    }
+
+    private var exerciseDetails: some View {
         HStack(spacing: 10) {
             Image(systemName: "dumbbell.fill")
                 .font(.title3)
@@ -34,26 +69,9 @@ struct ActiveExerciseBar: View {
                         .frame(width: 60, alignment: .trailing)
                         .accessibilityLabel("Elapsed exercise time")
                 }
-                Button(action: onStop) {
-                    Image(systemName: "stop.fill")
-                        .font(.body)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(isUpdating)
-                .accessibilityLabel("Stop active exercise")
-            } else {
-                Color.clear
-                    .frame(width: 44, height: 44)
-                    .accessibilityHidden(true)
             }
         }
-        .padding(.leading, isCompact ? 8 : 16)
-        .padding(.trailing, 8)
-        .padding(.vertical, isCompact ? 0 : 4)
-        .accessibilityIdentifier("activeExerciseBar")
-        // UITabBarController supplies the Liquid Glass surface and the expanded/inline transition.
+        .frame(minHeight: 44)
     }
 
     private var detailText: String {
