@@ -1,5 +1,9 @@
 import SwiftUI
 
+enum ContainerBorderStyle {
+    static let color = Color(white: 0.5).opacity(0.24)
+}
+
 enum CardRowPosition {
     case single, first, middle, last
 
@@ -13,21 +17,9 @@ enum CardRowPosition {
 
 struct SubtleCardBorder<S: InsettableShape>: View {
     let shape: S
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
-
-    private var accentColor: Color {
-        ThemeColor.resolve(accentColorRawValue).color
-    }
 
     var body: some View {
-        shape.strokeBorder(
-            LinearGradient(
-                colors: [accentColor.opacity(0.24), accentColor.opacity(0.08), accentColor.opacity(0.18)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            lineWidth: 1
-        )
+        shape.strokeBorder(ContainerBorderStyle.color, lineWidth: 1)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

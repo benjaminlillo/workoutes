@@ -82,7 +82,7 @@ struct ThemeSelectionView: View {
                     .padding(4)
                     .overlay {
                         RoundedRectangle(cornerRadius: 34, style: .continuous)
-                            .strokeBorder(isSelected ? accent : Color.primary.opacity(0.1),
+                            .strokeBorder(ContainerBorderStyle.color,
                                           lineWidth: isSelected ? 2.5 : 1)
                     }
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -133,7 +133,7 @@ struct ThemeExercisePreview: View {
                     .fill(Color(uiColor: .secondarySystemGroupedBackground))
                     .overlay {
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.07), lineWidth: 0.5)
+                            .strokeBorder(ContainerBorderStyle.color, lineWidth: 0.5)
                     }
                     .overlay(alignment: .topTrailing) {
                         ExerciseStatusSymbol(status: .done, accentColor: accent)
