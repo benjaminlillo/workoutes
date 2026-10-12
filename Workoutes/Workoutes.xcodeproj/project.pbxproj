@@ -474,7 +474,7 @@
                 INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes displays your strength workout metrics from Apple Watch.";
                 INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes starts strength workouts on your Apple Watch to save to Apple Health.";
                 ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-majorelle-blue WorkoutesIcon-frozen-water WorkoutesIcon-midnight-violet WorkoutesIcon-blazing-flame";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-majorelle-blue WorkoutesIcon-frozen-water WorkoutesIcon-midnight-violet WorkoutesIcon-blazing-flame WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -512,7 +512,7 @@
                 INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes displays your strength workout metrics from Apple Watch.";
                 INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes starts strength workouts on your Apple Watch to save to Apple Health.";
                 ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-majorelle-blue WorkoutesIcon-frozen-water WorkoutesIcon-midnight-violet WorkoutesIcon-blazing-flame";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-majorelle-blue WorkoutesIcon-frozen-water WorkoutesIcon-midnight-violet WorkoutesIcon-blazing-flame WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

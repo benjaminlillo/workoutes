@@ -47,16 +47,16 @@ struct ExerciseLiveActivity: Widget {
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
         details: "Pause at the bottom", tagColors: ["FF8800", "5599FF"],
-        accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .playing
+        accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .playing
     )
     ExerciseActivityAttributes.ContentState(
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
-        accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .done
+        accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .done
     )
     ExerciseActivityAttributes.ContentState(
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: false,
-        accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .empty
+        accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .empty
     )
 }
