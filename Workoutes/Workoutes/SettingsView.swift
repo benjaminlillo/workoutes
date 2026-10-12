@@ -15,6 +15,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 }
 
 struct SettingsView: View {
+    @Environment(\.trainingController) private var training
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     @State private var shareURL: IdentifiableURL?
@@ -34,6 +35,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let training {
+                    Section("Apple Watch") {
+                        NavigationLink("Training Structure and History") { TrainingView(controller: training) }
+                    }
+                }
                 Section("Appearance") {
                     NavigationLink(destination: ThemeSelectionView()) {
                         HStack {

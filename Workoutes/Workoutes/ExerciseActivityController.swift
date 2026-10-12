@@ -35,6 +35,7 @@ extension WorkoutExercise {
 @MainActor
 @Observable
 final class ExerciseActivityController {
+    var training: PhoneTrainingController?
     private(set) var activeExerciseID: String?
     private(set) var activeStartedAt: Date?
     private(set) var activeSessionID: String?
@@ -59,11 +60,21 @@ final class ExerciseActivityController {
     }
 
     func isActive(_ exercise: WorkoutExercise) -> Bool {
-        activeExerciseID != nil && activeExerciseID == exercise.activityID
+        if let training, training.hasActiveSession {
+            return training.run?.currentResult?.exercise.id == exercise.activityID
+                && training.run?.currentResult?.isComplete == false
+        }
+        return activeExerciseID != nil && activeExerciseID == exercise.activityID
     }
 
     func content(for exercise: WorkoutExercise) -> ExerciseActivityAttributes.ContentState {
         var state = exercise.activityContent
+        if let run = training?.run, run.isActive, run.currentResult?.exercise.id == exercise.activityID {
+            state.status = .playing
+            state.startedAt = run.progress.phaseStartedAt
+            state.sessionID = run.id.uuidString
+            return state
+        }
         if isActive(exercise) {
             state.status = .playing
             state.startedAt = activeStartedAt
@@ -75,6 +86,10 @@ final class ExerciseActivityController {
     /// Cycles the card control through empty, active, completed, and empty.
     func advanceState(_ exercise: WorkoutExercise, context: ModelContext) {
         guard !isUpdating, !exercise.isDeleted else { return }
+        if let training, training.hasActiveSession {
+            if isActive(exercise) { training.advance() } else { training.select(exercise) }
+            return
+        }
         if isActive(exercise) {
             toggle(exercise, context: context)
         } else if exercise.isDone {
@@ -88,6 +103,10 @@ final class ExerciseActivityController {
 
     func toggle(_ exercise: WorkoutExercise, context: ModelContext) {
         guard !isUpdating, !exercise.isDeleted else { return }
+        if let training, training.hasActiveSession {
+            if isActive(exercise) { training.advance() } else { training.select(exercise) }
+            return
+        }
         self.context = context
         do {
             try context.save()
@@ -115,6 +134,7 @@ final class ExerciseActivityController {
     }
 
     func synchronize(exercises: [WorkoutExercise]) {
+        guard training?.hasActiveSession != true else { return }
         enqueue {
             guard self.activeExerciseID != nil else {
                 if self.activity != nil { await self.finish() }
@@ -229,6 +249,12 @@ final class ExerciseActivityController {
         }
         session = nil
         updateActiveSession()
+    }
+
+    func cancelForTraining() throws {
+        guard session != nil || activity != nil else { return }
+        try cancelSession()
+        enqueue { await self.finish() }
     }
 
     private func finalize(_ exercise: WorkoutExercise, context: ModelContext) throws -> ExerciseActivityAttributes.ContentState? {

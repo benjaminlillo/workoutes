@@ -3,6 +3,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
+    @Environment(\.trainingController) private var training
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Query private var exercises: [WorkoutExercise]
@@ -67,19 +68,20 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                training?.refresh()
                 exerciseActivity.restore()
                 exerciseActivity.synchronize(exercises: exercises)
             }
         }
         .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
         .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
-        .alert("Exercise Session", isPresented: Binding(
-            get: { exerciseActivity.errorMessage != nil },
-            set: { if !$0 { exerciseActivity.errorMessage = nil } }
+        .alert(training?.errorMessage != nil ? "Training" : "Exercise Session", isPresented: Binding(
+            get: { exerciseActivity.errorMessage != nil || training?.errorMessage != nil },
+            set: { if !$0 { exerciseActivity.errorMessage = nil; training?.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { exerciseActivity.errorMessage = nil }
+            Button("OK", role: .cancel) { exerciseActivity.errorMessage = nil; training?.errorMessage = nil }
         } message: {
-            Text(exerciseActivity.errorMessage ?? "")
+            Text(training?.errorMessage ?? exerciseActivity.errorMessage ?? "")
         }
     }
 }

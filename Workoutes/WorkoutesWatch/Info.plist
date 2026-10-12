@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>WKApplication</key><true/>
+    <key>WKCompanionAppBundleIdentifier</key><string>benjaminlillo.Workoutes</string>
+    <key>WKBackgroundModes</key><array><string>workout-processing</string></array>
+    <key>NSHealthShareUsageDescription</key><string>Workoutes shows your heart rate, calories, heart rate zones and recovery during and after strength training.</string>
+    <key>NSHealthUpdateUsageDescription</key><string>Workoutes saves your strength workouts, calorie data and effort ratings to Apple Health.</string>
+</dict>
+</plist>

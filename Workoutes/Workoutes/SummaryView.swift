@@ -60,6 +60,7 @@ struct SummaryView: View {
 }
 
 private struct SummaryWeekView: View {
+    @Environment(\.trainingController) private var training
     let date: Date
     @Binding var pull: MotivationalPullState
     @Query private var completions: [ExerciseCompletion]
@@ -76,8 +77,10 @@ private struct SummaryWeekView: View {
 
     var body: some View {
         MotivationalScrollView(pull: $pull) {
-            SummaryDashboard(summary: WeeklySummary(completions: completions, date: date), today: date)
-                .padding(16)
+            VStack(spacing: 16) {
+                if let training { TrainingEntryView(controller: training) }
+                SummaryDashboard(summary: WeeklySummary(completions: completions, date: date), today: date)
+            }.padding(16)
         }
         .defaultScreenBackground()
     }
