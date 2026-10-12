@@ -6,7 +6,7 @@ struct ExerciseActivitySummary: View {
     let state: ExerciseActivityAttributes.ContentState
 
     private var status: ExerciseStatus { state.status ?? .playing }
-    private var accentColor: Color { color(hex: state.accentColorHex ?? "326884") }
+    private var accentColor: Color { color(hex: state.accentColorHex ?? "64CCC5") }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

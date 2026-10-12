@@ -3,37 +3,49 @@ import UIKit
 
 enum ThemeColor: String, CaseIterable, Identifiable {
     // Preserve the stored identifiers for existing selections.
-    case primary, indigo, mint, purple, orange
+    case primary, indigo, mint, purple, orange, electricRush, sunsetPop
     
     var id: Self { self }
     
     var hex: String {
         switch self {
-        case .primary: "326884"
-        case .indigo: "6155F5"
-        case .mint: "92DDBE"
-        case .purple: "42213D"
-        case .orange: "F15025"
+        case .primary: "176B87"
+        case .indigo: "6C3DD1"
+        case .mint: "2F6B4F"
+        case .purple: "8A3D65"
+        case .orange: "C9562D"
+        case .electricRush: "3D52F5"
+        case .sunsetPop: "D12D78"
         }
     }
 
     func hex(for scheme: ColorScheme) -> String {
-        guard scheme == .dark else { return hex }
+        scheme == .dark ? secondaryHex : hex
+    }
+
+    /// A lighter accent for dark surfaces and the first color of the background gradient.
+    var secondaryHex: String {
         switch self {
-        case .mint: return "D2F1E4"
-        case .purple: return "88447E"
-        default: return hex
+        case .primary: "64CCC5"
+        case .indigo: "B784E8"
+        case .mint: "8FC7A1"
+        case .purple: "C77C9B"
+        case .orange: "EBA66B"
+        case .electricRush: "32D5E5"
+        case .sunsetPop: "FF8059"
         }
     }
 
-    /// Used only as the second color of the theme's default background gradient.
-    var secondaryHex: String {
+    /// The supporting color of the theme's background gradient.
+    var tertiaryHex: String {
         switch self {
-        case .primary: "63B7AF"
-        case .indigo: "AB78DD"
-        case .mint: "83C8DB"
-        case .purple: "C27D98"
-        case .orange: "F5B84B"
+        case .primary: "DAFFFB"
+        case .indigo: "F3DDF2"
+        case .mint: "E6EFD8"
+        case .purple: "F2D6DE"
+        case .orange: "F6E5CF"
+        case .electricRush: "D5F66A"
+        case .sunsetPop: "FFD65C"
         }
     }
 
@@ -44,6 +56,8 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .mint: "WorkoutesIcon-frozen-water"
         case .purple: "WorkoutesIcon-midnight-violet"
         case .orange: "WorkoutesIcon-blazing-flame"
+        case .electricRush: "WorkoutesIcon-electric-rush"
+        case .sunsetPop: "WorkoutesIcon-sunset-pop"
         }
     }
 
@@ -57,11 +71,13 @@ enum ThemeColor: String, CaseIterable, Identifiable {
     
     var name: String {
         switch self {
-        case .primary: "Blue Slate"
-        case .indigo: "Majorelle Blue"
-        case .mint: "Frozen Water"
-        case .purple: "Midnight Violet"
-        case .orange: "Blazing Flame"
+        case .primary: "Ocean Pulse"
+        case .indigo: "Violet Aura"
+        case .mint: "Matcha Club"
+        case .purple: "Rosewood"
+        case .orange: "Ember Glow"
+        case .electricRush: "Electric Rush"
+        case .sunsetPop: "Sunset Pop"
         }
     }
 
@@ -75,17 +91,8 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Pastel versions of the theme's primary and secondary colors.
-    func defaultGradientColors(for scheme: ColorScheme) -> [String] {
-        zip([hex(for: scheme), secondaryHex], [0.35, 0.5]).map { hex, strength in
-            let color = UIColor(Color(hex: hex))
-            var red: CGFloat = 0
-            var green: CGFloat = 0
-            var blue: CGFloat = 0
-            guard color.getRed(&red, green: &green, blue: &blue, alpha: nil) else { return hex }
-            return Color(red: 1 - Double(1 - red) * strength,
-                         green: 1 - Double(1 - green) * strength,
-                         blue: 1 - Double(1 - blue) * strength).toHex()
-        }
+    /// Both appearances use the palette's complement and supporting color.
+    func defaultGradientColors(for _: ColorScheme) -> [String] {
+        [secondaryHex, tertiaryHex]
     }
 }
