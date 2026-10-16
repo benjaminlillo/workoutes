@@ -17,18 +17,24 @@ struct ExerciseListView: View {
     @State private var highlightedRequest: ExerciseRevealRequest?
     @State private var revealPosition: ExerciseRevealPosition?
     @State private var viewportSize: CGSize = .zero
+    @State private var displayedTagIDs: Set<PersistentIdentifier>?
+    @State private var isChangingTag = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var filterChange: FilterChange {
+        FilterChange(tags: navigation.selectedTagIDs, reveal: navigation.revealRequest)
+    }
     private var backgroundTagColors: [String] {
         allTags.filter { navigation.selectedTagIDs.contains($0.persistentModelID) }.map(\.colorHex)
     }
     
     var filteredExercises: [WorkoutExercise] {
-        if navigation.selectedTagIDs.isEmpty {
+        let tagIDs = displayedTagIDs ?? navigation.selectedTagIDs
+        if tagIDs.isEmpty {
             return allExercises
         }
         return allExercises.filter { exercise in
             exercise.tags.contains { tag in
-                navigation.selectedTagIDs.contains(tag.persistentModelID)
+                tagIDs.contains(tag.persistentModelID)
             }
         }
     }
@@ -37,11 +43,6 @@ struct ExerciseListView: View {
         NavigationStack {
             ScrollViewReader { proxy in
                 List {
-                    tagBar
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-
                     ForEach(filteredExercises) { exercise in
                         ExerciseCardView(
                             exercise: exercise,
@@ -73,7 +74,9 @@ struct ExerciseListView: View {
                 .coordinateSpace(name: "exerciseList")
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { viewportSize = $0 }
                 .onPreferenceChange(ExerciseRevealPositionKey.self) { revealPosition = $0 }
-                .task(id: navigation.revealRequest) {
+                .task(id: filterChange) { await transitionFilter() }
+                .task(id: FilterChange(tags: displayedTagIDs ?? navigation.selectedTagIDs,
+                                       reveal: navigation.revealRequest)) {
                     guard let request = navigation.revealRequest,
                           navigation.selectedTab == .exercises,
                           filteredExercises.contains(where: { $0.persistentModelID == request.exerciseID }) else { return }
@@ -102,11 +105,39 @@ struct ExerciseListView: View {
                 .listStyle(.plain)
                 .transparentNavigationChrome()
                 .scrollContentBackground(.hidden)
+                .overlay {
+                    if filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty {
+                        ContentUnavailableView("No Exercises", systemImage: "dumbbell",
+                                               description: Text("No exercises with this tag."))
+                            .padding(.bottom, TagWheelPicker.diameter - TagWheelPicker.bottomOverhang)
+                            .allowsHitTesting(false)
+                    }
+                }
+                .opacity(isChangingTag ? 0 : 1)
+                .blur(radius: isChangingTag && !reduceMotion ? 2 : 0)
+                .allowsHitTesting(!isChangingTag)
                 .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
+                .stableBottomOverlay(bottomContentMargin: TagWheelPicker.diameter - TagWheelPicker.bottomOverhang + 12) {
+                    TagWheelPicker(
+                        tags: allTags,
+                        selection: Binding(
+                            get: { navigation.selectedTagIDs.first },
+                            set: { navigation.selectedTagIDs = $0.map { [$0] } ?? [] }
+                        ),
+                        onAdd: { showingAddTagSheet = true },
+                        onEdit: { editingTag = $0 },
+                        onDelete: { tagPendingDeletion = $0 }
+                    )
+                    .offset(x: TagWheelPicker.overhang, y: TagWheelPicker.bottomOverhang)
+                }
                 .navigationTitle("All Exercises")
                 .navigationBarTitleDisplayMode(.large)
                 .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
                     navigation.selectedTagIDs.formIntersection(ids)
+                }
+                .onDisappear {
+                    displayedTagIDs = nil
+                    isChangingTag = false
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -159,68 +190,29 @@ struct ExerciseListView: View {
             }
         }
     }
-    
-    private var tagBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            GlassEffectContainer(spacing: 8) {
-                HStack(spacing: 12) {
-                    ForEach(allTags) { tag in
-                        let isSelected = navigation.selectedTagIDs.contains(tag.persistentModelID)
-                        Button {
-                            withAnimation(.smooth) {
-                                if isSelected {
-                                    navigation.selectedTagIDs.remove(tag.persistentModelID)
-                                } else {
-                                    navigation.selectedTagIDs.insert(tag.persistentModelID)
-                                }
-                            }
-                        } label: {
-                            TagLabel(tag: tag, isSelected: isSelected)
-                            .padding(.horizontal, 14)
-                            .frame(minHeight: 44)
-                            .contentShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .glassEffect(
-                            .regular.tint(isSelected ? Color(hex: tag.colorHex).opacity(0.45) : .clear).interactive(),
-                            in: .capsule
-                        )
-                        .accessibilityLabel(tag.name)
-                        .accessibilityAddTraits(isSelected ? .isSelected : [])
-                        .accessibilityValue(isSelected ? "Selected" : "Not selected")
-                        .contentShape(.contextMenuPreview, Capsule())
-                        .contextMenu {
-                            Button {
-                                editingTag = tag
-                            } label: {
-                                Label("Edit Tag", systemImage: "pencil")
-                            }
-                            Button(role: .destructive) {
-                                tagPendingDeletion = tag
-                            } label: {
-                                Label("Delete Tag", systemImage: "trash")
-                            }
-                        }
-                        .accessibilityAction(named: "Edit Tag") { editingTag = tag }
-                        .accessibilityAction(named: "Delete Tag") { tagPendingDeletion = tag }
-                    }
 
-                    Button(action: { showingAddTagSheet = true }) {
-                        Image(systemName: "plus")
-                            .font(.body.weight(.semibold))
-                            .frame(width: 44, height: 44)
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .glassEffect(.regular.interactive(), in: .circle)
-                    .accessibilityLabel("Add Tag")
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+    private func transitionFilter() async {
+        let change = filterChange
+        guard displayedTagIDs != nil,
+              displayedTagIDs != change.tags,
+              !reduceMotion, change.reveal == nil else {
+            displayedTagIDs = change.tags
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.24)) { isChangingTag = false }
+            return
         }
-        // Let Liquid Glass shadows fade outside the horizontal scroll bounds.
-        .scrollClipDisabled()
+
+        // Keep the old rows until they have faded, and cancel intermediate filters during a fast spin.
+        withAnimation(.easeIn(duration: 0.1)) { isChangingTag = true }
+        do { try await Task.sleep(for: .milliseconds(100)) }
+        catch { return }
+        guard !Task.isCancelled else { return }
+        displayedTagIDs = change.tags
+        withAnimation(.easeOut(duration: 0.24)) { isChangingTag = false }
+    }
+
+    private struct FilterChange: Equatable {
+        let tags: Set<PersistentIdentifier>
+        let reveal: ExerciseRevealRequest?
     }
 
     private func deleteExercises(offsets: IndexSet) {
