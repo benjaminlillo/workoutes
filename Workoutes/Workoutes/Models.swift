@@ -22,14 +22,19 @@ final class Tag {
     @Attribute(.unique) var stableID: String?
     var name: String
     var colorHex: String
+    // Optional so existing stores and tags retain their color-only appearance.
+    var iconName: String?
+
+    var muscleIcon: MuscleIcon? { iconName.flatMap(MuscleIcon.init(rawValue:)) }
     
     @Relationship(inverse: \WorkoutExercise.tags)
     var exercises: [WorkoutExercise] = []
     
-    init(name: String, colorHex: String) {
+    init(name: String, colorHex: String, iconName: String? = nil) {
         self.stableID = UUID().uuidString
         self.name = name
         self.colorHex = colorHex
+        self.iconName = iconName
     }
 }
 

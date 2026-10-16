@@ -175,14 +175,7 @@ struct ExerciseListView: View {
                                 }
                             }
                         } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle.fill")
-                                    .font(isSelected ? .subheadline : .system(size: 8))
-                                    .foregroundStyle(isSelected ? Color.primary : Color(hex: tag.colorHex))
-                                Text(tag.name)
-                                    .font(.subheadline.weight(.semibold))
-                                    .lineLimit(1)
-                            }
+                            TagLabel(tag: tag, isSelected: isSelected)
                             .padding(.horizontal, 14)
                             .frame(minHeight: 44)
                             .contentShape(Capsule())

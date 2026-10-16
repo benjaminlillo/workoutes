@@ -213,12 +213,20 @@ struct ExerciseCardView: View {
     }
 
     private var tagBars: some View {
-        HStack(spacing: 3) {
+        LazyVGrid(columns: Array(repeating: GridItem(.fixed(20), spacing: 3),
+                                 count: min(3, exercise.tags.count)), alignment: .trailing, spacing: 3) {
             ForEach(exercise.tags) { tag in
-                Circle()
-                    .fill(Color(hex: tag.colorHex))
-                    .frame(width: 7, height: 7)
-                    .accessibilityLabel("Tag: \(tag.name)")
+                Group {
+                    if let icon = tag.muscleIcon {
+                        MuscleIconView(icon: icon, color: Color(hex: tag.colorHex))
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Circle()
+                            .fill(Color(hex: tag.colorHex))
+                            .frame(width: 7, height: 7)
+                    }
+                }
+                .accessibilityLabel("Tag: \(tag.name)")
             }
         }
         .fixedSize()

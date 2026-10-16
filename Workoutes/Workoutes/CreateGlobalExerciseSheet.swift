@@ -40,13 +40,7 @@ struct CreateGlobalExerciseSheet: View {
                             HStack {
                                 ForEach(allTags) { tag in
                                     let isSelected = selectedTags.contains(tag)
-                                    Text(tag.name)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
-                                        .foregroundColor(isSelected ? .white : .primary)
-                                        .cornerRadius(16)
+                                    TagSelectionLabel(tag: tag, isSelected: isSelected)
                                         .onTapGesture {
                                             if isSelected { selectedTags.remove(tag) } else { selectedTags.insert(tag) }
                                         }

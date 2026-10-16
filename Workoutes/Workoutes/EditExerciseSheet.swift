@@ -31,13 +31,7 @@ struct EditExerciseSheet: View {
                             HStack {
                                 ForEach(allTags) { tag in
                                     let isSelected = exercise.tags.contains(tag)
-                                    Text(tag.name)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
-                                        .foregroundColor(isSelected ? .white : .primary)
-                                        .cornerRadius(16)
+                                    TagSelectionLabel(tag: tag, isSelected: isSelected)
                                         .onTapGesture {
                                             if let index = exercise.tags.firstIndex(of: tag) {
                                                 exercise.tags.remove(at: index)
