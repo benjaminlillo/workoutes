@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* WorkoutesLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* WorkoutesLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		C10000000000000000000001 /* WorkoutesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C10000000000000000000001 /* WorkoutesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* WorkoutesWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,7 +26,13 @@
 			remoteGlobalIDString = 00290BAC3003F83F004D59FD;
 			remoteInfo = Workoutes;
 		};
-		C10000000000000000000003 = {isa = PBXContainerItemProxy; containerPortal = 00290BA53003F83F004D59FD; proxyType = 1; remoteGlobalIDString = C10000000000000000000004; remoteInfo = WorkoutesWatch; };
+		C10000000000000000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00290BA53003F83F004D59FD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C10000000000000000000004;
+			remoteInfo = WorkoutesWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,14 +48,16 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C10000000000000000000005 /* Embed Watch Content */ = {
-            isa = PBXCopyFilesBuildPhase;
-            buildActionMask = 2147483647;
-            dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-            dstSubfolderSpec = 16;
-            files = (C10000000000000000000001, );
-            name = "Embed Watch Content";
-            runOnlyForDeploymentPostprocessing = 0;
-        };
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				C10000000000000000000001 /* WorkoutesWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -67,7 +75,13 @@
 			);
 			target = A10000000000000000000004 /* WorkoutesLiveActivity */;
 		};
-		C10000000000000000000006 = {isa = PBXFileSystemSynchronizedBuildFileExceptionSet; membershipExceptions = (Info.plist, WorkoutesWatch.entitlements, ); target = C10000000000000000000004; };
+		C10000000000000000000006 /* Exceptions for "WorkoutesWatch" folder in "WorkoutesWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C10000000000000000000004 /* WorkoutesWatch */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -94,8 +108,19 @@
 			path = WorkoutesTests;
 			sourceTree = "<group>";
 		};
-		C10000000000000000000007 /* WorkoutesWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C10000000000000000000006, ); path = WorkoutesWatch; sourceTree = "<group>"; };
-        C10000000000000000000008 /* TrainingShared */ = {isa = PBXFileSystemSynchronizedRootGroup; path = TrainingShared; sourceTree = "<group>"; };
+		C10000000000000000000007 /* WorkoutesWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C10000000000000000000006 /* Exceptions for "WorkoutesWatch" folder in "WorkoutesWatch" target */,
+			);
+			path = WorkoutesWatch;
+			sourceTree = "<group>";
+		};
+		C10000000000000000000008 /* TrainingShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TrainingShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,7 +145,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C1000000000000000000000B = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C1000000000000000000000B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -128,11 +159,11 @@
 			isa = PBXGroup;
 			children = (
 				00290BAF3003F83F004D59FD /* Workoutes */,
-                C10000000000000000000008 /* TrainingShared */,
+				C10000000000000000000008 /* TrainingShared */,
 				A10000000000000000000008 /* Shared */,
 				A10000000000000000000007 /* WorkoutesLiveActivity */,
 				B10000000000000000000002 /* WorkoutesTests */,
-                C10000000000000000000007 /* WorkoutesWatch */,
+				C10000000000000000000007 /* WorkoutesWatch */,
 				00290BAE3003F83F004D59FD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -143,7 +174,7 @@
 				00290BAD3003F83F004D59FD /* Workoutes.app */,
 				A10000000000000000000002 /* WorkoutesLiveActivity.appex */,
 				B10000000000000000000001 /* WorkoutesTests.xctest */,
-                C10000000000000000000002 /* WorkoutesWatch.app */,
+				C10000000000000000000002 /* WorkoutesWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -159,18 +190,18 @@
 				00290BAA3003F83F004D59FD /* Frameworks */,
 				00290BAB3003F83F004D59FD /* Resources */,
 				A10000000000000000000005 /* Embed App Extensions */,
-                C10000000000000000000005 /* Embed Watch Content */,
+				C10000000000000000000005 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				A1000000000000000000000D /* PBXTargetDependency */,
-                C1000000000000000000000D /* Watch dependency */,
+				C1000000000000000000000D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				00290BAF3003F83F004D59FD /* Workoutes */,
-                C10000000000000000000008 /* TrainingShared */,
 				A10000000000000000000008 /* Shared */,
+				C10000000000000000000008 /* TrainingShared */,
 			);
 			name = Workoutes;
 			packageProductDependencies = (
@@ -224,17 +255,26 @@
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		C10000000000000000000004 /* WorkoutesWatch */ = {
-            isa = PBXNativeTarget;
-            buildConfigurationList = C10000000000000000000009;
-            buildPhases = (C1000000000000000000000A, C1000000000000000000000B, C1000000000000000000000C, );
-            buildRules = ();
-            dependencies = ();
-            fileSystemSynchronizedGroups = (C10000000000000000000007, C10000000000000000000008, );
-            name = WorkoutesWatch;
-            productName = WorkoutesWatch;
-            productReference = C10000000000000000000002;
-            productType = "com.apple.product-type.application";
-        };
+			isa = PBXNativeTarget;
+			buildConfigurationList = C10000000000000000000009 /* Build configuration list for PBXNativeTarget "WorkoutesWatch" */;
+			buildPhases = (
+				C1000000000000000000000A /* Sources */,
+				C1000000000000000000000B /* Frameworks */,
+				C1000000000000000000000C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C10000000000000000000007 /* WorkoutesWatch */,
+				C10000000000000000000008 /* TrainingShared */,
+			);
+			name = WorkoutesWatch;
+			productName = WorkoutesWatch;
+			productReference = C10000000000000000000002 /* WorkoutesWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -248,13 +288,17 @@
 					00290BAC3003F83F004D59FD = {
 						CreatedOnToolsVersion = 26.6;
 						SystemCapabilities = {
-							com.apple.HealthKit = { enabled = 1; };
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
 						};
 					};
 					C10000000000000000000004 = {
 						CreatedOnToolsVersion = 27.0;
 						SystemCapabilities = {
-							com.apple.HealthKit = { enabled = 1; };
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
 						};
 					};
 				};
@@ -276,7 +320,7 @@
 				00290BAC3003F83F004D59FD /* Workoutes */,
 				A10000000000000000000004 /* WorkoutesLiveActivity */,
 				B10000000000000000000003 /* WorkoutesTests */,
-                C10000000000000000000004 /* WorkoutesWatch */,
+				C10000000000000000000004 /* WorkoutesWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -303,7 +347,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C1000000000000000000000C = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C1000000000000000000000C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -328,7 +378,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C1000000000000000000000A = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C1000000000000000000000A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -342,7 +398,11 @@
 			target = 00290BAC3003F83F004D59FD /* Workoutes */;
 			targetProxy = B10000000000000000000009 /* PBXContainerItemProxy */;
 		};
-		C1000000000000000000000D = {isa = PBXTargetDependency; target = C10000000000000000000004; targetProxy = C10000000000000000000003; };
+		C1000000000000000000000D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C10000000000000000000004 /* WorkoutesWatch */;
+			targetProxy = C10000000000000000000003 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -470,18 +530,18 @@
 		00290BBB3003F840004D59FD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Workoutes/Workoutes.entitlements;
-                INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes displays your strength workout metrics from Apple Watch.";
-                INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes starts strength workouts on your Apple Watch to save to Apple Health.";
-                ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-majorelle-blue WorkoutesIcon-frozen-water WorkoutesIcon-midnight-violet WorkoutesIcon-blazing-flame WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop";
+				ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Workoutes/Workoutes.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5QE8L87FLK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Workoutes uses the camera to take a photo for your workout or Exercises background.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes displays your strength workout metrics from Apple Watch.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes starts strength workouts on your Apple Watch to save to Apple Health.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -508,18 +568,18 @@
 		00290BBC3003F840004D59FD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Workoutes/Workoutes.entitlements;
-                INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes displays your strength workout metrics from Apple Watch.";
-                INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes starts strength workouts on your Apple Watch to save to Apple Health.";
-                ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-majorelle-blue WorkoutesIcon-frozen-water WorkoutesIcon-midnight-violet WorkoutesIcon-blazing-flame WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop";
+				ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Workoutes/Workoutes.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5QE8L87FLK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Workoutes uses the camera to take a photo for your workout or Exercises background.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes displays your strength workout metrics from Apple Watch.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes starts strength workouts on your Apple Watch to save to Apple Health.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -627,54 +687,68 @@
 			};
 			name = Release;
 		};
-        C1000000000000000000000E /* Debug */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
-                CODE_SIGN_ENTITLEMENTS = WorkoutesWatch/WorkoutesWatch.entitlements;
-                CODE_SIGN_STYLE = Automatic;
-                CURRENT_PROJECT_VERSION = 1;
-                DEVELOPMENT_TEAM = 5QE8L87FLK;
-                GENERATE_INFOPLIST_FILE = YES;
-                INFOPLIST_FILE = WorkoutesWatch/Info.plist;
-                INFOPLIST_KEY_CFBundleDisplayName = Workoutes;
-                LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", );
-                MARKETING_VERSION = 1.0;
-                PRODUCT_BUNDLE_IDENTIFIER = benjaminlillo.Workoutes.watchkitapp;
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = watchos;
-                SUPPORTED_PLATFORMS = "watchos watchsimulator";
-                SKIP_INSTALL = YES;
-                SWIFT_VERSION = 5.0;
-                TARGETED_DEVICE_FAMILY = 4;
-                WATCHOS_DEPLOYMENT_TARGET = 27.0;
-            };
-            name = Debug;
-        };
-        C1000000000000000000000F /* Release */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
-                CODE_SIGN_ENTITLEMENTS = WorkoutesWatch/WorkoutesWatch.entitlements;
-                CODE_SIGN_STYLE = Automatic;
-                CURRENT_PROJECT_VERSION = 1;
-                DEVELOPMENT_TEAM = 5QE8L87FLK;
-                GENERATE_INFOPLIST_FILE = YES;
-                INFOPLIST_FILE = WorkoutesWatch/Info.plist;
-                INFOPLIST_KEY_CFBundleDisplayName = Workoutes;
-                LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", );
-                MARKETING_VERSION = 1.0;
-                PRODUCT_BUNDLE_IDENTIFIER = benjaminlillo.Workoutes.watchkitapp;
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = watchos;
-                SUPPORTED_PLATFORMS = "watchos watchsimulator";
-                SKIP_INSTALL = YES;
-                SWIFT_VERSION = 5.0;
-                TARGETED_DEVICE_FAMILY = 4;
-                WATCHOS_DEPLOYMENT_TARGET = 27.0;
-            };
-            name = Release;
-        };
+		C1000000000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
+				CODE_SIGN_ENTITLEMENTS = WorkoutesWatch/WorkoutesWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5QE8L87FLK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WorkoutesWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Workoutes;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes shows your heart rate, calories, heart rate zones and recovery during and after strength training.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes saves your strength workouts, calorie data and effort ratings to Apple Health.";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = benjaminlillo.Workoutes;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = benjaminlillo.Workoutes.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Debug;
+		};
+		C1000000000000000000000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
+				CODE_SIGN_ENTITLEMENTS = WorkoutesWatch/WorkoutesWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5QE8L87FLK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WorkoutesWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Workoutes;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Workoutes shows your heart rate, calories, heart rate zones and recovery during and after strength training.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workoutes saves your strength workouts, calorie data and effort ratings to Apple Health.";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = benjaminlillo.Workoutes;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = benjaminlillo.Workoutes.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -714,7 +788,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-        C10000000000000000000009 = {isa = XCConfigurationList; buildConfigurations = (C1000000000000000000000E, C1000000000000000000000F, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		C10000000000000000000009 /* Build configuration list for PBXNativeTarget "WorkoutesWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1000000000000000000000E /* Debug */,
+				C1000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 	};
 	rootObject = 00290BA53003F83F004D59FD /* Project object */;

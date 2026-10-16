@@ -30,10 +30,13 @@ final class PhoneTrainingController {
         connection.onReceive = { [weak self] in self?.receive($0) }
         connection.onReachability = { [weak self] reachable in
             self?.isConnected = reachable
-            if reachable { self?.refresh() }
+            if reachable { self?.requestSnapshot() }
         }
         connection.onError = { [weak self] in self?.errorMessage = $0 }
-        if activate { connection.activate() }
+        if activate {
+            connection.workoutChannel.listen(using: healthStore)
+            connection.activate()
+        }
     }
 
     func attach(context: ModelContext, exerciseActivity: ExerciseActivityController) {
@@ -119,6 +122,9 @@ final class PhoneTrainingController {
     func retrySave() { perform(.retrySave) }
     func keepLocalRecord() { perform(.keepLocalRecord) }
     func refresh() {
+        connection.refresh()
+    }
+    private func requestSnapshot() {
         guard isConnected else { return }
         do {
             try connection.send(.init(kind: .requestSnapshot))

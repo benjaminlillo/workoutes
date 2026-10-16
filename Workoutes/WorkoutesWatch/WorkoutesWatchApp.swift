@@ -4,12 +4,16 @@ import WatchKit
 
 @main
 struct WorkoutesWatchApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @WKApplicationDelegateAdaptor(TrainingWatchDelegate.self) private var delegate
     @State private var controller = WatchTrainingController.shared
     var body: some Scene {
         WindowGroup {
             WatchTrainingView(controller: controller)
                 .task { await controller.restore() }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active { controller.refreshConnection() }
+                }
         }
     }
 }

@@ -56,7 +56,7 @@ enum TrainingFailure: LocalizedError {
         case .invalidExercise: "This exercise needs a name, 1–20 sets, 1–100 repetitions and a valid weight."
         case .wrongPhase: "Select an exercise in an empty exercise block. Finish or undo the current series first."
         case .staleCommand: "The workout has advanced. Check the current stage and try again."
-        case .notConnected: "Open Workoutes on your Apple Watch to connect. Your workout continues on the watch."
+        case .notConnected: "The live connection to Apple Watch is unavailable. Keep both devices nearby and tap Refresh to reconnect. Any workout already running continues on the watch."
         case .noSession: "There is no active training session."
         }
     }

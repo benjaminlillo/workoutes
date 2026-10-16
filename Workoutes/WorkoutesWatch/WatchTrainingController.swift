@@ -164,6 +164,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             session.startActivity(with: next.startedAt)
             try await builder?.beginCollection(at: next.startedAt)
             startTimer(); publish(durable: true)
+            Task { await connection.workoutChannel.reconnect() }
             #endif
         } catch {
             builder?.discardWorkout(); session?.end(); session = nil; builder = nil
@@ -178,6 +179,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
 
     private func attach(_ session: HKWorkoutSession) {
         self.session = session; session.delegate = self
+        connection.workoutChannel.attach(session)
         let builder = session.associatedWorkoutBuilder()
         self.builder = builder; builder.delegate = self
         builder.dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: session.workoutConfiguration)
@@ -188,12 +190,19 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
         Task { await receive(.init(kind: .command, command: .init(action: action, runID: run.id, revision: run.revision, effort: effort))) }
     }
 
+    func refreshConnection() {
+        connection.refresh()
+        Task { await connection.workoutChannel.reconnect() }
+        publish()
+    }
+
     private func receive(_ envelope: TrainingEnvelope) async {
         guard restored else { await restore(); await receive(envelope); return }
         if envelope.kind == .requestSnapshot {
             publish()
             for historical in archive.history {
-                try? connection.send(.init(kind: .snapshot, run: historical))
+                // Keep bulk history off HealthKit's live-workout channel (100 KB / 10 seconds).
+                try? connection.send(.init(kind: .snapshot, run: historical), allowsWorkoutChannel: false)
             }
             return
         }
@@ -271,6 +280,11 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
                 guard !Task.isCancelled, let self, var run = self.archive.current, run.isActive else { return }
+                // A phone relaunch or radio interruption can invalidate the mirrored session.
+                // Retry in the background without pausing HealthKit or depending on an open Watch UI.
+                if !self.connection.workoutChannel.isReachable {
+                    Task { await self.connection.workoutChannel.reconnect() }
+                }
                 if run.tick(at: .now) {
                     let previous = self.archive
                     self.archive.current = run
@@ -438,6 +452,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didChangeTo toState: HKWorkoutSessionState,
                                    from fromState: HKWorkoutSessionState, date: Date) {
         Task { @MainActor [weak self] in
+            if toState == .ended { self?.connection.workoutChannel.disconnected(workoutSession) }
             guard let self, self.session === workoutSession else { return }
             if toState == .stopped { await self.saveHealthWorkout() }
             if toState == .paused, self.archive.current?.isActive == true, self.archive.current?.pausedAt == nil {
@@ -450,6 +465,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
     }
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
         Task { @MainActor [weak self] in
+            self?.connection.workoutChannel.disconnected(workoutSession)
             guard let self, self.session === workoutSession else { return }
             self.timer?.cancel()
             self.archive.current?.finish(effort: nil, at: .now)
@@ -457,6 +473,12 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             try? self.persist(); self.publish(durable: true)
             self.isBusy = false; self.fail(error.localizedDescription)
         }
+    }
+    nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didReceiveDataFromRemoteWorkoutSession data: [Data]) {
+        Task { @MainActor [weak self] in self?.connection.workoutChannel.receive(data, from: workoutSession) }
+    }
+    nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didDisconnectFromRemoteDeviceWithError error: Error?) {
+        Task { @MainActor [weak self] in self?.connection.workoutChannel.disconnected(workoutSession) }
     }
     nonisolated func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {}
     nonisolated func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {
