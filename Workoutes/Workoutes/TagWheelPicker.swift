@@ -243,7 +243,9 @@ private struct TagWheelSlot: View, Animatable {
 
     var body: some View {
         ZStack {
-            Button(action: onChoose) {
+            ZStack {
+                // Keep the artwork outside the context menu's lifted source view.
+                // Its preview can otherwise pin the icon while the disc rotates underneath it.
                 Group {
                     if let icon = tag.muscleIcon {
                         MuscleIconView(icon: icon, color: color)
@@ -254,15 +256,21 @@ private struct TagWheelSlot: View, Animatable {
                 }
                 .frame(width: 50, height: 50)
                 .animation(reduceMotion ? nil : .easeInOut(duration: 0.35), value: color)
-                .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tag.name)
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .accessibilityIdentifier(isSelected ? "tag-wheel-selected" : "tag-wheel-option")
-            .contextMenu {
-                Button("Edit Tag", systemImage: "pencil", action: onEdit)
-                Button("Delete Tag", systemImage: "trash", role: .destructive, action: onDelete)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
+                Button(action: onChoose) {
+                    Color.clear.frame(width: 50, height: 50)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tag.name)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+                .accessibilityIdentifier(isSelected ? "tag-wheel-selected" : "tag-wheel-option")
+                .contextMenu {
+                    Button("Edit Tag", systemImage: "pencil", action: onEdit)
+                    Button("Delete Tag", systemImage: "trash", role: .destructive, action: onDelete)
+                }
             }
             .position(x: TagWheelPicker.diameter / 2 + cos(angle) * iconRadius,
                       y: TagWheelPicker.diameter / 2 + sin(angle) * iconRadius)

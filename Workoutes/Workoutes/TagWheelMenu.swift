@@ -22,6 +22,8 @@ struct TagWheelMenu: UIViewRepresentable {
         TagWheelMenuButton(frame: .zero)
     }
 
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func updateUIView(_ button: TagWheelMenuButton, context: Context) {
         button.setEmpty(tags.isEmpty)
         let tint = UIColor(color)
@@ -33,52 +35,133 @@ struct TagWheelMenu: UIViewRepresentable {
         }
         button.accessibilityValue = tags.first { $0.persistentModelID == selection }?.name ?? "No Tag Selected"
 
+        updateMenu(button, coordinator: context.coordinator, theme: ThemeColor.resolve(accentColorRawValue),
+                   scheme: colorScheme, scale: displayScale)
+    }
+
+    func updateMenu(_ button: TagWheelMenuButton, coordinator: Coordinator,
+                    theme: ThemeColor, scheme: ColorScheme, scale: CGFloat) {
+        // Refresh handlers even when the menu's appearance is unchanged, so cached
+        // actions always use the current SwiftUI bindings and model instances.
+        coordinator.tags = tags
+        coordinator.onChoose = onChoose
+        coordinator.onDeselect = onDeselect
+        coordinator.onAdd = onAdd
+        coordinator.onEdit = onEdit
+        coordinator.onDelete = onDelete
+        let key = MenuKey(tags: tags.map { TagKey(id: $0.persistentModelID, name: $0.name,
+                                                 colorHex: $0.colorHex, iconName: $0.iconName) },
+                          selection: selection, theme: theme, scheme: scheme, scale: scale)
+        guard coordinator.menuKey != key else { return }
+        coordinator.menuKey = key
+        coordinator.usedImages.removeAll(keepingCapacity: true)
+
         func action(_ title: String, image: UIImage? = nil, attributes: UIMenuElement.Attributes = [],
-                    state: UIMenuElement.State = .off, perform: @escaping () -> Void) -> UIAction {
-            UIAction(title: title, image: image, attributes: attributes, state: state) { [weak button] _ in
-                button?.performAfterMenuDismissal(perform)
+                    state: UIMenuElement.State = .off, perform: @escaping (Coordinator) -> Void) -> UIAction {
+            UIAction(title: title, image: image, attributes: attributes, state: state) { [weak button, weak coordinator] _ in
+                guard let coordinator else { return }
+                button?.performAfterMenuDismissal { [weak coordinator] in
+                    if let coordinator { perform(coordinator) }
+                }
+            }
+        }
+
+        func menuImage(_ name: String) -> UIImage? {
+            let key = ImageKey(name: "system-\(name)", colorHex: theme.hex(for: scheme), scheme: scheme, scale: scale)
+            return coordinator.image(for: key) {
+                UIImage(systemName: name)?.withTintColor(UIColor(theme.color), renderingMode: .alwaysOriginal)
+            }
+        }
+
+        func tagImage(_ tag: Tag) -> UIImage? {
+            let key = ImageKey(name: tag.muscleIcon?.rawValue ?? "color-dot", colorHex: tag.colorHex,
+                               scheme: scheme, scale: scale)
+            return coordinator.image(for: key) {
+                guard let icon = tag.muscleIcon else {
+                    return UIImage(systemName: "circle.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 8))?
+                        .withTintColor(UIColor(Color(hex: tag.colorHex)), renderingMode: .alwaysOriginal)
+                }
+                let renderer = ImageRenderer(content: MuscleIconView(icon: icon, color: Color(hex: tag.colorHex))
+                    .frame(width: 24, height: 24).environment(\.colorScheme, scheme))
+                renderer.scale = scale
+                return renderer.uiImage?.withRenderingMode(.alwaysOriginal)
             }
         }
 
         var children: [UIMenuElement] = []
         if !tags.isEmpty {
             let options = tags.map { tag in
-                action(tag.name, image: tagImage(tag),
-                       state: tag.persistentModelID == selection ? .on : .off) { onChoose(tag) }
+                let id = tag.persistentModelID
+                return action(tag.name, image: tagImage(tag), state: id == selection ? .on : .off) {
+                    if let tag = $0.tag(id) { $0.onChoose?(tag) }
+                }
             }
             children.append(UIMenu(title: "Filter by Tag", options: .displayInline, children: options))
             let deselect = action("Deselect All Tags", image: menuImage("xmark.circle"),
-                                  attributes: selection == nil ? .disabled : []) { onDeselect() }
+                                  attributes: selection == nil ? .disabled : []) { $0.onDeselect?() }
             children.append(UIMenu(options: .displayInline, children: [deselect]))
         }
 
-        var management: [UIMenuElement] = [action("Add Tag", image: menuImage("plus")) { onAdd() }]
+        var management: [UIMenuElement] = [action("Add Tag", image: menuImage("plus")) { $0.onAdd?() }]
         if !tags.isEmpty {
             management.append(UIMenu(title: "Edit Tag", image: menuImage("pencil"), children: tags.map { tag in
-                action(tag.name) { onEdit(tag) }
+                let id = tag.persistentModelID
+                return action(tag.name) { if let tag = $0.tag(id) { $0.onEdit?(tag) } }
             }))
             management.append(UIMenu(title: "Delete Tag", image: menuImage("trash"), children: tags.map { tag in
-                action(tag.name, attributes: .destructive) { onDelete(tag) }
+                let id = tag.persistentModelID
+                return action(tag.name, attributes: .destructive) { if let tag = $0.tag(id) { $0.onDelete?(tag) } }
             }))
         }
         children.append(UIMenu(options: .displayInline, children: management))
         button.menu = UIMenu(children: children)
+        coordinator.images = coordinator.images.filter { coordinator.usedImages.contains($0.key) }
     }
 
-    private func menuImage(_ name: String) -> UIImage? {
-        UIImage(systemName: name)?.withTintColor(UIColor(ThemeColor.resolve(accentColorRawValue).color),
-                                                renderingMode: .alwaysOriginal)
+    fileprivate struct TagKey: Equatable {
+        let id: PersistentIdentifier
+        let name: String
+        let colorHex: String
+        let iconName: String?
     }
 
-    private func tagImage(_ tag: Tag) -> UIImage? {
-        guard let icon = tag.muscleIcon else {
-            return UIImage(systemName: "circle.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 8))?
-                .withTintColor(UIColor(Color(hex: tag.colorHex)), renderingMode: .alwaysOriginal)
+    fileprivate struct MenuKey: Equatable {
+        let tags: [TagKey]
+        let selection: PersistentIdentifier?
+        let theme: ThemeColor
+        let scheme: ColorScheme
+        let scale: CGFloat
+    }
+
+    fileprivate struct ImageKey: Hashable {
+        let name: String
+        let colorHex: String
+        let scheme: ColorScheme
+        let scale: CGFloat
+    }
+
+    final class Coordinator {
+        fileprivate var menuKey: MenuKey?
+        fileprivate var images: [ImageKey: UIImage] = [:]
+        fileprivate var usedImages: Set<ImageKey> = []
+        fileprivate var tags: [Tag] = []
+        fileprivate var onChoose: ((Tag) -> Void)?
+        fileprivate var onDeselect: (() -> Void)?
+        fileprivate var onAdd: (() -> Void)?
+        fileprivate var onEdit: ((Tag) -> Void)?
+        fileprivate var onDelete: ((Tag) -> Void)?
+
+        fileprivate func tag(_ id: PersistentIdentifier) -> Tag? {
+            tags.first { $0.persistentModelID == id }
         }
-        let renderer = ImageRenderer(content: MuscleIconView(icon: icon, color: Color(hex: tag.colorHex))
-            .frame(width: 24, height: 24).environment(\.colorScheme, colorScheme))
-        renderer.scale = displayScale
-        return renderer.uiImage?.withRenderingMode(.alwaysOriginal)
+
+        fileprivate func image(for key: ImageKey, render: () -> UIImage?) -> UIImage? {
+            usedImages.insert(key)
+            if let cached = images[key] { return cached }
+            let image = render()
+            images[key] = image
+            return image
+        }
     }
 }
 
@@ -88,6 +171,7 @@ final class TagWheelMenuButton: UIButton {
                                                     withConfiguration: UIImage.SymbolConfiguration(pointSize: 8, weight: .bold)))
     private var menuIsPresented = false
     private var pendingAction: (() -> Void)?
+    private var emptyLabel: Bool?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -115,6 +199,8 @@ final class TagWheelMenuButton: UIButton {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func setEmpty(_ isEmpty: Bool) {
+        guard emptyLabel != isEmpty else { return }
+        emptyLabel = isEmpty
         symbol.image = UIImage(systemName: isEmpty ? "plus" : "tag",
                                withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold))
         chevron.isHidden = isEmpty
