@@ -1,48 +1,27 @@
 import SwiftUI
 
 extension View {
-    func stableBottomOverlay<Overlay: View>(bottomContentMargin: CGFloat = 0,
+    func stableBottomOverlay<Overlay: View>(bottomInset: CGFloat = 0, bottomContentMargin: CGFloat = 0,
                                            @ViewBuilder _ overlay: @escaping () -> Overlay) -> some View {
-        modifier(StableBottomOverlayModifier(bottomContentMargin: bottomContentMargin, overlay: overlay))
+        modifier(StableBottomOverlayModifier(bottomInset: bottomInset,
+                                             bottomContentMargin: bottomContentMargin, overlay: overlay))
     }
 }
 
-/// Keeps floating controls at the expanded bar's height while its bottom safe area contracts.
+/// Anchors floating controls to the window's bottom edge, independently of bar minimization.
 private struct StableBottomOverlayModifier<Overlay: View>: ViewModifier {
+    let bottomInset: CGFloat
     let bottomContentMargin: CGFloat
     let overlay: () -> Overlay
-    @State private var reference: BottomOverlayGeometry?
-    @State private var correction: CGFloat = 0
 
     func body(content: Content) -> some View {
         content
-            .contentMargins(.bottom, bottomContentMargin - correction, for: .scrollContent)
-            .background {
-                GeometryReader { geometry in
-                    Color.clear.onChange(of: BottomOverlayGeometry(geometry), initial: true) { _, value in
-                        if reference?.viewport != value.viewport || value.bottomInset > (reference?.bottomInset ?? 0) {
-                            reference = value
-                        }
-                        correction = value.bottomInset - (reference?.bottomInset ?? value.bottomInset)
-                    }
-                }
-                .ignoresSafeArea(.keyboard, edges: .bottom)
-                .allowsHitTesting(false)
-            }
+            .contentMargins(.bottom, bottomContentMargin, for: .scrollContent)
             .overlay(alignment: .bottomTrailing) {
-                overlay().offset(y: correction)
+                overlay()
+                    .padding(.bottom, bottomInset)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .ignoresSafeArea(.container, edges: .bottom)
             }
-    }
-}
-
-private struct BottomOverlayGeometry: Equatable {
-    let viewport: CGSize
-    let bottomInset: CGFloat
-
-    init(_ geometry: GeometryProxy) {
-        bottomInset = geometry.safeAreaInsets.bottom
-        // Unlike the list's height, these dimensions don't change when either navigation bar collapses.
-        viewport = CGSize(width: geometry.size.width.rounded(),
-                          height: (geometry.frame(in: .global).maxY + bottomInset).rounded())
     }
 }

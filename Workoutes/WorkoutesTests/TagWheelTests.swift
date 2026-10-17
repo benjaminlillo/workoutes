@@ -90,7 +90,7 @@ final class TagWheelTests: XCTestCase {
         XCTAssertEqual(hub.intent, .undecided, "The native center menu must retain its gestures")
     }
 
-    func testBottomOverlayKeepsItsExpandedPositionWhenTheBottomBarContracts() async throws {
+    func testBottomOverlayStaysAtTheWindowBottomWhileTheBottomBarAnimates() async throws {
         let state = BottomBarState()
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
@@ -102,10 +102,13 @@ final class TagWheelTests: XCTestCase {
         let moving = try XCTUnwrap(state.movingView)
         let expanded = fixed.convert(fixed.bounds, to: window)
         let movingExpanded = moving.convert(moving.bounds, to: window)
+        XCTAssertEqual(expanded.maxY, window.bounds.maxY - 35, accuracy: 0.5)
 
-        state.bottomHeight = 47
-        try await Task.sleep(for: .milliseconds(350))
-        XCTAssertEqual(fixed.convert(fixed.bounds, to: window).maxY, expanded.maxY, accuracy: 0.5)
+        for height: CGFloat in [93, 81, 69, 57, 47] {
+            state.bottomHeight = height
+            try await Task.sleep(for: .milliseconds(40))
+            XCTAssertEqual(fixed.convert(fixed.bounds, to: window).maxY, expanded.maxY, accuracy: 0.5)
+        }
         XCTAssertEqual(moving.convert(moving.bounds, to: window).maxY - movingExpanded.maxY, 58, accuracy: 0.5,
                        "The fixture must really change the available content height")
 
@@ -253,7 +256,7 @@ final class TagWheelTests: XCTestCase {
                 .overlay(alignment: .bottomLeading) {
                     FrameProbe { state.movingView = $0 }.frame(width: 80, height: 80)
                 }
-                .stableBottomOverlay {
+                .stableBottomOverlay(bottomInset: 35, bottomContentMargin: 192) {
                     FrameProbe { state.fixedView = $0 }.frame(width: 80, height: 80)
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) {

@@ -10,7 +10,8 @@ struct TagWheelPicker: View {
 
     static let diameter: CGFloat = 284
     static let overhang: CGFloat = 78
-    static let bottomOverhang: CGFloat = 104
+    static let bottomInset: CGFloat = 35
+    static let scrollClearance: CGFloat = 180
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -106,9 +107,6 @@ struct TagWheelPicker: View {
             Color.clear
                 .glassEffect(.regular.tint(.white.opacity(colorScheme == .dark ? 0.22 : 0.55)),
                              in: ContinuousPlateShape())
-            Circle()
-                .strokeBorder(.white.opacity(0.35), lineWidth: 1)
-                .padding(6)
             Circle()
                 .strokeBorder(.primary.opacity(0.06), lineWidth: 1)
                 .padding(28)
@@ -219,6 +217,7 @@ private struct TagWheelSlot: View, Animatable {
     let onChoose: () -> Void
     let onEdit: () -> Void
     let onDelete: () -> Void
+    private let iconRadius = 84.0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
 
@@ -237,7 +236,7 @@ private struct TagWheelSlot: View, Animatable {
         case .fullBody, .lowerBody, .forearms, .quadriceps, .hamstrings, .adductors: base = 48
         default: base = 40
         }
-        let available = 2 * sin(TagWheelPosition.angularSpacing(for: count) / 2) * 94 - 8
+        let available = 2 * sin(TagWheelPosition.angularSpacing(for: count) / 2) * iconRadius - 8
         let scale = count <= 2 ? 1 : min(1, max(0.42, available / 48))
         return base * scale
     }
@@ -265,8 +264,8 @@ private struct TagWheelSlot: View, Animatable {
                 Button("Edit Tag", systemImage: "pencil", action: onEdit)
                 Button("Delete Tag", systemImage: "trash", role: .destructive, action: onDelete)
             }
-            .position(x: TagWheelPicker.diameter / 2 + cos(angle) * 94,
-                      y: TagWheelPicker.diameter / 2 + sin(angle) * 94)
+            .position(x: TagWheelPicker.diameter / 2 + cos(angle) * iconRadius,
+                      y: TagWheelPicker.diameter / 2 + sin(angle) * iconRadius)
             PlateInscription(text: tag.name, angle: angle,
                              arc: min(80 * .pi / 180, TagWheelPosition.angularSpacing(for: count) * 0.82), color: color)
         }

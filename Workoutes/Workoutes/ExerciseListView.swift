@@ -109,7 +109,7 @@ struct ExerciseListView: View {
                     if filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty {
                         ContentUnavailableView("No Exercises", systemImage: "dumbbell",
                                                description: Text("No exercises with this tag."))
-                            .padding(.bottom, TagWheelPicker.diameter - TagWheelPicker.bottomOverhang)
+                            .padding(.bottom, TagWheelPicker.scrollClearance)
                             .allowsHitTesting(false)
                     }
                 }
@@ -117,7 +117,8 @@ struct ExerciseListView: View {
                 .blur(radius: isChangingTag && !reduceMotion ? 2 : 0)
                 .allowsHitTesting(!isChangingTag)
                 .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
-                .stableBottomOverlay(bottomContentMargin: TagWheelPicker.diameter - TagWheelPicker.bottomOverhang + 12) {
+                .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset,
+                                     bottomContentMargin: TagWheelPicker.scrollClearance + 12) {
                     TagWheelPicker(
                         tags: allTags,
                         selection: Binding(
@@ -128,7 +129,7 @@ struct ExerciseListView: View {
                         onEdit: { editingTag = $0 },
                         onDelete: { tagPendingDeletion = $0 }
                     )
-                    .offset(x: TagWheelPicker.overhang, y: TagWheelPicker.bottomOverhang)
+                    .offset(x: TagWheelPicker.overhang)
                 }
                 .navigationTitle("All Exercises")
                 .navigationBarTitleDisplayMode(.large)
