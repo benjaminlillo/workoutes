@@ -49,16 +49,16 @@ struct ExerciseLiveActivity: Widget {
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
         details: "Pause at the bottom", tagColors: ["FF8800", "5599FF"],
         tagIconNames: [MuscleIcon.chest.rawValue, nil],
-        accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .playing
+        accentColorHex: "B784E8", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .playing
     )
     ExerciseActivityAttributes.ContentState(
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
-        accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .done
+        accentColorHex: "B784E8", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .done
     )
     ExerciseActivityAttributes.ContentState(
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: false,
-        accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .empty
+        accentColorHex: "B784E8", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .empty
     )
 }

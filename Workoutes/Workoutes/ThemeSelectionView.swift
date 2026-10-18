@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ThemeSelectionView: View {
-    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize

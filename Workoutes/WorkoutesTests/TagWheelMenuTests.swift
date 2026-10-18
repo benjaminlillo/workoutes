@@ -10,18 +10,18 @@ final class TagWheelMenuTests: XCTestCase {
         let view = menu(tags: fixture.tags)
         let coordinator = view.makeCoordinator()
         let button = TagWheelMenuButton(frame: .zero)
-        view.updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+        view.updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         let initial = try XCTUnwrap(button.menu)
         let images = try options(button).map { try XCTUnwrap($0.image) }
 
         // Safe-area and animation updates must not recreate the closed menu.
         for _ in 0..<120 {
-            view.updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+            view.updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         }
         XCTAssertTrue(button.menu === initial)
 
         menu(tags: fixture.tags, selection: fixture.tags[0].persistentModelID)
-            .updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+            .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         let selected = try options(button)
         XCTAssertFalse(button.menu === initial)
         XCTAssertEqual(selected[0].state, .on)
@@ -30,7 +30,7 @@ final class TagWheelMenuTests: XCTestCase {
         XCTAssertTrue(selected[1].image === images[1])
         XCTAssertEqual(try deselect(button).attributes.contains(.disabled), false)
 
-        view.updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+        view.updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         XCTAssertTrue(try deselect(button).attributes.contains(.disabled))
         XCTAssertTrue(try options(button)[0].image === images[0])
     }
@@ -39,7 +39,7 @@ final class TagWheelMenuTests: XCTestCase {
         let fixture = try fixture()
         let coordinator = TagWheelMenu.Coordinator()
         let button = TagWheelMenuButton(frame: .zero)
-        func update(theme: ThemeColor = .primary, scheme: ColorScheme = .light, scale: CGFloat = 3) {
+        func update(theme: ThemeColor = .indigo, scheme: ColorScheme = .light, scale: CGFloat = 3) {
             menu(tags: fixture.tags).updateMenu(button, coordinator: coordinator, theme: theme, scheme: scheme, scale: scale)
         }
         update()
@@ -74,9 +74,9 @@ final class TagWheelMenuTests: XCTestCase {
         XCTAssertFalse(try options(button)[0].image === dark)
         XCTAssertEqual(try XCTUnwrap(options(button)[0].image).scale, 2)
 
-        menu(tags: [fixture.tags[1]]).updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+        menu(tags: [fixture.tags[1]]).updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         XCTAssertEqual(try options(button).map(\.title), [fixture.tags[1].name])
-        menu(tags: []).updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+        menu(tags: []).updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         XCTAssertEqual(button.menu?.children.count, 1)
         let remaining = try XCTUnwrap(button.menu?.children.first as? UIMenu)
         XCTAssertEqual(remaining.children.compactMap { ($0 as? UIAction)?.title }, ["Add Tag"])
@@ -89,19 +89,19 @@ final class TagWheelMenuTests: XCTestCase {
         var oldCalls = 0
         var newCalls = 0
         menu(tags: fixture.tags, onChoose: { _ in oldCalls += 1 })
-            .updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+            .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         let initial = try XCTUnwrap(button.menu)
         let choose = try options(button)[0]
 
         menu(tags: fixture.tags, onChoose: { _ in newCalls += 1 })
-            .updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+            .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         XCTAssertTrue(button.menu === initial)
         button.sendAction(choose)
         XCTAssertEqual(oldCalls, 0)
         XCTAssertEqual(newCalls, 1)
 
         menu(tags: [], onChoose: { _ in newCalls += 1 })
-            .updateMenu(button, coordinator: coordinator, theme: .primary, scheme: .light, scale: 3)
+            .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         button.sendAction(choose)
         XCTAssertEqual(newCalls, 1, "An action retained during menu dismissal must not select a removed tag")
     }
