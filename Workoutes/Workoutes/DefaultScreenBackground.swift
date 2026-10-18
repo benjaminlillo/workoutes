@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Spreads the selected theme across the screen, independently of saved customization.
 struct DefaultScreenBackground: View {
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
 
     var body: some View {
         ThemeBackgroundGradient(theme: ThemeColor.resolve(accentColorRawValue))

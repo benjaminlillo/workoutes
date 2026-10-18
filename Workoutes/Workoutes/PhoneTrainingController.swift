@@ -110,7 +110,8 @@ final class PhoneTrainingController {
             guard let id = exercise.stableID, !exercise.isDeleted else { throw TrainingFailure.invalidExercise }
             let payload = TrainingExercise(id: id, name: String(exercise.title.prefix(160)),
                                            weightKilograms: exercise.weight, repetitions: exercise.reps,
-                                           sets: exercise.numberOfSets, usesPounds: unit == .imperial)
+                                           sets: exercise.numberOfSets, usesPounds: unit == .imperial,
+                                           historySnapshot: ExerciseCompletionSnapshot(exercise: exercise))
             try send(.selectExercise, exercise: payload)
         } catch { errorMessage = error.localizedDescription }
     }
@@ -191,7 +192,9 @@ final class PhoneTrainingController {
             if try context.fetchCount(FetchDescriptor<ExerciseCompletion>(predicate: #Predicate { $0.id == id })) == 0,
                let exercise = exercises.first(where: { $0.stableID == result.exercise.id }),
                let completedAt = result.completedAt {
-                context.insert(ExerciseCompletion(id: id, completedAt: completedAt, exercise: exercise))
+                // The watch run retains the values selected for this block, even if the catalog changes.
+                context.insert(ExerciseCompletion(id: id, completedAt: completedAt, exercise: exercise,
+                                                  snapshot: result.exercise.historySnapshot))
                 if affectsCurrent { exercise.isDone = true }
             }
         }

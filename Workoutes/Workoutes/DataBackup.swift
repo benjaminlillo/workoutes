@@ -28,6 +28,7 @@ struct ExerciseCompletionDTO: Codable {
     var id: String
     var completedAt: Date
     var exerciseID: String?
+    var snapshot: ExerciseCompletionSnapshot? = nil
 }
 
 @MainActor
@@ -55,7 +56,7 @@ enum DataBackup {
             },
             tags: tags.map { .init(id: $0.stableID!, name: $0.name, colorHex: $0.colorHex, iconName: $0.iconName) },
             history: includeHistory ? try context.fetch(FetchDescriptor<ExerciseCompletion>()).map {
-                .init(id: $0.id, completedAt: $0.completedAt, exerciseID: $0.exercise?.stableID)
+                .init(id: $0.id, completedAt: $0.completedAt, exerciseID: $0.exercise?.stableID, snapshot: $0.snapshot)
             } : nil
         )
         let encoder = JSONEncoder()
@@ -110,7 +111,7 @@ enum DataBackup {
             }
             for dto in payload.history ?? [] where !historyIDs.contains(dto.id) {
                 context.insert(ExerciseCompletion(id: dto.id, completedAt: dto.completedAt,
-                                                  exercise: dto.exerciseID.flatMap { exercises[$0] }))
+                                                  exercise: dto.exerciseID.flatMap { exercises[$0] }, snapshot: dto.snapshot))
                 historyIDs.insert(dto.id)
             }
             try context.save()
@@ -137,6 +138,9 @@ enum DataBackup {
         for dto in payload.history ?? [] {
             guard dto.exerciseID.map({ allExercises.contains($0) }) ?? true else {
                 throw ImportError.invalid("History refers to an unknown exercise.")
+            }
+            guard dto.snapshot?.isValid ?? true else {
+                throw ImportError.invalid("Invalid historical exercise details.")
             }
         }
     }

@@ -13,7 +13,7 @@ struct TagWheelMenu: UIViewRepresentable {
     let onAdd: () -> Void
     let onEdit: (Tag) -> Void
     let onDelete: (Tag) -> Void
-    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.displayScale) private var displayScale

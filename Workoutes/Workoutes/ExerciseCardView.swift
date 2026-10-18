@@ -4,7 +4,7 @@ import SwiftData
 struct ExerciseCardView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @Bindable var exercise: WorkoutExercise
     var workout: Workout? = nil

@@ -13,7 +13,7 @@ struct BackgroundCustomizationSheet: View {
     let background: ExerciseBackgroundStore
     let title: String
     let tagColors: [String]
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @State private var colors: [String] = ExerciseBackgroundStore.defaultGradientColors

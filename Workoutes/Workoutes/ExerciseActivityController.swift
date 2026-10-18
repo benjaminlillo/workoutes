@@ -267,7 +267,8 @@ final class ExerciseActivityController {
             let id = session.id
             let existing = try context.fetch(FetchDescriptor<ExerciseCompletion>(predicate: #Predicate { $0.id == id }))
             if existing.isEmpty {
-                context.insert(ExerciseCompletion(id: id, completedAt: finishedAt, exercise: exercise))
+                context.insert(ExerciseCompletion(id: id, completedAt: finishedAt, exercise: exercise,
+                                                  snapshot: ExerciseCompletionSnapshot(exercise: exercise)))
             }
         }
         var state = content(for: exercise)
