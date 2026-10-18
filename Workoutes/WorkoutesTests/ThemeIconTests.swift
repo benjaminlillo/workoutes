@@ -25,7 +25,9 @@ final class ThemeIconTests: XCTestCase {
     func testEveryThemeIconIsRegisteredForIPhoneAndIPad() throws {
         let expected = Set(["WorkoutesIcon-majorelle-blue", "WorkoutesIcon-frozen-water",
                             "WorkoutesIcon-midnight-violet", "WorkoutesIcon-blazing-flame",
-                            "WorkoutesIcon-electric-rush", "WorkoutesIcon-sunset-pop"])
+                            "WorkoutesIcon-electric-rush", "WorkoutesIcon-sunset-pop",
+                            "WorkoutesIcon-ultravolt", "WorkoutesIcon-cobalt-heat",
+                            "WorkoutesIcon-cherry-ice", "WorkoutesIcon-midnight-gold"])
         XCTAssertNil(ThemeColor.primary.alternateIconName)
         XCTAssertEqual(Set(ThemeColor.allCases.compactMap(\.alternateIconName)), expected)
         let data = try Data(contentsOf: Bundle.main.bundleURL.appendingPathComponent("Info.plist"))
