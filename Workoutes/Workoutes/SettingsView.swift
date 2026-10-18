@@ -21,7 +21,7 @@ struct SettingsView: View {
     @State private var shareURL: IdentifiableURL?
     @State private var showingExportOptions = false
     @State private var exportError: String?
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
 
     private var accentColor: Color {
