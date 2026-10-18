@@ -66,7 +66,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
                 XCTAssertEqual(try render(ThemeBackgroundGradient(theme: theme), scheme: scheme),
                                try render(DefaultScreenBackground(), scheme: scheme))
                 let before = try render(ThemeExercisePreview(theme: theme), scheme: scheme)
-                UserDefaults.standard.set(theme == .orange ? "primary" : "orange", forKey: "appAccentColor")
+                UserDefaults.standard.set(theme == .sunsetPop ? "indigo" : "sunsetPop", forKey: "appAccentColor")
                 XCTAssertEqual(try render(ThemeExercisePreview(theme: theme), scheme: scheme), before)
                 previews.insert(before)
             }
@@ -90,7 +90,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         let customBefore = try render(ScreenBackgroundView(background: custom))
         try custom.setAutomaticGradient()
         let tagsBefore = try render(ScreenBackgroundView(background: custom, tagColors: ["33AA11", "FF8800"]))
-        UserDefaults.standard.set(ThemeColor.orange.rawValue, forKey: "appAccentColor")
+        UserDefaults.standard.set(ThemeColor.sunsetPop.rawValue, forKey: "appAccentColor")
         XCTAssertNotEqual(try render(DefaultScreenBackground()), before)
         XCTAssertEqual(try render(ScreenBackgroundView(background: custom, tagColors: ["33AA11", "FF8800"])), tagsBefore)
         try custom.setAutomaticGradient(false)
@@ -108,7 +108,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         // Older versions persisted this palette when resetting the background.
         try background.saveGradient(colors: ExerciseBackgroundStore.defaultGradientColors)
         let reopened = ExerciseBackgroundStore(directory: directory)
-        for theme in [ThemeColor.indigo, .orange] {
+        for theme in [ThemeColor.indigo, .sunsetPop] {
             UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
             let expected = try render(DefaultScreenBackground())
             XCTAssertEqual(try render(ScreenBackgroundView(background: reopened)), expected)
@@ -118,7 +118,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             try reopened.remove()
             XCTAssertEqual(try render(ScreenBackgroundView(background: ExerciseBackgroundStore(directory: directory))), expected)
         }
-        UserDefaults.standard.set(ThemeColor.primary.rawValue, forKey: "appAccentColor")
+        UserDefaults.standard.set(ThemeColor.indigo.rawValue, forKey: "appAccentColor")
         let primaryBackground = try render(DefaultScreenBackground())
         UserDefaults.standard.set("unknown-color", forKey: "appAccentColor")
         XCTAssertEqual(try render(DefaultScreenBackground()), primaryBackground)
