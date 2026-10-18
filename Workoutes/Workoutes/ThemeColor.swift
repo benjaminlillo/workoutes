@@ -4,6 +4,7 @@ import UIKit
 enum ThemeColor: String, CaseIterable, Identifiable {
     // Preserve the stored identifiers for existing selections.
     case primary, indigo, mint, purple, orange, electricRush, sunsetPop
+    case ultravolt, cobaltHeat, cherryIce, midnightGold
     
     var id: Self { self }
     
@@ -16,6 +17,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .orange: "C9562D"
         case .electricRush: "3D52F5"
         case .sunsetPop: "D12D78"
+        case .ultravolt: "5621B6"
+        case .cobaltHeat: "1745A3"
+        case .cherryIce: "AE194F"
+        case .midnightGold: "1C2D50"
         }
     }
 
@@ -33,6 +38,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .orange: "EBA66B"
         case .electricRush: "32D5E5"
         case .sunsetPop: "FF8059"
+        case .ultravolt: "B9EE4A"
+        case .cobaltHeat: "FF985C"
+        case .cherryIce: "55D6CF"
+        case .midnightGold: "F6C85F"
         }
     }
 
@@ -46,6 +55,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .orange: "F6E5CF"
         case .electricRush: "D5F66A"
         case .sunsetPop: "FFD65C"
+        case .ultravolt: "F0FFD0"
+        case .cobaltHeat: "FFF1CB"
+        case .cherryIce: "D9FFF7"
+        case .midnightGold: "FFF1C7"
         }
     }
 
@@ -58,6 +71,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .orange: "WorkoutesIcon-blazing-flame"
         case .electricRush: "WorkoutesIcon-electric-rush"
         case .sunsetPop: "WorkoutesIcon-sunset-pop"
+        case .ultravolt: "WorkoutesIcon-ultravolt"
+        case .cobaltHeat: "WorkoutesIcon-cobalt-heat"
+        case .cherryIce: "WorkoutesIcon-cherry-ice"
+        case .midnightGold: "WorkoutesIcon-midnight-gold"
         }
     }
 
@@ -78,6 +95,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .orange: "Ember Glow"
         case .electricRush: "Electric Rush"
         case .sunsetPop: "Sunset Pop"
+        case .ultravolt: "Ultravolt"
+        case .cobaltHeat: "Cobalt Heat"
+        case .cherryIce: "Cherry Ice"
+        case .midnightGold: "Midnight Gold"
         }
     }
 
