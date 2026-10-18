@@ -13,7 +13,8 @@ struct ExerciseLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ExerciseActivityAttributes.self) { context in
             ExerciseActivitySummary(state: context.state)
-                .padding(16)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 7)
                 // Use a matching, explicit foreground/background pair: the Lock Screen
                 // can supply a different color scheme from the app's UIKit colors.
                 .activityBackgroundTint(.black)
@@ -47,6 +48,7 @@ struct ExerciseLiveActivity: Widget {
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
         details: "Pause at the bottom", tagColors: ["FF8800", "5599FF"],
+        tagIconNames: [MuscleIcon.chest.rawValue, nil],
         accentColorHex: "64CCC5", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .playing
     )
     ExerciseActivityAttributes.ContentState(

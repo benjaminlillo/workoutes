@@ -54,6 +54,8 @@ struct ExerciseListView: View {
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                             .padding(.vertical, 10)
+                            .opacity(isChangingTag ? 0 : 1)
+                            .allowsHitTesting(!isChangingTag)
                             .background {
                                 if let request = navigation.revealRequest,
                                    request.exerciseID == exercise.persistentModelID {
@@ -110,12 +112,10 @@ struct ExerciseListView: View {
                         ContentUnavailableView("No Exercises", systemImage: "dumbbell",
                                                description: Text("No exercises with this tag."))
                             .padding(.bottom, TagWheelPicker.scrollClearance)
+                            .opacity(isChangingTag ? 0 : 1)
                             .allowsHitTesting(false)
                     }
                 }
-                .opacity(isChangingTag ? 0 : 1)
-                .blur(radius: isChangingTag && !reduceMotion ? 2 : 0)
-                .allowsHitTesting(!isChangingTag)
                 .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
                 .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset,
                                      bottomContentMargin: TagWheelPicker.scrollClearance + 12) {

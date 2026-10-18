@@ -6,52 +6,19 @@ struct ExerciseActivitySummary: View {
     let state: ExerciseActivityAttributes.ContentState
 
     private var status: ExerciseStatus { state.status ?? .playing }
-    private var accentColor: Color { color(hex: state.accentColorHex ?? "64CCC5") }
+    private var accentColor: Color { Color(hex: state.accentColorHex ?? "64CCC5") }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 10) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(state.title)
-                        .font(.headline.weight(.bold))
-                        .lineLimit(2)
-
-                    if !state.subtitle.isEmpty {
-                        Text(state.subtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
-                            .lineLimit(1)
-                    }
-                    if let details = state.details, !details.isEmpty {
-                        HStack(alignment: .firstTextBaseline, spacing: 6) {
-                            Image(systemName: "doc.text")
-                            Text(details)
-                                .lineLimit(2)
-                        }
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.7))
-                            .padding(.top, 2)
-                    }
-                }
-                Spacer(minLength: 8)
-
-                VStack(spacing: 3) {
-                    statusControl
-
-                    HStack(spacing: 4) {
-                        ForEach(Array((state.tagColors ?? []).enumerated()), id: \.offset) { _, hex in
-                            Circle().fill(color(hex: hex)).frame(width: 7, height: 7)
-                        }
-                        if state.increaseLoadNextTime {
-                            ExerciseBumpBadge(color: .white)
-                        }
-                    }
-                    .fixedSize()
-                }
-                .frame(minWidth: 44)
+        VStack(alignment: .leading, spacing: 14) {
+            ExerciseCardHeader(
+                title: state.title, subtitle: state.subtitle, details: state.details ?? "",
+                increaseLoadNextTime: state.increaseLoadNextTime, accentColor: accentColor,
+                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? []
+            ) {
+                statusControl
             }
 
-            Rectangle().fill(.white.opacity(0.2)).frame(height: 0.5)
+            Divider()
 
             HStack(spacing: 0) {
                 ExerciseMetricView(
@@ -59,6 +26,7 @@ struct ExerciseActivitySummary: View {
                     value: "\((state.displayedWeight ?? state.weight).formatted(.number.precision(.fractionLength(0...2)))) \(state.weightUnitSymbol ?? "kg")",
                     label: "Weight"
                 )
+                .frame(maxWidth: .infinity, minHeight: 44)
 
                 metricDivider
 
@@ -67,6 +35,7 @@ struct ExerciseActivitySummary: View {
                     value: "\(state.numberOfSets) sets",
                     label: "Sets"
                 )
+                .frame(maxWidth: .infinity, minHeight: 44)
 
                 metricDivider
 
@@ -75,9 +44,11 @@ struct ExerciseActivitySummary: View {
                     value: "\(state.reps) reps",
                     label: "Repetitions"
                 )
+                .frame(maxWidth: .infinity, minHeight: 44)
             }
 
         }
+        .environment(\.colorScheme, .dark)
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -100,15 +71,7 @@ struct ExerciseActivitySummary: View {
 
     private var metricDivider: some View {
         Rectangle()
-            .fill(.white.opacity(0.2))
-            .frame(width: 1, height: 38)
-    }
-
-    private func color(hex: String) -> Color {
-        var value: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&value)
-        return Color(.sRGB, red: Double((value >> 16) & 255) / 255,
-                     green: Double((value >> 8) & 255) / 255,
-                     blue: Double(value & 255) / 255, opacity: 1)
+            .fill(Color.secondary.opacity(0.2))
+            .frame(width: 1, height: 42)
     }
 }

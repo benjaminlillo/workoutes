@@ -34,56 +34,26 @@ struct ExerciseCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(exercise.title)
-                        .font(.title3.weight(.bold))
-
-                    if !exercise.subtitle.isEmpty {
-                        Text(exercise.subtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if !exercise.details.isEmpty {
-                        HStack(alignment: .firstTextBaseline, spacing: 7) {
-                            Image(systemName: "doc.text")
-                            Text(exercise.details)
-                                .lineLimit(2)
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 4)
-                    }
+            ExerciseCardHeader(
+                title: exercise.title, subtitle: exercise.subtitle, details: exercise.details,
+                increaseLoadNextTime: exercise.increaseLoadNextTime, accentColor: accentColor,
+                tagColors: exercise.tags.map(\.colorHex), tagIconNames: exercise.tags.map(\.iconName),
+                tagNames: exercise.tags.map(\.name)
+            ) {
+                Button {
+                    exerciseActivity.advanceState(exercise, context: modelContext)
+                } label: {
+                    ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
+                                         accentColor: accentColor)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                VStack(spacing: 5) {
-                    Button {
-                        exerciseActivity.advanceState(exercise, context: modelContext)
-                    } label: {
-                        ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
-                                             accentColor: accentColor)
-                    }
-                    .buttonStyle(.borderless)
-                    .disabled(exerciseActivity.isUpdating)
-                    .accessibilityLabel("Exercise status")
-                    .accessibilityValue(stateValue)
-                    .accessibilityHint(stateHint)
-                    .accessibilityAddTraits(exercise.isDone || isPlaying ? .isSelected : [])
-                    .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
-                    .sensoryFeedback(.selection, trigger: stateValue)
-
-                    if !exercise.tags.isEmpty || exercise.increaseLoadNextTime {
-                        HStack(spacing: 4) {
-                            tagBars
-                            if exercise.increaseLoadNextTime {
-                                ExerciseBumpBadge(color: accentColor)
-                            }
-                        }
-                    }
-                }
-                .frame(minWidth: 44)
+                .buttonStyle(.borderless)
+                .disabled(exerciseActivity.isUpdating)
+                .accessibilityLabel("Exercise status")
+                .accessibilityValue(stateValue)
+                .accessibilityHint(stateHint)
+                .accessibilityAddTraits(exercise.isDone || isPlaying ? .isSelected : [])
+                .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
+                .sensoryFeedback(.selection, trigger: stateValue)
             }
 
             Divider()
@@ -210,26 +180,6 @@ struct ExerciseCardView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-    }
-
-    private var tagBars: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.fixed(20), spacing: 3),
-                                 count: min(3, exercise.tags.count)), alignment: .trailing, spacing: 3) {
-            ForEach(exercise.tags) { tag in
-                Group {
-                    if let icon = tag.muscleIcon {
-                        MuscleIconView(icon: icon, color: Color(hex: tag.colorHex))
-                            .frame(width: 20, height: 20)
-                    } else {
-                        Circle()
-                            .fill(Color(hex: tag.colorHex))
-                            .frame(width: 7, height: 7)
-                    }
-                }
-                .accessibilityLabel("Tag: \(tag.name)")
-            }
-        }
-        .fixedSize()
     }
 
     private var metricDivider: some View {

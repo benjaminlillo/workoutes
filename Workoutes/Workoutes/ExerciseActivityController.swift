@@ -23,6 +23,7 @@ extension WorkoutExercise {
             increaseLoadNextTime: increaseLoadNextTime,
             details: String(details.prefix(200)),
             tagColors: tags.prefix(12).map { String($0.colorHex.prefix(8)) },
+            tagIconNames: tags.prefix(12).map { $0.muscleIcon?.rawValue },
             // Live Activities and the Dynamic Island use a fixed dark surface.
             accentColorHex: accent.hex(for: .dark),
             displayedWeight: unit.displayedWeight(from: safeWeight),

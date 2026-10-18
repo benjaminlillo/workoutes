@@ -10,7 +10,7 @@ from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF
 
 HERE = Path(__file__).resolve().parent
-DEST = HERE.parents[1] / 'Workoutes/Workoutes/Assets.xcassets/MuscleIcons'
+DEST = HERE.parents[1] / 'Workoutes/Shared/MuscleIcons.xcassets/MuscleIcons'
 DATA = json.loads((HERE / 'body-paths.json').read_text())
 TRUNK = ['neck', 'trapezius', 'deltoids', 'chest', 'biceps', 'triceps', 'abs', 'obliques', 'upper-back', 'lower-back']
 MUSCLES = TRUNK + ['forearm', 'quadriceps', 'adductors', 'calves', 'tibialis', 'hamstring', 'gluteal', 'abductors']
