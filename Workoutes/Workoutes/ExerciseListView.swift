@@ -111,14 +111,12 @@ struct ExerciseListView: View {
                     if filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty {
                         ContentUnavailableView("No Exercises", systemImage: "dumbbell",
                                                description: Text("No exercises with this tag."))
-                            .padding(.bottom, TagWheelPicker.scrollClearance)
                             .opacity(isChangingTag ? 0 : 1)
                             .allowsHitTesting(false)
                     }
                 }
                 .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
-                .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset,
-                                     bottomContentMargin: TagWheelPicker.scrollClearance + 12) {
+                .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset) {
                     TagWheelPicker(
                         tags: allTags,
                         selection: Binding(

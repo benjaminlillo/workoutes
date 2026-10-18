@@ -90,7 +90,7 @@ final class TagWheelTests: XCTestCase {
         XCTAssertEqual(hub.intent, .undecided, "The native center menu must retain its gestures")
     }
 
-    func testBottomOverlayStaysAtTheWindowBottomWhileTheBottomBarAnimates() async throws {
+    func testWheelOverlayKeepsItsDistanceFromTheScreenBottomWhileTheBarAnimates() async throws {
         let state = BottomBarState()
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
@@ -102,7 +102,7 @@ final class TagWheelTests: XCTestCase {
         let moving = try XCTUnwrap(state.movingView)
         let expanded = fixed.convert(fixed.bounds, to: window)
         let movingExpanded = moving.convert(moving.bounds, to: window)
-        XCTAssertEqual(expanded.maxY, window.bounds.maxY - 35, accuracy: 0.5)
+        XCTAssertEqual(expanded.maxY, window.bounds.maxY - TagWheelPicker.bottomInset, accuracy: 0.5)
 
         for height: CGFloat in [93, 81, 69, 57, 47] {
             state.bottomHeight = height
@@ -128,9 +128,9 @@ final class TagWheelTests: XCTestCase {
         button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
         button.performAfterMenuDismissal { changes += 1 }
         button.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
-        XCTAssertEqual(changes, 0, "The menu's returning preview must keep the active wheel's size")
+        XCTAssertEqual(changes, 0, "Selection must wait until the menu's preview has returned")
         animator.complete()
-        XCTAssertEqual(changes, 1, "The wheel can shrink once the native preview has finished returning")
+        XCTAssertEqual(changes, 1, "Selection can change once the native preview has finished returning")
 
         // Closing without choosing anything must leave the wheel unchanged.
         button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
@@ -256,7 +256,7 @@ final class TagWheelTests: XCTestCase {
                 .overlay(alignment: .bottomLeading) {
                     FrameProbe { state.movingView = $0 }.frame(width: 80, height: 80)
                 }
-                .stableBottomOverlay(bottomInset: 35, bottomContentMargin: 192) {
+                .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset) {
                     FrameProbe { state.fixedView = $0 }.frame(width: 80, height: 80)
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) {

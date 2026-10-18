@@ -10,8 +10,8 @@ struct TagWheelPicker: View {
 
     static let diameter: CGFloat = 284
     static let overhang: CGFloat = 78
-    static let bottomInset: CGFloat = 35
-    static let scrollClearance: CGFloat = 180
+    // Fixed distance from the display's bottom edge; leaves room for the expanded bottom bars.
+    static let bottomInset: CGFloat = 130
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -26,7 +26,6 @@ struct TagWheelPicker: View {
     private var isInactive: Bool { selectedIndex == nil }
     private var selectedColor: Color { selectedTag.map { Color(hex: $0.colorHex) } ?? .secondary }
     private var snapAnimation: Animation? { reduceMotion ? nil : .snappy(duration: 0.3, extraBounce: 0.04) }
-    private var activationAnimation: Animation? { reduceMotion ? nil : .smooth(duration: 0.32) }
     private var colorAnimation: Animation? { reduceMotion ? nil : .easeInOut(duration: 0.35) }
 
     var body: some View {
@@ -51,9 +50,8 @@ struct TagWheelPicker: View {
         disc
         .contentShape(Circle())
         .highPriorityGesture(wheelGesture)
-        .scaleEffect(isInactive ? 0.82 : 1)
-        .offset(x: isInactive ? 46 : 0, y: isInactive ? 34 : 0)
-        .animation(activationAnimation, value: isInactive)
+        .scaleEffect(0.82)
+        .offset(x: 46)
     }
 
     private var observedDisc: some View {
@@ -138,7 +136,7 @@ struct TagWheelPicker: View {
                     wheel.drag(to: angle(at: value.startLocation, around: center), count: count)
                 }
                 wheel.drag(to: angle(at: value.location, around: center), count: count)
-                // Restore the full size after release, rather than moving it under the finger mid-turn.
+                // A first turn activates the filter on release; an active filter follows the rotation.
                 if !isInactive { updateSelection() }
             }
             .onEnded { _ in
@@ -178,7 +176,7 @@ struct TagWheelPicker: View {
     }
 
     private func deactivate() {
-        withAnimation(activationAnimation) {
+        withAnimation(snapAnimation) {
             drag = TagWheelDrag()
             wheel.snap()
             selection = nil
