@@ -36,7 +36,7 @@ struct ExerciseCompletionPreview: View {
 /// Shares the card's presentation without exposing any edit or exercise-session controls.
 struct ExerciseCompletionCard: View {
     let snapshot: ExerciseCompletionSnapshot
-    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
