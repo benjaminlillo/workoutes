@@ -26,7 +26,7 @@ final class ExerciseCompletionPreviewTests: XCTestCase {
         let item = exercise()
         context.insert(item)
         try context.save()
-        let expected = ExerciseCompletionSnapshot(exercise: item)
+        var expected = ExerciseCompletionSnapshot(exercise: item)
         var now = Date.now
         let controller = ExerciseActivityController(context: context, now: { now }, liveActivitiesEnabled: false)
         controller.advanceState(item, context: context)
@@ -36,7 +36,11 @@ final class ExerciseCompletionPreviewTests: XCTestCase {
         await controller.waitForPendingUpdates()
 
         let entry = try XCTUnwrap(try context.fetch(FetchDescriptor<ExerciseCompletion>()).first)
-        XCTAssertEqual(entry.snapshot, expected)
+        let saved = try XCTUnwrap(entry.snapshot)
+        // SwiftData relationships are unordered; the snapshot preserves the order at capture time.
+        XCTAssertEqual(saved.tags.sorted { $0.name < $1.name }, expected.tags.sorted { $0.name < $1.name })
+        expected.tags = saved.tags
+        XCTAssertEqual(saved, expected)
         item.title = "Edited"; item.subtitle = "New subtitle"; item.details = "New notes"
         item.weight = 90; item.reps = 12; item.numberOfSets = 2; item.increaseLoadNextTime = false
         item.tags.first?.colorHex = "00FF00"; item.tags.first?.iconName = "back"
