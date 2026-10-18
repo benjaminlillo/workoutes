@@ -113,18 +113,8 @@ struct SummaryDashboard: View {
                                 Spacer(minLength: 0)
                                 VStack(spacing: blockSpacing) {
                                     ForEach(day.completions.reversed()) { completion in
-                                        HStack(spacing: 0) {
-                                            let colors = completion.tagColors
-                                            if colors.isEmpty {
-                                                Color.gray.opacity(0.5)
-                                            } else {
-                                                ForEach(Array(colors.enumerated()), id: \.offset) { _, hex in
-                                                    Color(hex: hex)
-                                                }
-                                            }
-                                        }
-                                        .frame(height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
-                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                                        WeeklyExerciseBlock(completion: completion,
+                                                            height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
                                     }
                                     if day.completions.isEmpty {
                                         RoundedRectangle(cornerRadius: 2)
@@ -138,9 +128,9 @@ struct SummaryDashboard: View {
                                 .foregroundStyle(Calendar.current.isDate(day.date, inSameDayAs: today) ? Color.accentColor : .secondary)
                         }
                         .frame(maxWidth: .infinity)
-                        .accessibilityElement(children: .ignore)
+                        .accessibilityElement(children: .contain)
                         .accessibilityLabel(day.date.formatted(.dateTime.weekday(.wide).month().day()))
-                        .accessibilityValue("\(day.completions.count) completed exercises. \(day.completions.map(\.exerciseTitle).joined(separator: ", "))")
+                        .accessibilityValue("\(day.completions.count) completed exercises")
                     }
                 }
                 .accessibilityIdentifier("weeklyExerciseChart")

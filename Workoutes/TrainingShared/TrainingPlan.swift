@@ -36,11 +36,13 @@ struct TrainingExercise: Codable, Equatable, Sendable {
     var repetitions: Int
     var sets: Int
     var usesPounds: Bool
+    var historySnapshot: ExerciseCompletionSnapshot? = nil
 
     var isValid: Bool {
         !id.isEmpty && id.count <= 100 && !name.isEmpty && name.count <= 160 &&
         weightKilograms.isFinite && weightKilograms >= 0 &&
-        (1...20).contains(sets) && (1...100).contains(repetitions)
+        (1...20).contains(sets) && (1...100).contains(repetitions) &&
+        (historySnapshot?.isValid ?? true)
     }
     var weightLabel: String {
         let value = usesPounds ? weightKilograms / 0.45359237 : weightKilograms
