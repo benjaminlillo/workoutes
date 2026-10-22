@@ -41,12 +41,13 @@ struct WeeklySummary {
 struct SummaryView: View {
     var pull: Binding<MotivationalPullState>? = nil
     @State private var localPull = MotivationalPullState()
+    @State private var selectedWeek: Date?
 
     var body: some View {
         NavigationStack {
             // Refreshes after midnight/time-zone changes, including when this tab stays open.
             TimelineView(.periodic(from: .now, by: 60)) { timeline in
-                SummaryWeekView(date: timeline.date, pull: pull ?? $localPull)
+                SummaryWeekView(today: timeline.date, selectedWeek: $selectedWeek, pull: pull ?? $localPull)
             }
             .transparentNavigationChrome()
             .navigationTitle("Summary")
@@ -62,13 +63,17 @@ struct SummaryView: View {
 private struct SummaryWeekView: View {
     @Environment(\.trainingController) private var training
     let date: Date
+    let today: Date
+    @Binding var selectedWeek: Date?
     @Binding var pull: MotivationalPullState
     @Query private var completions: [ExerciseCompletion]
 
-    init(date: Date, pull: Binding<MotivationalPullState>) {
-        self.date = date
+    init(today: Date, selectedWeek: Binding<Date?>, pull: Binding<MotivationalPullState>) {
+        self.today = today
+        self.date = selectedWeek.wrappedValue ?? today
+        _selectedWeek = selectedWeek
         _pull = pull
-        let interval = WeeklySummary.interval(containing: date)
+        let interval = WeeklySummary.interval(containing: selectedWeek.wrappedValue ?? today)
         let start = interval.start
         let end = interval.end
         _completions = Query(filter: #Predicate<ExerciseCompletion> { $0.completedAt >= start && $0.completedAt < end },
@@ -79,29 +84,75 @@ private struct SummaryWeekView: View {
         MotivationalScrollView(pull: $pull) {
             VStack(spacing: 16) {
                 if let training { TrainingEntryView(controller: training) }
-                SummaryDashboard(summary: WeeklySummary(completions: completions, date: date), today: date)
+                SummaryDashboard(summary: WeeklySummary(completions: completions, date: date), today: today,
+                                 onPreviousWeek: { moveWeek(by: -1) }, onNextWeek: { moveWeek(by: 1) })
             }.padding(16)
         }
         .defaultScreenBackground()
+    }
+
+    private func moveWeek(by offset: Int) {
+        let calendar = Calendar.current
+        let displayedWeek = WeeklySummary.interval(containing: date, calendar: calendar)
+        guard let shifted = calendar.date(byAdding: .day, value: offset * 7, to: displayedWeek.start) else { return }
+        let target = WeeklySummary.interval(containing: shifted, calendar: calendar).start
+        let current = WeeklySummary.interval(containing: today, calendar: calendar).start
+        guard target <= current else { return }
+        // The current week follows the clock; historical weeks stay on the chosen dates.
+        selectedWeek = target == current ? nil : target
     }
 }
 
 struct SummaryDashboard: View {
     let summary: WeeklySummary
     let today: Date
+    var onPreviousWeek: () -> Void = {}
+    var onNextWeek: () -> Void = {}
     @ScaledMetric(relativeTo: .caption) private var chartHeight = 190
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var maximum: Int { max(1, summary.days.map { $0.completions.count }.max() ?? 0) }
     private var blockSpacing: CGFloat { min(2, chartHeight / CGFloat(maximum) * 0.12) }
+    private var isCurrentWeek: Bool { summary.interval.start == WeeklySummary.interval(containing: today).start }
+    private var canGoForward: Bool { summary.interval.start < WeeklySummary.interval(containing: today).start }
+
+    private var dateRange: String {
+        let calendar = Calendar.current
+        let showYear = !calendar.isDate(summary.interval.start, equalTo: today, toGranularity: .year)
+            || !calendar.isDate(summary.days.last!.date, equalTo: today, toGranularity: .year)
+        let format = showYear ? Date.FormatStyle.dateTime.month(.abbreviated).day().year()
+            : Date.FormatStyle.dateTime.month(.abbreviated).day()
+        return "\(summary.interval.start.formatted(format)) – \(summary.days.last!.date.formatted(format))"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("This Week").font(.title3.bold())
-                    Text("\(summary.interval.start.formatted(.dateTime.month(.abbreviated).day())) – \(summary.days.last!.date.formatted(.dateTime.month(.abbreviated).day()))")
-                        .font(.subheadline).foregroundStyle(.secondary)
+                HStack(alignment: .top, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(isCurrentWeek ? "This Week" : "Week Summary").font(.title3.bold())
+                        Text(dateRange)
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    HStack(spacing: 0) {
+                        Button(action: onPreviousWeek) {
+                            Label("Previous Week", systemImage: "chevron.left")
+                                .labelStyle(.iconOnly)
+                                .frame(width: 44, height: 44)
+                        }
+                        .accessibilityIdentifier("previousSummaryWeek")
+                        Button(action: onNextWeek) {
+                            Label("Next Week", systemImage: "chevron.right")
+                                .labelStyle(.iconOnly)
+                                .frame(width: 44, height: 44)
+                        }
+                        .disabled(!canGoForward)
+                        .accessibilityIdentifier("nextSummaryWeek")
+                    }
+                    .buttonStyle(.borderless)
                 }
 
                 HStack(alignment: .bottom, spacing: 8) {
@@ -134,7 +185,9 @@ struct SummaryDashboard: View {
                     }
                 }
                 .accessibilityIdentifier("weeklyExerciseChart")
-                Text(summary.total == 0 ? "No completed exercises this week. Start an exercise and stop after more than 10 seconds to record it." : "Each block is one completed exercise. Colors follow its current tags.")
+                Text(summary.total == 0
+                     ? (isCurrentWeek ? "No completed exercises this week. Start an exercise and stop after more than 10 seconds to record it." : "No completed exercises this week.")
+                     : "Each block is one completed exercise. Colors follow its current tags.")
                     .font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
