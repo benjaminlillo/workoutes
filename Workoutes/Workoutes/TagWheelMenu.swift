@@ -2,8 +2,8 @@ import SwiftData
 import SwiftUI
 import UIKit
 
-/// The wheel must wait for the native menu's source preview to return before
-/// changing scale or position. A dismissal completion also respects Reduce Motion.
+/// Fixed wheel geometry lets filters update immediately, while UIKit dismisses the menu.
+/// Actions that present another interface still wait for dismissal to finish.
 struct TagWheelMenu: UIViewRepresentable {
     let tags: [Tag]
     let selection: PersistentIdentifier?
@@ -57,11 +57,16 @@ struct TagWheelMenu: UIViewRepresentable {
         coordinator.usedImages.removeAll(keepingCapacity: true)
 
         func action(_ title: String, image: UIImage? = nil, attributes: UIMenuElement.Attributes = [],
-                    state: UIMenuElement.State = .off, perform: @escaping (Coordinator) -> Void) -> UIAction {
+                    state: UIMenuElement.State = .off, afterMenuDismissal: Bool = false,
+                    perform: @escaping (Coordinator) -> Void) -> UIAction {
             UIAction(title: title, image: image, attributes: attributes, state: state) { [weak button, weak coordinator] _ in
                 guard let coordinator else { return }
-                button?.performAfterMenuDismissal { [weak coordinator] in
-                    if let coordinator { perform(coordinator) }
+                if afterMenuDismissal {
+                    button?.performAfterMenuDismissal { [weak coordinator] in
+                        if let coordinator { perform(coordinator) }
+                    }
+                } else {
+                    perform(coordinator)
                 }
             }
         }
@@ -102,15 +107,15 @@ struct TagWheelMenu: UIViewRepresentable {
             children.append(UIMenu(options: .displayInline, children: [deselect]))
         }
 
-        var management: [UIMenuElement] = [action("Add Tag", image: menuImage("plus")) { $0.onAdd?() }]
+        var management: [UIMenuElement] = [action("Add Tag", image: menuImage("plus"), afterMenuDismissal: true) { $0.onAdd?() }]
         if !tags.isEmpty {
             management.append(UIMenu(title: "Edit Tag", image: menuImage("pencil"), children: tags.map { tag in
                 let id = tag.persistentModelID
-                return action(tag.name) { if let tag = $0.tag(id) { $0.onEdit?(tag) } }
+                return action(tag.name, afterMenuDismissal: true) { if let tag = $0.tag(id) { $0.onEdit?(tag) } }
             }))
             management.append(UIMenu(title: "Delete Tag", image: menuImage("trash"), children: tags.map { tag in
                 let id = tag.persistentModelID
-                return action(tag.name, attributes: .destructive) { if let tag = $0.tag(id) { $0.onDelete?(tag) } }
+                return action(tag.name, attributes: .destructive, afterMenuDismissal: true) { if let tag = $0.tag(id) { $0.onDelete?(tag) } }
             }))
         }
         children.append(UIMenu(options: .displayInline, children: management))

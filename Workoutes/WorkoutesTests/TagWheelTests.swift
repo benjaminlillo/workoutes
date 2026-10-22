@@ -117,7 +117,7 @@ final class TagWheelTests: XCTestCase {
         XCTAssertEqual(fixed.convert(fixed.bounds, to: window).maxY, expanded.maxY, accuracy: 0.5)
     }
 
-    func testCenterMenuWaitsForItsDismissalBeforeChangingTheWheel() throws {
+    func testManagementActionsWaitForMenuDismissalBeforePresentingAnotherInterface() throws {
         let button = TagWheelMenuButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
         button.menu = UIMenu(children: [UIAction(title: "Deselect All Tags") { _ in }])
         let interaction = try XCTUnwrap(button.contextMenuInteraction)

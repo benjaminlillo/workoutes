@@ -82,7 +82,7 @@ final class TagWheelMenuTests: XCTestCase {
         XCTAssertEqual(remaining.children.compactMap { ($0 as? UIAction)?.title }, ["Add Tag"])
     }
 
-    func testCachedActionsUseCurrentCallbacksAndCannotSelectRemovedTags() throws {
+    func testCachedSelectionRunsBeforeMenuDismissalWithCurrentCallbacksAndAvailableTags() throws {
         let fixture = try fixture()
         let coordinator = TagWheelMenu.Coordinator()
         let button = TagWheelMenuButton(frame: .zero)
@@ -92,13 +92,16 @@ final class TagWheelMenuTests: XCTestCase {
             .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         let initial = try XCTUnwrap(button.menu)
         let choose = try options(button)[0]
+        let interaction = try XCTUnwrap(button.contextMenuInteraction)
+        let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in button.menu }
+        button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
 
         menu(tags: fixture.tags, onChoose: { _ in newCalls += 1 })
             .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
         XCTAssertTrue(button.menu === initial)
         button.sendAction(choose)
         XCTAssertEqual(oldCalls, 0)
-        XCTAssertEqual(newCalls, 1)
+        XCTAssertEqual(newCalls, 1, "Selecting a tag must take effect before the menu finishes closing")
 
         menu(tags: [], onChoose: { _ in newCalls += 1 })
             .updateMenu(button, coordinator: coordinator, theme: .indigo, scheme: .light, scale: 3)
