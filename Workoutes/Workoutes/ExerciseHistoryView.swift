@@ -18,7 +18,7 @@ struct ExerciseHistoryView: View {
                         .foregroundStyle(.secondary)
                 }
                 .accessibilityElement(children: .combine)
-                .subtleFormRowBorder(.row(at: index, count: completions.count))
+                .subtleFormRowShadow(.row(at: index, count: completions.count))
             }
             .onDelete(perform: deleteEntries)
         }

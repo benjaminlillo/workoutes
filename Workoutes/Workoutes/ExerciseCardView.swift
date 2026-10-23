@@ -132,9 +132,9 @@ struct ExerciseCardView: View {
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .subtleCardBorder()
+        .subtleCardShadow()
         .overlay {
-            ExerciseRevealBorder(color: accentColor, trigger: revealHighlight)
+            ExerciseRevealHighlight(color: accentColor, trigger: revealHighlight)
         }
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
@@ -160,7 +160,6 @@ struct ExerciseCardView: View {
                 Label("Delete Permanently", systemImage: "trash")
             }
         }
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         .padding(.horizontal)
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button {

@@ -38,7 +38,7 @@ struct SettingsView: View {
                 if let training {
                     Section("Apple Watch") {
                         NavigationLink("Training Structure and History") { TrainingView(controller: training) }
-                            .subtleFormRowBorder()
+                            .subtleFormRowShadow()
                     }
                 }
                 Section("Appearance") {
@@ -51,7 +51,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityIdentifier("settingsTheme")
-                    .subtleFormRowBorder()
+                    .subtleFormRowShadow()
                 }
                 Section("Units") {
                     Picker(selection: $weightUnit) {
@@ -65,22 +65,22 @@ struct SettingsView: View {
                     .tint(accentColor)
                     // The native menu picker caches its selected-label style.
                     .id(pickerStyleID)
-                    .subtleFormRowBorder()
+                    .subtleFormRowShadow()
                 }
                 Section("Data") {
                     NavigationLink(destination: ExerciseHistoryView()) {
                         HStack { Text("Exercise History"); Spacer(); Image(systemName: "clock.arrow.circlepath") }
                     }
                     .accessibilityIdentifier("settingsExerciseHistory")
-                    .subtleFormRowBorder(.first)
+                    .subtleFormRowShadow(.first)
                     Button { showingExportOptions = true } label: {
                         HStack { Text("Export Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.up") }
                     }
-                    .subtleFormRowBorder(.middle)
+                    .subtleFormRowShadow(.middle)
                     NavigationLink(destination: ImportDataView()) {
                         HStack { Text("Import Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.down") }
                     }
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
                 }
             }
             .transparentNavigationChrome()

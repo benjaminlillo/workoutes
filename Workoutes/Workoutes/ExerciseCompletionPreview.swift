@@ -69,7 +69,7 @@ struct ExerciseCompletionCard: View {
         .padding()
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .subtleCardBorder()
+        .subtleCardShadow()
     }
 
     @ViewBuilder

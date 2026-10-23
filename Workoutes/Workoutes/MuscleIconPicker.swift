@@ -18,6 +18,7 @@ struct MuscleIconPicker: View {
                     }
                     .padding()
                     .background(.background, in: RoundedRectangle(cornerRadius: 18))
+                    .subtleCardShadow()
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selection == nil ? .isSelected : [])
@@ -57,11 +58,15 @@ struct MuscleIconPicker: View {
             .frame(maxWidth: .infinity, minHeight: 90)
             .padding(6)
             .background(.background, in: RoundedRectangle(cornerRadius: 18))
-            .overlay {
-                RoundedRectangle(cornerRadius: 18)
-                    .strokeBorder(selection == icon ? color : ContainerBorderStyle.color,
-                                  lineWidth: selection == icon ? 2 : 1)
+            .overlay(alignment: .topTrailing) {
+                if selection == icon {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(color)
+                        .padding(6)
+                }
             }
+            .subtleCardShadow()
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)

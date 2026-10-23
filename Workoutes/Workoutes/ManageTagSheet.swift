@@ -23,9 +23,9 @@ struct ManageTagSheet: View {
             Form {
                 Section(header: Text("Tag Details")) {
                     TextField("Name", text: $name)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     ColorPicker("Color", selection: $color)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     NavigationLink {
                         MuscleIconPicker(selection: $selectedIcon, color: color)
                     } label: {
@@ -40,7 +40,7 @@ struct ManageTagSheet: View {
                         }
                     }
                     .accessibilityIdentifier("tagMuscleIcon")
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
                 }
                 
                 if let editingTag = editingTag {
@@ -49,7 +49,7 @@ struct ManageTagSheet: View {
                             modelContext.delete(editingTag)
                             dismiss()
                         }
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                     }
                 }
             }

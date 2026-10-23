@@ -186,7 +186,7 @@ private struct WatchTrainingProgressPage: View {
         .padding(compact ? 9 : 11)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 18))
-        .overlay { RoundedRectangle(cornerRadius: 18).strokeBorder(.white.opacity(0.12), lineWidth: 1) }
+        .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 1)
         .accessibilityElement(children: .combine)
     }
 }

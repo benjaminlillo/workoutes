@@ -28,7 +28,7 @@ struct TrainingEntryView: View {
             }
             .padding(20)
             .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24))
-            .subtleCardBorder(cornerRadius: 24)
+            .subtleCardShadow()
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("watchTrainingEntry")
@@ -47,74 +47,74 @@ struct TrainingView: View {
                     TimelineView(.periodic(from: .now, by: 1)) { timeline in
                         TrainingSessionSummary(run: run, date: timeline.date)
                     }
-                    .subtleFormRowBorder(.first)
+                    .subtleFormRowShadow(.first)
                     if !controller.isConnected {
                         Label("Reconnecting to Apple Watch. Your workout continues there. Keep both devices nearby and tap Refresh if needed.", systemImage: "applewatch.slash")
                             .foregroundStyle(.secondary)
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                     }
                     Button(run.pausedAt == nil ? "Pause Training" : "Resume Training") { controller.pause() }
                         .disabled(!controller.isConnected)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     if run.canAdvance {
                         Button(run.progress.stage == .series ? "Finish Series" : "Skip Rest") { controller.advance() }
                             .disabled(!controller.isConnected)
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                     }
                     if run.undo != nil {
                         Button("Undo Last Transition") { controller.undo() }
                             .disabled(!controller.isConnected || run.pausedAt != nil)
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                     }
                     if run.queuedExercise != nil {
                         Button("Remove Queued Exercise") { controller.clearQueuedExercise() }
                             .disabled(!controller.isConnected || run.pausedAt != nil)
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                     }
                     Button("Finish Training") { finishing = true }
                         .disabled(!controller.isConnected)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
             } else {
                 Section {
                     Text(controller.plan.name).font(.headline)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     #if targetEnvironment(simulator)
                     Label("Simulator Preview · No Health recording", systemImage: "testtube.2")
                         .font(.caption).foregroundStyle(.orange)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     #endif
                     Text("\(controller.plan.exerciseCount) exercise blocks · choose exercises as you train")
                         .foregroundStyle(.secondary)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Button(controller.isStarting ? "Starting on Apple Watch…" : "Start Training on Apple Watch") {
                         Task { await controller.start() }
                     }
                     .disabled(controller.isStarting)
                     .accessibilityIdentifier("startWatchTraining")
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
                 }
             }
             if let run = controller.run, !run.isActive, run.healthSaveError != nil {
                 Section("Health Save") {
                     Text(run.healthSaveError ?? "")
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     Button("Retry on Apple Watch") { controller.retrySave() }
                         .disabled(!controller.isConnected)
-                        .subtleFormRowBorder(run.healthSaveSkipped == true ? .last : .middle)
+                        .subtleFormRowShadow(run.healthSaveSkipped == true ? .last : .middle)
                     if run.healthSaveSkipped != true {
                         Text("If Health cannot be saved, you can keep this record in Workoutes and start another session.").font(.caption)
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                         Button("Keep Local Record and Continue") { controller.keepLocalRecord() }
                             .disabled(!controller.isConnected)
-                            .subtleFormRowBorder(.last)
+                            .subtleFormRowShadow(.last)
                     }
                 }
             }
             Section("Structure") {
                 Button("Edit Training Structure") { editingPlan = true }
                     .disabled(controller.hasActiveSession || controller.isStarting)
-                    .subtleFormRowBorder(controller.plan.blocks.isEmpty ? .single : .first)
+                    .subtleFormRowShadow(controller.plan.blocks.isEmpty ? .single : .first)
                 ForEach(Array(controller.plan.blocks.enumerated()), id: \.element.id) { index, block in
                     Label {
                         VStack(alignment: .leading) {
@@ -126,13 +126,13 @@ struct TrainingView: View {
                         }
                     } icon: { Image(systemName: block.kind == .exercise ? "dumbbell" : "timer") }
                     .accessibilityIdentifier("trainingBlock.\(index)")
-                    .subtleFormRowBorder(.row(at: index + 1, count: controller.plan.blocks.count + 1))
+                    .subtleFormRowShadow(.row(at: index + 1, count: controller.plan.blocks.count + 1))
                 }
             }
             Section("Training History") {
                 if controller.history.isEmpty {
                     Text("Completed sessions will appear here.").foregroundStyle(.secondary)
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                 }
                 ForEach(Array(controller.history.enumerated()), id: \.element.id) { index, run in
                     NavigationLink {
@@ -146,7 +146,7 @@ struct TrainingView: View {
                             Text(run.startedAt, format: .dateTime.month().day().hour().minute()).font(.caption).foregroundStyle(.secondary)
                         }
                     }
-                    .subtleFormRowBorder(.row(at: index, count: controller.history.count))
+                    .subtleFormRowShadow(.row(at: index, count: controller.history.count))
                 }
             }
         }
@@ -170,36 +170,36 @@ private struct TrainingHistoryDetail: View {
         List {
             Section {
                 TrainingSessionSummary(run: run, date: run.endedAt ?? .now)
-                    .subtleFormRowBorder(run.progress.results.isEmpty ? .single : .first)
+                    .subtleFormRowShadow(run.progress.results.isEmpty ? .single : .first)
                 ForEach(Array(run.progress.results.enumerated()), id: \.element.id) { index, result in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(result.exercise.name).font(.headline)
                         Text("\(result.exercise.weightLabel) · \(result.exercise.repetitions) reps · \(result.sets.count)/\(result.exercise.sets) series")
                         Text(result.isComplete ? "Completed" : "Incomplete").foregroundStyle(.secondary)
                     }
-                    .subtleFormRowBorder(.row(at: index + 1, count: run.progress.results.count + 1))
+                    .subtleFormRowShadow(.row(at: index + 1, count: run.progress.results.count + 1))
                 }
             }
             if !run.metrics.zones.isEmpty {
                 Section("Heart Rate Zones") {
                     ForEach(Array(run.metrics.zones.enumerated()), id: \.element.id) { index, zone in
                         LabeledContent("Zone \(zone.id + 1)", value: TrainingClock.label(zone.seconds))
-                            .subtleFormRowBorder(.row(at: index, count: run.metrics.zones.count))
+                            .subtleFormRowShadow(.row(at: index, count: run.metrics.zones.count))
                     }
                 }
             }
             Section {
                 if let effort = run.effort {
                     LabeledContent("Effort", value: "\(effort)/10")
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                 }
                 Text(run.healthWorkoutID != nil ? "Saved to Apple Health" : (run.healthSaveSkipped == true ? "Kept in Workoutes only" : "Health save pending"))
                     .foregroundStyle(.secondary)
-                    .subtleFormRowBorder(.row(at: run.effort == nil ? 0 : 1,
+                    .subtleFormRowShadow(.row(at: run.effort == nil ? 0 : 1,
                                               count: 1 + (run.effort == nil ? 0 : 1) + (run.healthSaveError == nil ? 0 : 1)))
                 if let error = run.healthSaveError {
                     Text(error).font(.caption).foregroundStyle(.secondary)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
             }
         }
@@ -262,7 +262,7 @@ struct TrainingPlanEditor: View {
             List {
                 Section {
                     TextField("Name", text: $plan.name)
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                 }
                 Section {
                     ForEach($plan.blocks) { $block in
@@ -276,7 +276,7 @@ struct TrainingPlanEditor: View {
                                  : "Automatically moves to the next block when the timer ends.")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
-                        .subtleFormRowBorder(.row(at: plan.blocks.firstIndex(where: { $0.id == block.id }) ?? 0,
+                        .subtleFormRowShadow(.row(at: plan.blocks.firstIndex(where: { $0.id == block.id }) ?? 0,
                                                   count: plan.blocks.count))
                     }
                     .onDelete { plan.blocks.remove(atOffsets: $0) }
@@ -284,9 +284,9 @@ struct TrainingPlanEditor: View {
                 } header: { Text("Blocks") } footer: { Text("An exercise runs for as long as you need. Double-tap the watch display to finish each series.") }
                 Section {
                     Button("Add Exercise Block") { plan.blocks.append(.init(kind: .exercise, seconds: 120)) }
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     Button("Add Rest Block") { plan.blocks.append(.init(kind: .rest, seconds: 300)) }
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }.disabled(plan.blocks.count >= 40)
             }
             .navigationTitle("Training Structure")
@@ -316,15 +316,15 @@ struct TrainingFinishSheet: View {
             Form {
                 Section("How Hard Was Your Training?") {
                     Stepper("Effort: \(effort)/10", value: $effort, in: 1...10)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     Text(isSimulatorPreview ? "Preview results stay in Workoutes. Nothing is saved to Apple Health."
                          : "This rating contributes to Apple's training load.").font(.caption).foregroundStyle(.secondary)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
                 Button(isSimulatorPreview ? "Finish Preview" : "Finish and Save to Health") { finish(effort) }
-                    .subtleFormRowBorder(.first)
+                    .subtleFormRowShadow(.first)
                 Button("Finish Without an Effort Rating") { finish(nil) }
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
             }
             .navigationTitle("Finish Training")
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }

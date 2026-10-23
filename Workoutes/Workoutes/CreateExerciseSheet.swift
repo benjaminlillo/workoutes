@@ -46,28 +46,28 @@ struct CreateExerciseSheet: View {
                                         .foregroundColor(.blue)
                                 }
                             }
-                            .subtleFormRowBorder(.row(at: index, count: availableExercises.count))
+                            .subtleFormRowShadow(.row(at: index, count: availableExercises.count))
                         }
                     }
                 }
                 
                 Section(header: Text("Create New Exercise")) {
                     TextField("Title", text: $title)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     TextField("Subtitle (Optional)", text: $subtitle)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     TextField("Details (Optional)", text: $details)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Text("Targets")
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Stepper("Reps: \(reps)", value: $reps, in: 1...100)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     
                     if !allTags.isEmpty {
                         Text("Tags")
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                         Group {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
@@ -80,7 +80,7 @@ struct CreateExerciseSheet: View {
                                     }
                                 }
                             }
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                         }
                     }
                     
@@ -91,7 +91,7 @@ struct CreateExerciseSheet: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
-                    .subtleFormRowBorder(.middle)
+                    .subtleFormRowShadow(.middle)
                     
                     Button("Create and Add") {
                         createNewExercise()
@@ -99,7 +99,7 @@ struct CreateExerciseSheet: View {
                     .disabled(title.isEmpty)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(title.isEmpty ? .gray : .blue)
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
                 }
             }
             .transparentNavigationChrome()

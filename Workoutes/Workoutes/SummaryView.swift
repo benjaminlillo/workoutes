@@ -193,7 +193,7 @@ struct SummaryDashboard: View {
             }
             .padding(20)
             .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .subtleCardBorder(cornerRadius: 24)
+            .subtleCardShadow()
 
             let layout = dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
@@ -224,7 +224,7 @@ struct SummaryStatisticCard: View {
                 .padding(20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .subtleCardBorder(cornerRadius: 24)
+            .subtleCardShadow()
             .accessibilityElement(children: .combine)
     }
 }

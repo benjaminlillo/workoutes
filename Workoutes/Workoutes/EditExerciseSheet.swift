@@ -11,18 +11,18 @@ struct EditExerciseSheet: View {
             Form {
                 Section(header: Text("Basic Info")) {
                     TextField("Title", text: $exercise.title)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     TextField("Subtitle (Optional)", text: $exercise.subtitle)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     TextField("Details (Optional)", text: $exercise.details)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
                 
                 Section(header: Text("Targets")) {
                     Stepper("Sets: \(exercise.numberOfSets)", value: $exercise.numberOfSets, in: 1...20)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     Stepper("Reps: \(exercise.reps)", value: $exercise.reps, in: 1...100)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
                 
                 if !allTags.isEmpty {
@@ -42,7 +42,7 @@ struct EditExerciseSheet: View {
                                 }
                             }
                         }
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                     }
                 }
             }

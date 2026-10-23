@@ -14,7 +14,7 @@ struct CreateWorkoutSheet: View {
             Form {
                 Section(header: Text("Workout Details")) {
                     TextField("Workout Name", text: $name)
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                 }
                 
                 if !allTags.isEmpty {
@@ -34,7 +34,7 @@ struct CreateWorkoutSheet: View {
                                 }
                             }
                         }
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                     }
                 }
             }

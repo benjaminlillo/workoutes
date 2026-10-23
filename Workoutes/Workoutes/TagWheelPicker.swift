@@ -105,9 +105,6 @@ struct TagWheelPicker: View {
             Color.clear
                 .glassEffect(.regular.tint(.white.opacity(colorScheme == .dark ? 0.22 : 0.55)),
                              in: ContinuousPlateShape())
-            Circle()
-                .strokeBorder(.primary.opacity(0.06), lineWidth: 1)
-                .padding(28)
             Color.clear
                 .frame(width: 78, height: 78)
                 .glassEffect(.regular, in: PlateHubShape())

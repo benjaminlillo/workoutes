@@ -34,7 +34,11 @@ struct TagSelectionLabel: View {
         TagLabel(tag: tag, isSelected: isSelected)
             .padding(.horizontal, 12)
             .frame(minHeight: 44)
-            .background(isSelected ? Color(hex: tag.colorHex).opacity(0.18) : Color.secondary.opacity(0.1), in: Capsule())
+            .background {
+                Capsule()
+                    .fill(isSelected ? Color(hex: tag.colorHex).opacity(0.18) : Color.secondary.opacity(0.1))
+                    .subtleCardShadow()
+            }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(tag.name)
             .accessibilityAddTraits(.isButton)
