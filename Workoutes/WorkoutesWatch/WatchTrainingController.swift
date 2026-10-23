@@ -17,6 +17,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
     @ObservationIgnored private var session: HKWorkoutSession?
     @ObservationIgnored private var builder: HKLiveWorkoutBuilder?
     @ObservationIgnored private var timer: Task<Void, Never>?
+    @ObservationIgnored private var hapticRepeat: Task<Void, Never>?
     @ObservationIgnored private var recoveryTask: Task<Void, Never>?
     @ObservationIgnored private var lastMetricsPublish = Date.distantPast
     @ObservationIgnored private var collectionEnded = false
@@ -231,7 +232,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             if run.tick(at: date) {
                 archive.current = run; try persist(); publish(durable: true)
                 committedAutomaticTransition = true
-                WKInterfaceDevice.current().play(.notification)
+                playFeedback(.notification)
                 throw TrainingFailure.staleCommand
             }
             switch command.action {
@@ -267,7 +268,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
                     session.stopActivity(with: date)
                 } else { await saveHealthWorkout() }
             }
-            WKInterfaceDevice.current().play(.click)
+            playFeedback(.click)
             publish(durable: true)
         } catch {
             // Preserve automatic timer transitions even when rejecting an outdated command.
@@ -292,11 +293,25 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
                     self.archive.current = run
                     do {
                         try self.persist()
-                        WKInterfaceDevice.current().play(.notification)
+                        self.playFeedback(.notification)
                         self.publish(durable: true)
                     } catch { self.archive = previous; self.fail(error.localizedDescription) }
                 }
             }
+        }
+    }
+
+    private func playFeedback(_ type: WKHapticType) {
+        hapticRepeat?.cancel()
+        WKInterfaceDevice.current().play(type)
+        // WatchKit exposes fixed patterns, not intensity. Repeat the same kind of
+        // feedback after it finishes; playing it immediately would interrupt it.
+        hapticRepeat = Task {
+            do {
+                try await Task.sleep(for: type == .click ? .milliseconds(450) : .milliseconds(1600))
+            } catch { return }
+            guard !Task.isCancelled else { return }
+            WKInterfaceDevice.current().play(type)
         }
     }
 
