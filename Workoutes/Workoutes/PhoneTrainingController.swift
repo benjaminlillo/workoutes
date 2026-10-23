@@ -52,7 +52,7 @@ final class PhoneTrainingController {
                 next.reconciledRevisions?[run.id.uuidString] = run.revision
             }
             try store.write(next); archive = next
-            if hasActiveSession { try exerciseActivity.cancelForTraining() }
+            synchronizeActiveExercise()
         } catch { errorMessage = error.localizedDescription }
     }
 
@@ -117,6 +117,7 @@ final class PhoneTrainingController {
     }
 
     func advance() { perform(.advance) }
+    func clearQueuedExercise() { perform(.clearQueuedExercise) }
     func pause() { perform(.pause) }
     func undo() { perform(.undo) }
     func finish(effort: Int?) { perform(.finish, effort: effort) }
@@ -177,13 +178,13 @@ final class PhoneTrainingController {
             if incoming.isActive || (pendingStartID != nil && incoming.startCommandID == pendingStartID) {
                 isStarting = false; pendingStartID = nil; startTimeout?.cancel()
             }
+            if archive.current?.id == incoming.id { synchronizeActiveExercise() }
         } catch { errorMessage = "Couldn't save training: \(error.localizedDescription)" }
     }
 
     private func reconcile(_ incoming: TrainingRun, previous: TrainingRun?) throws {
         guard let context else { return }
         let affectsCurrent = archive.current == nil || incoming.startedAt >= archive.current!.startedAt
-        if incoming.isActive && affectsCurrent { try exerciseActivity?.cancelForTraining() }
         try context.save()
         let exercises = try context.fetch(FetchDescriptor<WorkoutExercise>())
         let completed = incoming.progress.results.filter(\.isComplete)
@@ -210,5 +211,11 @@ final class PhoneTrainingController {
             exercises.first { $0.stableID == result.exercise.id }?.isDone = false
         }
         do { try context.save() } catch { context.rollback(); throw error }
+    }
+
+    private func synchronizeActiveExercise() {
+        guard let context, let exerciseActivity else { return }
+        do { exerciseActivity.synchronize(exercises: try context.fetch(FetchDescriptor<WorkoutExercise>())) }
+        catch { errorMessage = error.localizedDescription }
     }
 }

@@ -238,7 +238,9 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             case .selectExercise:
                 guard let exercise = command.exercise else { throw TrainingFailure.invalidExercise }
                 try run.select(exercise, at: date)
+            case .clearQueuedExercise: try run.clearQueuedExercise(at: date)
             case .advance: try run.advance(at: date)
+            case .previousBlock: try run.returnToPreviousBlock(at: date)
             case .pause: run.togglePause(at: date)
             case .undo: try run.undoTransition(at: date)
             case .finish: run.finish(effort: command.effort, at: date)

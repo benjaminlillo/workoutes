@@ -51,12 +51,13 @@ struct TrainingExercise: Codable, Equatable, Sendable {
 }
 
 enum TrainingFailure: LocalizedError {
-    case invalidPlan, invalidExercise, wrongPhase, staleCommand, notConnected, noSession
+    case invalidPlan, invalidExercise, wrongPhase, noAvailableExerciseBlock, staleCommand, notConnected, noSession
     var errorDescription: String? {
         switch self {
         case .invalidPlan: "Add at least one exercise block and valid rest durations."
         case .invalidExercise: "This exercise needs a name, 1–20 sets, 1–100 repetitions and a valid weight."
-        case .wrongPhase: "Select an exercise in an empty exercise block. Finish or undo the current series first."
+        case .wrongPhase: "This action isn't available in the current training stage. Resume training if it is paused."
+        case .noAvailableExerciseBlock: "There are no upcoming empty exercise blocks in this training."
         case .staleCommand: "The workout has advanced. Check the current stage and try again."
         case .notConnected: "The live connection to Apple Watch is unavailable. Keep both devices nearby and tap Refresh to reconnect. Any workout already running continues on the watch."
         case .noSession: "There is no active training session."

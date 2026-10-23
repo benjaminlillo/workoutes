@@ -37,15 +37,27 @@ extension WorkoutExercise {
 @Observable
 final class ExerciseActivityController {
     var training: PhoneTrainingController?
-    private(set) var activeExerciseID: String?
-    private(set) var activeStartedAt: Date?
-    private(set) var activeSessionID: String?
+    private var localExerciseID: String?
+    private var localStartedAt: Date?
+    private var localSessionID: String?
+    var activeExerciseID: String? { currentTrainingResult?.exercise.id ?? localExerciseID }
+    var activeStartedAt: Date? {
+        guard let result = currentTrainingResult, let run = training?.run else { return localStartedAt }
+        return result.sets.first?.startedAt ?? run.progress.phaseActualStartedAt ?? run.progress.phaseStartedAt
+    }
+    var activeSessionID: String? {
+        guard let result = currentTrainingResult, let run = training?.run else { return localSessionID }
+        // A button rendered for an earlier series must not advance a later one.
+        let phaseStart = run.progress.phaseActualStartedAt ?? run.progress.phaseStartedAt
+        return "\(result.id):\(run.progress.stage.rawValue):\(result.sets.count):\(phaseStart.timeIntervalSinceReferenceDate)"
+    }
     private(set) var isUpdating = false
     var errorMessage: String?
 
     @ObservationIgnored private var activity: Activity<ExerciseActivityAttributes>?
     @ObservationIgnored private var pendingOperation: Task<Void, Never>?
     @ObservationIgnored private var stateObservation: Task<Void, Never>?
+    @ObservationIgnored private var awaitingForeground = false
     @ObservationIgnored private var queuedOperationCount = 0
     @ObservationIgnored private var context: ModelContext?
     @ObservationIgnored private var session: ExerciseSession?
@@ -60,21 +72,29 @@ final class ExerciseActivityController {
         restoreCurrentActivity()
     }
 
+    private var currentTrainingResult: TrainingExerciseResult? {
+        guard let run = training?.run, run.isActive, let result = run.currentResult, !result.isComplete else { return nil }
+        return result
+    }
+
     func isActive(_ exercise: WorkoutExercise) -> Bool {
-        if let training, training.hasActiveSession {
-            return training.run?.currentResult?.exercise.id == exercise.activityID
-                && training.run?.currentResult?.isComplete == false
-        }
         return activeExerciseID != nil && activeExerciseID == exercise.activityID
+    }
+
+    func isQueued(_ exercise: WorkoutExercise) -> Bool {
+        training?.run?.queuedExercise?.id == exercise.activityID
     }
 
     func content(for exercise: WorkoutExercise) -> ExerciseActivityAttributes.ContentState {
         var state = exercise.activityContent
-        if let run = training?.run, run.isActive, run.currentResult?.exercise.id == exercise.activityID {
-            state.status = .playing
-            state.startedAt = run.progress.phaseStartedAt
-            state.sessionID = run.id.uuidString
-            return state
+        if let selected = currentTrainingResult?.exercise, selected.id == exercise.activityID {
+            state.title = selected.name
+            state.numberOfSets = selected.sets
+            state.reps = selected.repetitions
+            state.weight = selected.weightKilograms
+            let unit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .metric
+            state.displayedWeight = unit.displayedWeight(from: selected.weightKilograms)
+            state.weightUnitSymbol = unit.symbol
         }
         if isActive(exercise) {
             state.status = .playing
@@ -87,8 +107,10 @@ final class ExerciseActivityController {
     /// Cycles the card control through empty, active, completed, and empty.
     func advanceState(_ exercise: WorkoutExercise, context: ModelContext) {
         guard !isUpdating, !exercise.isDeleted else { return }
-        if let training, training.hasActiveSession {
-            if isActive(exercise) { training.advance() } else { training.select(exercise) }
+        if let training, training.hasActiveSession, currentTrainingResult != nil || localExerciseID != exercise.activityID {
+            if isActive(exercise) { training.advance() }
+            else if isQueued(exercise) { training.clearQueuedExercise() }
+            else { training.select(exercise) }
             return
         }
         if isActive(exercise) {
@@ -104,8 +126,10 @@ final class ExerciseActivityController {
 
     func toggle(_ exercise: WorkoutExercise, context: ModelContext) {
         guard !isUpdating, !exercise.isDeleted else { return }
-        if let training, training.hasActiveSession {
-            if isActive(exercise) { training.advance() } else { training.select(exercise) }
+        if let training, training.hasActiveSession, currentTrainingResult != nil || localExerciseID != exercise.activityID {
+            if isActive(exercise) { training.advance() }
+            else if isQueued(exercise) { training.clearQueuedExercise() }
+            else { training.select(exercise) }
             return
         }
         self.context = context
@@ -135,30 +159,38 @@ final class ExerciseActivityController {
     }
 
     func synchronize(exercises: [WorkoutExercise]) {
-        guard training?.hasActiveSession != true else { return }
-        enqueue {
-            guard self.activeExerciseID != nil else {
-                if self.activity != nil { await self.finish() }
-                return
-            }
-            guard let exercise = exercises.first(where: {
-                      !$0.isDeleted && $0.activityID == self.activeExerciseID
-                  }), !exercise.isDone else {
-                do { try self.cancelSession() }
-                catch { self.errorMessage = error.localizedDescription; return }
-                await self.finish()
-                return
-            }
-            await self.publish(exercise)
+        enqueue { await self.synchronizeCurrentExercise(exercises: exercises) }
+    }
+
+    private func synchronizeCurrentExercise(exercises: [WorkoutExercise]) async {
+        // Starting a tracker alone doesn't replace an active exercise. Only an
+        // actual exercise selection takes over the single active-exercise slot.
+        if currentTrainingResult != nil, session != nil {
+            do { try cancelSession() }
+            catch { errorMessage = error.localizedDescription; return }
         }
+        guard let id = activeExerciseID else {
+            if activity != nil { await finish() }
+            return
+        }
+        guard let exercise = exercises.first(where: { !$0.isDeleted && $0.activityID == id }), !exercise.isDone else {
+            do { try cancelSession() }
+            catch { errorMessage = error.localizedDescription; return }
+            await finish()
+            return
+        }
+        await publish(exercise)
     }
 
     func restore() {
         enqueue {
+            self.awaitingForeground = false
             self.restoreSession()
             self.restoreCurrentActivity()
-            if let exercise = self.session?.exercise { await self.publish(exercise) }
-            else { await self.finish() }
+            guard let context = self.context else { return }
+            do {
+                await self.synchronizeCurrentExercise(exercises: try context.fetch(FetchDescriptor<WorkoutExercise>()))
+            } catch { self.errorMessage = error.localizedDescription }
         }
     }
 
@@ -169,9 +201,14 @@ final class ExerciseActivityController {
     func performLiveActivityAction(exerciseID: String, sessionID: String? = nil, complete: Bool, context: ModelContext) async throws {
         await waitForPendingUpdates()
         guard let sessionID, sessionID == activeSessionID,
-              let exercise = session?.exercise, exercise.activityID == exerciseID,
+              let exercise = try context.fetch(FetchDescriptor<WorkoutExercise>()).first(where: { $0.activityID == exerciseID }),
               !exercise.isDeleted, !exercise.isDone, isActive(exercise) else { return }
         if complete {
+            if currentTrainingResult != nil {
+                guard training?.run?.canAdvance == true else { return }
+                training?.advance()
+                return
+            }
             try context.save()
             do {
                 let finalState = try finalize(exercise, context: context)
@@ -225,9 +262,9 @@ final class ExerciseActivityController {
     }
 
     private func updateActiveSession() {
-        activeExerciseID = session?.exercise?.stableID
-        activeSessionID = session?.id
-        activeStartedAt = session?.startedAt
+        localExerciseID = session?.exercise?.stableID
+        localSessionID = session?.id
+        localStartedAt = session?.startedAt
     }
 
     private func restoreSession() {
@@ -250,12 +287,6 @@ final class ExerciseActivityController {
         }
         session = nil
         updateActiveSession()
-    }
-
-    func cancelForTraining() throws {
-        guard session != nil || activity != nil else { return }
-        try cancelSession()
-        enqueue { await self.finish() }
     }
 
     private func finalize(_ exercise: WorkoutExercise, context: ModelContext) throws -> ExerciseActivityAttributes.ContentState? {
@@ -293,9 +324,14 @@ final class ExerciseActivityController {
             if let activity, isRunning(activity) {
                 if state != activity.content.state { await activity.update(content) }
             } else {
+                guard !awaitingForeground else { return }
                 activity = try Activity.request(attributes: ExerciseActivityAttributes(), content: content, pushType: nil)
                 observeActivity()
             }
+        } catch ActivityAuthorizationError.visibility {
+            // iOS can deny a new activity from a background snapshot. Foreground
+            // restoration retries it; repeated snapshots shouldn't produce alerts.
+            awaitingForeground = true
         } catch { errorMessage = "Exercise is running, but the Live Activity couldn't start: \(error.localizedDescription)" }
     }
 

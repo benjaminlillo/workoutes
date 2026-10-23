@@ -16,6 +16,11 @@ struct TrainingExerciseResult: Codable, Equatable, Identifiable, Sendable {
     var completedAt: Date? { isComplete ? sets.last?.endedAt : nil }
 }
 
+struct TrainingQueuedExercise: Codable, Equatable, Sendable {
+    let blockID: UUID
+    let exercise: TrainingExercise
+}
+
 struct TrainingMetrics: Codable, Equatable, Sendable {
     struct Zone: Codable, Equatable, Identifiable, Sendable {
         var id: Int
@@ -44,11 +49,14 @@ struct TrainingProgress: Codable, Equatable, Sendable {
     var phaseStartedAt: Date
     var phaseActualStartedAt: Date?
     var results: [TrainingExerciseResult] = []
+    var queuedExercise: TrainingQueuedExercise?
 }
 
 struct TrainingUndo: Codable, Equatable, Sendable {
     var progress: TrainingProgress
     var phaseElapsed: TimeInterval
+    // Queue edits don't restart the current phase when undone.
+    var pausedSecondsAtCheckpoint: TimeInterval?
 }
 
 struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
@@ -85,10 +93,25 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
         guard let currentBlock else { return nil }
         return progress.results.first { $0.blockID == currentBlock.id }
     }
-    var canSelectExercise: Bool { isActive && pausedAt == nil && progress.stage == .choosingExercise }
+    var exerciseSelectionBlockIndex: Int? {
+        guard isActive, pausedAt == nil else { return nil }
+        if progress.stage == .choosingExercise { return progress.blockIndex }
+        return plan.blocks.indices.first { index in
+            index > progress.blockIndex && plan.blocks[index].kind == .exercise &&
+            !progress.results.contains(where: { $0.blockID == plan.blocks[index].id })
+        }
+    }
+    var canSelectExercise: Bool { exerciseSelectionBlockIndex != nil }
+    var queuedExercise: TrainingExercise? { isActive ? progress.queuedExercise?.exercise : nil }
+    var queuedExerciseNumber: Int? {
+        guard let queued = progress.queuedExercise,
+              let index = plan.blocks.firstIndex(where: { $0.id == queued.blockID }) else { return nil }
+        return plan.blocks.prefix(index + 1).filter { $0.kind == .exercise }.count
+    }
     var canAdvance: Bool {
         isActive && pausedAt == nil && [.series, .seriesRest, .blockRest].contains(progress.stage)
     }
+    var canReturnToPreviousBlock: Bool { isActive && pausedAt == nil && progress.blockIndex > 0 }
     var exerciseNumber: Int {
         plan.blocks.prefix(progress.blockIndex + 1).filter { $0.kind == .exercise }.count
     }
@@ -118,13 +141,27 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
     }
 
     mutating func select(_ exercise: TrainingExercise, at date: Date) throws {
-        guard canSelectExercise, let block = currentBlock else { throw TrainingFailure.wrongPhase }
+        guard isActive, pausedAt == nil else { throw TrainingFailure.wrongPhase }
+        guard let index = exerciseSelectionBlockIndex else { throw TrainingFailure.noAvailableExerciseBlock }
         guard exercise.isValid else { throw TrainingFailure.invalidExercise }
-        checkpoint(at: date)
-        progress.results.append(.init(id: "\(id.uuidString):\(block.id.uuidString)", blockID: block.id, exercise: exercise))
-        progress.stage = .series
-        progress.phaseStartedAt = date
-        progress.phaseActualStartedAt = date
+        checkpoint(at: date, preservingPhaseClock: index != progress.blockIndex)
+        let block = plan.blocks[index]
+        if index == progress.blockIndex {
+            progress.results.append(.init(id: "\(id.uuidString):\(block.id.uuidString)", blockID: block.id, exercise: exercise))
+            if progress.queuedExercise?.blockID == block.id { progress.queuedExercise = nil }
+            progress.stage = .series
+            progress.phaseStartedAt = date
+            progress.phaseActualStartedAt = date
+        } else {
+            progress.queuedExercise = .init(blockID: block.id, exercise: exercise)
+        }
+        revision += 1
+    }
+
+    mutating func clearQueuedExercise(at date: Date) throws {
+        guard isActive, pausedAt == nil, progress.queuedExercise != nil else { throw TrainingFailure.wrongPhase }
+        checkpoint(at: date, preservingPhaseClock: true)
+        progress.queuedExercise = nil
         revision += 1
     }
 
@@ -133,7 +170,9 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
         checkpoint(at: date)
         switch progress.stage {
         case .series:
-            guard let index = progress.results.indices.last else { throw TrainingFailure.wrongPhase }
+            guard let index = progress.results.firstIndex(where: { $0.blockID == currentBlock?.id }) else {
+                throw TrainingFailure.wrongPhase
+            }
             progress.results[index].sets.append(.init(startedAt: progress.phaseActualStartedAt ?? progress.phaseStartedAt, endedAt: date,
                                                      duration: phaseElapsed(at: date)))
             if progress.results[index].isComplete {
@@ -151,6 +190,20 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
             progress.blockIndex += 1; enterBlock(at: date)
         default: throw TrainingFailure.wrongPhase
         }
+        revision += 1
+    }
+
+    mutating func returnToPreviousBlock(at date: Date) throws {
+        guard canReturnToPreviousBlock else { throw TrainingFailure.wrongPhase }
+        checkpoint(at: date)
+        progress.blockIndex -= 1
+        // Reopen only the last set of a completed exercise. Keep all other recorded
+        // sets, including work in later blocks, so navigating never erases them.
+        if let index = progress.results.firstIndex(where: { $0.blockID == currentBlock?.id }),
+           progress.results[index].isComplete {
+            progress.results[index].sets.removeLast()
+        }
+        enterBlock(at: date)
         revision += 1
     }
 
@@ -183,7 +236,11 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
     mutating func undoTransition(at date: Date) throws {
         guard isActive, pausedAt == nil, let undo else { throw TrainingFailure.wrongPhase }
         progress = undo.progress
-        progress.phaseStartedAt = date.addingTimeInterval(-undo.phaseElapsed)
+        if let pausedSecondsAtCheckpoint = undo.pausedSecondsAtCheckpoint {
+            progress.phaseStartedAt = progress.phaseStartedAt.addingTimeInterval(pausedSeconds - pausedSecondsAtCheckpoint)
+        } else {
+            progress.phaseStartedAt = date.addingTimeInterval(-undo.phaseElapsed)
+        }
         self.undo = nil
         revision += 1
     }
@@ -197,17 +254,27 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
         }
         self.pausedAt = nil
         self.effort = effort.map { min(10, max(1, $0)) }
-        endedAt = date; progress.stage = .finished; undo = nil; revision += 1
+        endedAt = date; progress.stage = .finished; progress.queuedExercise = nil; undo = nil; revision += 1
     }
 
-    private mutating func checkpoint(at date: Date) {
-        undo = TrainingUndo(progress: progress, phaseElapsed: phaseElapsed(at: date))
+    private mutating func checkpoint(at date: Date, preservingPhaseClock: Bool = false) {
+        undo = TrainingUndo(progress: progress, phaseElapsed: phaseElapsed(at: date),
+                            pausedSecondsAtCheckpoint: preservingPhaseClock ? pausedSeconds : nil)
     }
     private mutating func enterBlock(at date: Date) {
         progress.phaseStartedAt = date
         progress.phaseActualStartedAt = date
         guard let currentBlock else { progress.stage = .readyToFinish; return }
-        progress.stage = currentBlock.kind == .exercise ? .choosingExercise : .blockRest
+        if currentBlock.kind == .rest {
+            progress.stage = .blockRest
+        } else {
+            if let queued = progress.queuedExercise, queued.blockID == currentBlock.id, currentResult == nil {
+                progress.results.append(.init(id: "\(id.uuidString):\(currentBlock.id.uuidString)",
+                                              blockID: currentBlock.id, exercise: queued.exercise))
+                progress.queuedExercise = nil
+            }
+            progress.stage = currentResult == nil ? .choosingExercise : .series
+        }
     }
 }
 

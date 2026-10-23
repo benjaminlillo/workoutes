@@ -11,7 +11,7 @@ struct WorkoutesApp: App {
     @State private var exerciseBackground = ExerciseBackgroundStore()
     @State private var exerciseActivity = ExerciseActivityRuntime.shared.controller
     @State private var themeIcon = ThemeIconController()
-    @State private var training = PhoneTrainingController()
+    @State private var training = ExerciseActivityRuntime.shared.training
     
     let sharedModelContainer = ExerciseActivityRuntime.shared.container
 
@@ -21,12 +21,6 @@ struct WorkoutesApp: App {
                 .environment(exerciseActivity)
                 .environment(exerciseBackground)
                 .environment(\.trainingController, training)
-                .task {
-                    #if DEBUG
-                    guard NSClassFromString("XCTestCase") == nil else { return }
-                    #endif
-                    training.attach(context: sharedModelContainer.mainContext, exerciseActivity: exerciseActivity)
-                }
                 .tint(ThemeColor.resolve(accentColorRawValue).color)
                 .onChange(of: accentColorRawValue, initial: true) {
                     let resolved = ThemeColor.resolve(accentColorRawValue).rawValue

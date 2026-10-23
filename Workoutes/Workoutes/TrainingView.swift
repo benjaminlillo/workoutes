@@ -66,6 +66,11 @@ struct TrainingView: View {
                             .disabled(!controller.isConnected || run.pausedAt != nil)
                             .subtleFormRowBorder(.middle)
                     }
+                    if run.queuedExercise != nil {
+                        Button("Remove Queued Exercise") { controller.clearQueuedExercise() }
+                            .disabled(!controller.isConnected || run.pausedAt != nil)
+                            .subtleFormRowBorder(.middle)
+                    }
                     Button("Finish Training") { finishing = true }
                         .disabled(!controller.isConnected)
                         .subtleFormRowBorder(.last)
@@ -226,6 +231,15 @@ struct TrainingSessionSummary: View {
                     .font(.largeTitle.monospacedDigit())
             }
             LabeledContent("Duration", value: TrainingClock.label(run.elapsed(at: date)))
+            if let queued = run.queuedExercise, let number = run.queuedExerciseNumber {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label("Queued · Exercise \(number)", systemImage: "text.line.first.and.arrowtriangle.forward")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text(queued.name).font(.headline)
+                    Text("\(queued.weightLabel) · \(queued.repetitions) reps · \(queued.sets) series").font(.subheadline)
+                }
+                .accessibilityIdentifier("trainingQueuedExercise")
+            }
             if run.pausedAt != nil { Label("Paused", systemImage: "pause.fill") }
             if let hr = run.metrics.heartRate, run.isActive { LabeledContent("Heart Rate", value: "\(Int(hr)) bpm") }
             if let hr = run.metrics.averageHeartRate { LabeledContent("Average Heart Rate", value: "\(Int(hr)) bpm") }
