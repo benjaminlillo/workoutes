@@ -33,7 +33,7 @@ struct WatchActiveTrainingView: View {
     private var controls: some View {
         ScrollView {
             VStack(spacing: 8) {
-                Text("Controls").font(.caption).foregroundStyle(.secondary)
+                Text("Controls").font(.headline).foregroundStyle(.secondary)
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 9) {
                     control(run.pausedAt == nil ? "Pause" : "Resume",
                             symbol: run.pausedAt == nil ? "pause.fill" : "play.fill", color: .yellow) {
@@ -56,13 +56,13 @@ struct WatchActiveTrainingView: View {
                     onAction(.undo)
                     showProgress()
                 }
-                .font(.caption2)
+                .font(.caption)
                 .buttonStyle(.bordered)
-                .controlSize(.mini)
+                .controlSize(.small)
                 .disabled(run.undo == nil || run.pausedAt != nil)
             }
             .disabled(isBusy)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 4)
         }
         .accessibilityIdentifier("watchTrainingControls")
     }
@@ -72,11 +72,11 @@ struct WatchActiveTrainingView: View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: symbol)
-                    .font(.system(size: 21, weight: .semibold))
+                    .font(.system(size: 25, weight: .semibold))
                     .foregroundStyle(color)
-                    .frame(width: 46, height: 46)
+                    .frame(width: 54, height: 54)
                     .background(color.opacity(0.18), in: Circle())
-                Text(title).font(.system(size: 11, weight: .medium))
+                Text(title).font(.system(size: 13, weight: .medium))
                     .multilineTextAlignment(.center).lineLimit(2)
             }
             .frame(maxWidth: .infinity)
@@ -111,15 +111,15 @@ private struct WatchTrainingProgressPage: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let compact = geometry.size.height < 190
-            VStack(alignment: .leading, spacing: compact ? 5 : 9) {
-                exerciseCard(compact: compact)
+            let compact = geometry.size.height < 210
+            VStack(alignment: .leading, spacing: compact ? 4 : 7) {
+                exerciseSummary(compact: compact)
                 HStack(alignment: .center, spacing: 6) {
                     VStack(alignment: .leading, spacing: 0) {
                         Text(run.pausedAt != nil ? "Paused" : (isResting ? "Rest" : "Training"))
-                            .font(.system(size: 11, weight: .medium))
+                            .font(.system(size: compact ? 13 : 14, weight: .medium))
                         Text(TrainingClock.label(run.remaining(at: date) ?? run.phaseElapsed(at: date)))
-                            .font(.system(size: compact ? 38 : 46, weight: .medium, design: .rounded))
+                            .font(.system(size: compact ? 46 : 52, weight: .medium, design: .rounded))
                             .monospacedDigit()
                             .lineLimit(1).minimumScaleFactor(0.65)
                     }
@@ -128,9 +128,9 @@ private struct WatchTrainingProgressPage: View {
                     VStack(spacing: 2) {
                         Image(systemName: "heart.fill").foregroundStyle(.red)
                         Text(run.metrics.heartRate.map { "\(Int($0))" } ?? "—")
-                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .font(.system(size: compact ? 21 : 23, weight: .semibold, design: .rounded))
                             .monospacedDigit()
-                        Text("BPM").font(.system(size: 9)).foregroundStyle(.secondary)
+                        Text("BPM").font(.system(size: 11)).foregroundStyle(.secondary)
                     }
                     .font(.caption2)
                     .accessibilityElement(children: .ignore)
@@ -142,16 +142,17 @@ private struct WatchTrainingProgressPage: View {
                     Spacer(minLength: 4)
                     Text(TrainingClock.label(run.elapsed(at: date))).monospacedDigit()
                 }
-                .font(.system(size: compact ? 12 : 14, weight: .medium))
+                .font(.system(size: compact ? 15 : 16, weight: .medium))
+                .padding(.horizontal, 8)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
-        .padding(.horizontal, 10)
-        .padding(.bottom, 12)
+        .padding(.horizontal, 2)
+        .padding(.bottom, 18)
     }
 
-    private func exerciseCard(compact: Bool) -> some View {
-        VStack(alignment: .leading, spacing: compact ? 3 : 5) {
+    private func exerciseSummary(compact: Bool) -> some View {
+        VStack(alignment: .leading, spacing: compact ? 2 : 4) {
             HStack(spacing: 4) {
                 Text(showsQueuedExercise ? "Next · \(run.queuedExerciseNumber ?? 0) / \(run.plan.exerciseCount)"
                      : "Exercise \(run.exerciseNumber) / \(run.plan.exerciseCount)")
@@ -161,11 +162,11 @@ private struct WatchTrainingProgressPage: View {
                     Text("Preview").foregroundStyle(.orange)
                 }
             }
-            .font(.system(size: 10, weight: .medium))
+            .font(.system(size: compact ? 12 : 13, weight: .medium))
             .lineLimit(1).minimumScaleFactor(0.8)
             Text(displayedExercise?.name ?? (run.progress.stage == .blockRest ? "Rest" :
                  (run.progress.stage == .readyToFinish ? "All Blocks Complete" : "Choose an Exercise")))
-                .font(.system(size: compact ? 14 : 16, weight: .semibold))
+                .font(.system(size: compact ? 20 : 22, weight: .semibold))
                 .lineLimit(2).minimumScaleFactor(0.8)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -175,18 +176,15 @@ private struct WatchTrainingProgressPage: View {
                     Text("·").foregroundStyle(.secondary)
                     Text("\(exercise.repetitions) reps")
                 }
-                .font(.system(size: compact ? 11 : 12)).lineLimit(1).minimumScaleFactor(0.8)
+                .font(.system(size: compact ? 14 : 16)).lineLimit(1).minimumScaleFactor(0.8)
                 Text(showsQueuedExercise ? "Queued · \(exercise.sets) series" : run.phaseTitle)
-                    .font(.system(size: compact ? 10 : 11, weight: .medium)).foregroundStyle(phaseColor)
+                    .font(.system(size: compact ? 13 : 14, weight: .medium)).foregroundStyle(phaseColor)
                     .lineLimit(1).minimumScaleFactor(0.8)
             } else if run.progress.stage == .choosingExercise {
-                Text("Select on iPhone").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("Select on iPhone").font(.system(size: 14)).foregroundStyle(.secondary)
             }
         }
-        .padding(compact ? 9 : 11)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 18))
-        .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 1)
         .accessibilityElement(children: .combine)
     }
 }
@@ -200,10 +198,10 @@ private struct WatchTrainingDetailsPage: View {
                 Text("Details").font(.headline)
                 if let queued = run.queuedExercise, let number = run.queuedExerciseNumber {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Up Next · Exercise \(number)").font(.caption2).foregroundStyle(.secondary)
+                        Text("Up Next · Exercise \(number)").font(.subheadline).foregroundStyle(.secondary)
                         Text(queued.name).font(.headline)
                         Text("\(queued.weightLabel) · \(queued.repetitions) reps · \(queued.sets) series")
-                            .font(.caption)
+                            .font(.subheadline)
                     }
                     Divider()
                 }
@@ -221,24 +219,24 @@ private struct WatchTrainingDetailsPage: View {
                         Spacer()
                         Text(TrainingClock.label(zone.seconds)).monospacedDigit()
                     }
-                    .font(.caption)
+                    .font(.subheadline)
                 }
                 Text("Block \(min(run.progress.blockIndex + 1, run.plan.blocks.count)) / \(run.plan.blocks.count)")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(.secondary)
                 if run.isSimulatorPreview == true {
                     Text("Simulator Preview · No Health recording").font(.caption2).foregroundStyle(.orange)
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 4)
             .padding(.bottom, 18)
         }
     }
 
     private func metric(_ title: String, value: Double?, unit: String, symbol: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.caption2).foregroundStyle(.secondary)
+            Text(title).font(.subheadline).foregroundStyle(.secondary)
             Label(value.map { "\(Int($0)) \(unit)" } ?? "— \(unit)", systemImage: symbol)
-                .font(.system(.title3, design: .rounded, weight: .medium))
+                .font(.system(.title2, design: .rounded, weight: .medium))
                 .foregroundStyle(color).monospacedDigit()
         }
         .accessibilityElement(children: .combine)
