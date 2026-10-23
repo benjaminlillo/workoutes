@@ -71,7 +71,10 @@ struct TrainingView: View {
                             .disabled(!controller.isConnected || run.pausedAt != nil)
                             .subtleFormRowShadow(.middle)
                     }
-                    Button("Finish Training") { finishing = true }
+                    Button("Finish Training") {
+                        if run.plan.asksForEffortRating { finishing = true }
+                        else { controller.finish(effort: nil) }
+                    }
                         .disabled(!controller.isConnected)
                         .subtleFormRowShadow(.last)
                 }
@@ -263,6 +266,15 @@ struct TrainingPlanEditor: View {
                 Section {
                     TextField("Name", text: $plan.name)
                         .subtleFormRowShadow()
+                }
+                Section {
+                    Toggle("Ask for Effort Rating", isOn: $plan.asksForEffortRating)
+                        .accessibilityIdentifier("trainingAskForEffortRating")
+                        .subtleFormRowShadow()
+                } header: {
+                    Text("End of Training")
+                } footer: {
+                    Text("When disabled, finishing training skips the effort question and saves no effort rating in Workoutes or Apple Health. Applies to new sessions.")
                 }
                 Section {
                     ForEach($plan.blocks) { $block in

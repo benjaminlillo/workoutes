@@ -35,7 +35,10 @@ struct WatchTrainingView: View {
         Group {
             if let run = controller.run, run.isActive {
                 WatchActiveTrainingView(run: run, isBusy: controller.isBusy,
-                                        onAction: { controller.local($0) }, onFinish: { finishing = true })
+                                        onAction: { controller.local($0) }, onFinish: {
+                    if run.plan.asksForEffortRating { finishing = true }
+                    else { controller.local(.finish) }
+                })
                     .id(run.id)
             } else {
                 NavigationStack {
