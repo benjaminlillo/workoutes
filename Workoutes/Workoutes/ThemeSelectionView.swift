@@ -5,6 +5,7 @@ struct ThemeSelectionView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.displayScale) private var displayScale
     @State private var centeredTheme: ThemeColor?
 
     private var selectedTheme: ThemeColor { ThemeColor.resolve(accentColorRawValue) }
@@ -75,6 +76,8 @@ struct ThemeSelectionView: View {
         return Button(action: select) {
             VStack(spacing: 16) {
                 ThemeExercisePreview(theme: theme)
+                    // Compensate for the silhouette's magnification so grain stays one physical pixel.
+                    .environment(\.displayScale, displayScale * (width - 8) / 140)
                     .scaleEffect((width - 8) / 140)
                     .frame(width: width - 8, height: (width - 8) * 272 / 140)
                     .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))

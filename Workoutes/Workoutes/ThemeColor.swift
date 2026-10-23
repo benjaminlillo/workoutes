@@ -88,8 +88,8 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         return .indigo
     }
 
-    /// Both appearances use the palette's complement and supporting color.
+    /// Both appearances use the full palette for the atmospheric background.
     func defaultGradientColors(for _: ColorScheme) -> [String] {
-        [secondaryHex, tertiaryHex]
+        [hex, secondaryHex, tertiaryHex]
     }
 }

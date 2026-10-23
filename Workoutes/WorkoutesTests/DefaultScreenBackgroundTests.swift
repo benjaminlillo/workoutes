@@ -19,17 +19,20 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         }
     }
 
-    private func pixelRGB(_ data: Data, x: Int, y: Int) throws -> [Int] {
+    private func averageRGB(_ data: Data, x: Int, y: Int) throws -> [Int] {
         let image = try XCTUnwrap(UIImage(data: data)?.cgImage)
-        let pixel = try XCTUnwrap(image.cropping(to: CGRect(x: x, y: y, width: 1, height: 1)))
-        var bytes = [UInt8](repeating: 0, count: 4)
+        let patch = try XCTUnwrap(image.cropping(to: CGRect(x: x - 8, y: y - 8, width: 16, height: 16)))
+        var bytes = [UInt8](repeating: 0, count: 16 * 16 * 4)
         try bytes.withUnsafeMutableBytes { buffer in
-            let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 1, height: 1,
-                bitsPerComponent: 8, bytesPerRow: 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+            let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 16, height: 16,
+                bitsPerComponent: 8, bytesPerRow: 16 * 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
-            context.draw(pixel, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+            context.draw(patch, in: CGRect(x: 0, y: 0, width: 16, height: 16))
         }
-        return bytes.prefix(3).map { Int($0) }
+        // Average out the random grain instead of asserting a single noise pixel's brightness.
+        return (0..<3).map { channel in
+            stride(from: channel, to: bytes.count, by: 4).reduce(0) { $0 + Int(bytes[$1]) } / 256
+        }
     }
 
     func testDefaultDistributesEachThemeAcrossTheScreenInBothColorSchemes() throws {
@@ -40,15 +43,12 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             for theme in ThemeColor.allCases {
                 UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
                 let rendered = try render(DefaultScreenBackground(), scheme: scheme)
-                let top = try pixelRGB(rendered, x: 8, y: 8)
-                let center = try pixelRGB(rendered, x: 199, y: 422)
-                let bottom = try pixelRGB(rendered, x: 389, y: 835)
+                try rendered.write(to: URL(fileURLWithPath: "/tmp/workoutes-film-background-\(theme.rawValue)-\(scheme).png"))
+                let top = try averageRGB(rendered, x: 8, y: 8)
+                let bottom = try averageRGB(rendered, x: 389, y: 835)
                 XCTAssertGreaterThan(zip(top, bottom).map { abs($0 - $1) }.reduce(0, +), 5)
-                for channel in 0..<3 {
-                    // The center must sit between the ends, rather than form a bright radial hotspot.
-                    XCTAssertGreaterThanOrEqual(center[channel], min(top[channel], bottom[channel]) - 2)
-                    XCTAssertLessThanOrEqual(center[channel], max(top[channel], bottom[channel]) + 2)
-                }
+                // The reference places softer, lighter colors above the deeper lower color fields.
+                XCTAssertGreaterThan(top.reduce(0, +), bottom.reduce(0, +), "\(theme.name) in \(scheme)")
                 backgrounds.insert(rendered)
             }
             XCTAssertEqual(backgrounds.count, ThemeColor.allCases.count)
