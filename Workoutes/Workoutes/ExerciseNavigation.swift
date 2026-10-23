@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 enum AppTab: Hashable {
-    case summary, workouts, exercises, settings
+    case summary, workouts, exercises, settings, activeExercise
 }
 
 struct ExerciseRevealRequest: Equatable {
@@ -29,6 +29,15 @@ final class ExerciseNavigation {
     var selectedTab: AppTab = .summary
     var selectedTagIDs: Set<PersistentIdentifier> = []
     var revealRequest: ExerciseRevealRequest?
+
+    func resolveActiveExerciseShortcut(_ exercise: WorkoutExercise?, previousTab: AppTab) {
+        guard selectedTab == .activeExercise else { return }
+        guard let exercise, !exercise.isDeleted else {
+            selectedTab = previousTab == .activeExercise ? .exercises : previousTab
+            return
+        }
+        reveal(exercise)
+    }
 
     func reveal(_ exercise: WorkoutExercise) {
         guard !exercise.isDeleted else { return }

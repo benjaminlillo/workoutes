@@ -4,7 +4,6 @@ import SwiftData
 struct ContentView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.trainingController) private var training
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Query private var exercises: [WorkoutExercise]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
@@ -16,49 +15,44 @@ struct ContentView: View {
         exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
     }
 
+    private var activeExerciseRole: TabRole {
+        if #available(iOS 27.0, *) { .prominent } else { .search }
+    }
+
     var body: some View {
         TabView(selection: $navigation.selectedTab) {
             Tab(value: AppTab.summary) {
                 SummaryView(pull: $motivationalPull)
             } label: {
-                Image(systemName: "house.fill")
-                    .accessibilityLabel("Summary")
+                Image(systemName: "house.fill").accessibilityLabel("Summary")
             }
             Tab(value: AppTab.workouts) {
                 WorkoutListView()
             } label: {
-                Image(systemName: "list.bullet.clipboard")
-                    .accessibilityLabel("Workouts")
+                Image(systemName: "list.bullet.clipboard").accessibilityLabel("Workouts")
             }
             Tab(value: AppTab.exercises) {
                 ExerciseListView(navigation: navigation)
             } label: {
-                Image(systemName: "dumbbell")
-                    .accessibilityLabel("Exercises")
+                Image(systemName: "dumbbell").accessibilityLabel("Exercises")
             }
             Tab(value: AppTab.settings) {
                 SettingsView()
             } label: {
-                Image(systemName: "gearshape")
-                    .accessibilityLabel("Settings")
+                Image(systemName: "gearshape").accessibilityLabel("Settings")
             }
+            Tab(value: AppTab.activeExercise, role: activeExerciseRole) {
+                // Selection is redirected after the native tab controller records the tap.
+                EmptyView()
+            } label: {
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .accessibilityLabel(activeExercise?.title ?? "No Active Exercise")
+            }
+            .disabled(activeExercise == nil)
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .tabViewBottomAccessory {
-            NativeExerciseAccessory(
-                content: activeExercise.map { exerciseActivity.content(for: $0) },
-                isUpdating: exerciseActivity.isUpdating,
-                accentColor: ThemeColor.resolve(accentColorRawValue).color,
-                onShow: {
-                    if let exercise = activeExercise {
-                        navigation.reveal(exercise)
-                    }
-                }
-            ) {
-                if let exercise = activeExercise {
-                    exerciseActivity.toggle(exercise, context: modelContext)
-                }
-            }
+        .onChange(of: navigation.selectedTab) { previousTab, _ in
+            navigation.resolveActiveExerciseShortcut(activeExercise, previousTab: previousTab)
         }
         .overlay {
             MotivationalPullOverlay(pull: motivationalPull)
