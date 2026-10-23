@@ -92,17 +92,20 @@ final class TagWheelTests: XCTestCase {
 
     func testWheelOverlayKeepsItsDistanceFromTheScreenBottomWhileTheBarAnimates() async throws {
         let state = BottomBarState()
+        let suiteName = "TagWheelTests.Dock.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = UIHostingController(rootView: BottomBarFixture(state: state))
+        window.rootViewController = UIHostingController(rootView: BottomBarFixture(state: state).defaultAppStorage(defaults))
         window.makeKeyAndVisible()
         defer { window.isHidden = true }
         try await Task.sleep(for: .milliseconds(350))
-        let fixed = try XCTUnwrap(state.fixedView)
+        let fixed = try XCTUnwrap(findHub(in: try XCTUnwrap(window.rootViewController).view))
         let moving = try XCTUnwrap(state.movingView)
         let expanded = fixed.convert(fixed.bounds, to: window)
         let movingExpanded = moving.convert(moving.bounds, to: window)
-        XCTAssertEqual(expanded.maxY, window.bounds.maxY - TagWheelPicker.bottomInset, accuracy: 0.5)
+        XCTAssertEqual(expanded.midY, window.bounds.maxY - TagWheelPicker.bottomInset - TagWheelPicker.diameter / 2, accuracy: 0.5)
 
         for height: CGFloat in [93, 81, 69, 57, 47] {
             state.bottomHeight = height
@@ -216,6 +219,11 @@ final class TagWheelTests: XCTestCase {
         return view.subviews.compactMap { findList(in: $0) }.first
     }
 
+    private func findHub(in view: UIView) -> TagWheelGripView? {
+        if let hub = view as? TagWheelGripView { return hub }
+        return view.subviews.compactMap { findHub(in: $0) }.first
+    }
+
     private func rowCount(in list: UICollectionView) -> Int {
         (0..<list.numberOfSections).reduce(0) { $0 + list.numberOfItems(inSection: $1) }
     }
@@ -230,7 +238,6 @@ final class TagWheelTests: XCTestCase {
 
     private final class BottomBarState: ObservableObject {
         @Published var bottomHeight: CGFloat = 105
-        var fixedView: UIView?
         var movingView: UIView?
     }
 
@@ -256,11 +263,11 @@ final class TagWheelTests: XCTestCase {
                 .overlay(alignment: .bottomLeading) {
                     FrameProbe { state.movingView = $0 }.frame(width: 80, height: 80)
                 }
-                .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset) {
-                    FrameProbe { state.fixedView = $0 }.frame(width: 80, height: 80)
-                }
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     Color.clear.frame(height: state.bottomHeight)
+                }
+                .overlay {
+                    DockableTagWheel(tags: [], selection: .constant(nil), onAdd: {}, onEdit: { _ in }, onDelete: { _ in })
                 }
         }
     }

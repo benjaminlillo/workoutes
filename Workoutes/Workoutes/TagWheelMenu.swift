@@ -2,8 +2,8 @@ import SwiftData
 import SwiftUI
 import UIKit
 
-/// Fixed wheel geometry lets filters update immediately, while UIKit dismisses the menu.
-/// Actions that present another interface still wait for dismissal to finish.
+/// Shared tag actions hosted in the native navigation toolbar.
+/// Actions that present another interface wait for menu dismissal to finish.
 struct TagWheelMenu: UIViewRepresentable {
     let tags: [Tag]
     let selection: PersistentIdentifier?
@@ -180,14 +180,13 @@ final class TagWheelMenuButton: UIButton {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        var configuration = UIButton.Configuration.glass()
-        configuration.cornerStyle = .capsule
+        var configuration = UIButton.Configuration.plain()
         configuration.contentInsets = .zero
         self.configuration = configuration
         showsMenuAsPrimaryAction = true
         preferredMenuElementOrder = .fixed
         accessibilityLabel = "Filter and Manage Tags"
-        accessibilityIdentifier = "tag-wheel-menu"
+        accessibilityIdentifier = "tag-management-menu"
 
         let label = UIStackView(arrangedSubviews: [symbol, chevron])
         label.alignment = .center
@@ -207,7 +206,7 @@ final class TagWheelMenuButton: UIButton {
         guard emptyLabel != isEmpty else { return }
         emptyLabel = isEmpty
         symbol.image = UIImage(systemName: isEmpty ? "plus" : "tag",
-                               withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold))
+                               withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .regular))
         chevron.isHidden = isEmpty
     }
 

@@ -26,6 +26,14 @@ struct ExerciseListView: View {
     private var backgroundTagColors: [String] {
         allTags.filter { navigation.selectedTagIDs.contains($0.persistentModelID) }.map(\.colorHex)
     }
+    private var tagSelection: Binding<PersistentIdentifier?> {
+        Binding(get: { navigation.selectedTagIDs.first },
+                set: { navigation.selectedTagIDs = $0.map { [$0] } ?? [] })
+    }
+    private var selectedTagColor: Color {
+        allTags.first { $0.persistentModelID == tagSelection.wrappedValue }
+            .map { Color(hex: $0.colorHex) } ?? .accentColor
+    }
     
     var filteredExercises: [WorkoutExercise] {
         let tagIDs = displayedTagIDs ?? navigation.selectedTagIDs
@@ -116,19 +124,6 @@ struct ExerciseListView: View {
                     }
                 }
                 .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
-                .stableBottomOverlay(bottomInset: TagWheelPicker.bottomInset) {
-                    TagWheelPicker(
-                        tags: allTags,
-                        selection: Binding(
-                            get: { navigation.selectedTagIDs.first },
-                            set: { navigation.selectedTagIDs = $0.map { [$0] } ?? [] }
-                        ),
-                        onAdd: { showingAddTagSheet = true },
-                        onEdit: { editingTag = $0 },
-                        onDelete: { tagPendingDeletion = $0 }
-                    )
-                    .offset(x: TagWheelPicker.overhang)
-                }
                 .navigationTitle("All Exercises")
                 .navigationBarTitleDisplayMode(.large)
                 .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
@@ -139,16 +134,21 @@ struct ExerciseListView: View {
                     isChangingTag = false
                 }
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Button("Customize Background", systemImage: "paintpalette") { showingBackgroundSheet = true }
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
                         ResetCompletedExercisesButton(exercises: allExercises)
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: { showingAddExerciseSheet = true }) {
                             Label("Add Exercise", systemImage: "plus")
                         }
+                        TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue, color: selectedTagColor,
+                                     onChoose: { tag in
+                                         let id = tag.persistentModelID
+                                         tagSelection.wrappedValue = tagSelection.wrappedValue == id ? nil : id
+                                     }, onDeselect: { navigation.selectedTagIDs.removeAll() },
+                                     onAdd: { showingAddTagSheet = true },
+                                     onEdit: { editingTag = $0 },
+                                     onDelete: { tagPendingDeletion = $0 })
+                            .frame(width: 44, height: 44)
                     }
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
@@ -187,6 +187,13 @@ struct ExerciseListView: View {
                     ManageTagSheet(editingTag: tag)
                 }
             }
+        }
+        .overlay {
+            DockableTagWheel(tags: allTags,
+                             selection: tagSelection,
+                             onAdd: { showingAddTagSheet = true },
+                             onEdit: { editingTag = $0 },
+                             onDelete: { tagPendingDeletion = $0 })
         }
     }
 

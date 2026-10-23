@@ -50,8 +50,8 @@ nonisolated struct TagWheelPosition {
         previousDragAngle = nil
     }
 
-    func index(at angle: Double, count: Int) -> Int {
-        let target = position + (Self.selectionAngle - angle) / Self.angularSpacing(for: count)
+    func index(at angle: Double, count: Int, referenceAngle: Double = TagWheelPosition.selectionAngle) -> Int {
+        let target = position + (referenceAngle - angle) / Self.angularSpacing(for: count)
         return Self.wrappedIndex(Int(target.rounded()), count: count)
     }
 }

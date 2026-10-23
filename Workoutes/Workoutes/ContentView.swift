@@ -50,7 +50,7 @@ struct ContentView: View {
             }
             .disabled(activeExercise == nil)
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabBarMinimizeBehavior(.never)
         .onChange(of: navigation.selectedTab) { previousTab, _ in
             navigation.resolveActiveExerciseShortcut(activeExercise, previousTab: previousTab)
         }

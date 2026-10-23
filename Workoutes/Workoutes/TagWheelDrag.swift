@@ -8,7 +8,7 @@ nonisolated struct TagWheelDrag {
 
     mutating func update(start: CGPoint, location: CGPoint, center: CGPoint) {
         let radius = hypot(start.x - center.x, start.y - center.y)
-        // Taps and small drags on the axle belong to its native menu.
+        // The picker handles movement on the axle separately.
         guard radius > 42 else { return }
         let inwardX = (center.x - start.x) / radius
         let inwardY = (center.y - start.y) / radius
