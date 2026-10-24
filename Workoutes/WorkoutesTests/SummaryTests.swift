@@ -280,7 +280,8 @@ final class SummaryTests: XCTestCase {
         let date = Date.now
         let week = WeeklySummary.interval(containing: date)
         let first = exercise()
-        first.tags = [Tag(name: "Chest", colorHex: "FF8800"), Tag(name: "Strength", colorHex: "5599FF")]
+        first.tags = [Tag(name: "Chest", colorHex: "FF8800", iconName: "chest"),
+                      Tag(name: "Strength", colorHex: "5599FF", iconName: "fullBody")]
         let records = (0..<5).map {
             ExerciseCompletion(id: "\($0)", completedAt: Calendar.current.date(byAdding: .day, value: $0 % 3, to: week.start)!,
                                exercise: $0 == 4 ? nil : first)
@@ -291,7 +292,11 @@ final class SummaryTests: XCTestCase {
             ("dark", records, .dark, .large),
             ("accessible", records, .light, .accessibility3)
         ] {
-            let renderer = ImageRenderer(content: SummaryDashboard(summary: WeeklySummary(completions: history, date: date), today: date)
+            let summary = WeeklySummary(completions: history, date: date)
+            let renderer = ImageRenderer(content: VStack(spacing: 16) {
+                WeeklyExerciseChart(summary: summary, today: date)
+                SummaryStatistics(summary: summary)
+            }
                 .padding(16).frame(width: 398).background(DefaultScreenBackground())
                 .environment(\.colorScheme, scheme).environment(\.dynamicTypeSize, size))
             renderer.scale = 2

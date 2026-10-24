@@ -84,37 +84,106 @@ private struct SummaryWeekView: View {
         MotivationalScrollView(pull: $pull) {
             VStack(spacing: 16) {
                 if let training { TrainingEntryView(controller: training) }
-                SummaryDashboard(summary: WeeklySummary(completions: completions, date: date), today: today,
-                                 onPreviousWeek: { moveWeek(by: -1) }, onNextWeek: { moveWeek(by: 1) })
+                WeeklySummaryPager(today: today, selectedWeek: $selectedWeek)
+                SummaryStatistics(summary: WeeklySummary(completions: completions, date: date))
             }.padding(16)
         }
         .defaultScreenBackground()
     }
+}
+
+/// Each visible page fetches its own week; extending the range keeps the same date IDs.
+struct WeeklySummaryPager: View {
+    let today: Date
+    @Binding var selectedWeek: Date?
+    @State private var centeredWeek: Date?
+    @State private var oldestWeek: Date
+
+    init(today: Date, selectedWeek: Binding<Date?>) {
+        self.today = today
+        _selectedWeek = selectedWeek
+        let selected = WeeklySummary.interval(containing: selectedWeek.wrappedValue ?? today).start
+        _centeredWeek = State(initialValue: selected)
+        _oldestWeek = State(initialValue: Calendar.current.date(byAdding: .day, value: -12 * 7, to: selected)!)
+    }
+
+    private var currentWeek: Date { WeeklySummary.interval(containing: today).start }
+    private var weeks: [Date] {
+        let calendar = Calendar.current
+        let first = WeeklySummary.interval(containing: oldestWeek).start
+        let count = (calendar.dateComponents([.day], from: first, to: currentWeek).day ?? 0) / 7
+        return (0...max(0, count)).compactMap { calendar.date(byAdding: .day, value: $0 * 7, to: first) }
+    }
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            LazyHStack(alignment: .top, spacing: 0) {
+                ForEach(weeks, id: \.self) { week in
+                    WeeklySummaryPage(week: week, today: today)
+                        .padding(.vertical, 5)
+                        .containerRelativeFrame(.horizontal)
+                        .id(week)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $centeredWeek)
+        .defaultScrollAnchor(.trailing, for: .initialOffset)
+        .scrollIndicators(.hidden)
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.vertical, -5)
+        .accessibilityIdentifier("weeklySummaryPager")
+        .accessibilityAction(named: "Previous Week") { moveWeek(by: -1) }
+        .accessibilityAction(named: "Next Week") { moveWeek(by: 1) }
+        .onChange(of: centeredWeek) { _, week in
+            guard let week, week <= currentWeek else { return }
+            // The current week follows the clock; historical weeks stay on their dates.
+            selectedWeek = week == currentWeek ? nil : week
+            if let threshold = Calendar.current.date(byAdding: .day, value: 4 * 7, to: oldestWeek), week <= threshold {
+                oldestWeek = Calendar.current.date(byAdding: .day, value: -12 * 7, to: oldestWeek)!
+            }
+        }
+        .onChange(of: currentWeek) { _, week in
+            if selectedWeek == nil { centeredWeek = week }
+        }
+    }
 
     private func moveWeek(by offset: Int) {
-        let calendar = Calendar.current
-        let displayedWeek = WeeklySummary.interval(containing: date, calendar: calendar)
-        guard let shifted = calendar.date(byAdding: .day, value: offset * 7, to: displayedWeek.start) else { return }
-        let target = WeeklySummary.interval(containing: shifted, calendar: calendar).start
-        let current = WeeklySummary.interval(containing: today, calendar: calendar).start
-        guard target <= current else { return }
-        // The current week follows the clock; historical weeks stay on the chosen dates.
-        selectedWeek = target == current ? nil : target
+        guard let target = Calendar.current.date(byAdding: .day, value: offset * 7, to: centeredWeek ?? currentWeek),
+              target <= currentWeek else { return }
+        centeredWeek = target
     }
 }
 
-struct SummaryDashboard: View {
+private struct WeeklySummaryPage: View {
+    let week: Date
+    let today: Date
+    @Query private var completions: [ExerciseCompletion]
+
+    init(week: Date, today: Date) {
+        self.week = week
+        self.today = today
+        let interval = WeeklySummary.interval(containing: week)
+        let start = interval.start
+        let end = interval.end
+        _completions = Query(filter: #Predicate<ExerciseCompletion> { $0.completedAt >= start && $0.completedAt < end },
+                             sort: \ExerciseCompletion.completedAt)
+    }
+
+    var body: some View {
+        WeeklyExerciseChart(summary: WeeklySummary(completions: completions, date: week), today: today)
+    }
+}
+
+struct WeeklyExerciseChart: View {
     let summary: WeeklySummary
     let today: Date
-    var onPreviousWeek: () -> Void = {}
-    var onNextWeek: () -> Void = {}
     @ScaledMetric(relativeTo: .caption) private var chartHeight = 190
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var maximum: Int { max(1, summary.days.map { $0.completions.count }.max() ?? 0) }
     private var blockSpacing: CGFloat { min(2, chartHeight / CGFloat(maximum) * 0.12) }
     private var isCurrentWeek: Bool { summary.interval.start == WeeklySummary.interval(containing: today).start }
-    private var canGoForward: Bool { summary.interval.start < WeeklySummary.interval(containing: today).start }
 
     private var dateRange: String {
         let calendar = Calendar.current
@@ -126,81 +195,62 @@ struct SummaryDashboard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 20) {
-                HStack(alignment: .top, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(isCurrentWeek ? "This Week" : "Week Summary").font(.title3.bold())
-                        Text(dateRange)
-                            .font(.subheadline).foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    HStack(spacing: 0) {
-                        Button(action: onPreviousWeek) {
-                            Label("Previous Week", systemImage: "chevron.left")
-                                .labelStyle(.iconOnly)
-                                .frame(width: 44, height: 44)
-                        }
-                        .accessibilityIdentifier("previousSummaryWeek")
-                        Button(action: onNextWeek) {
-                            Label("Next Week", systemImage: "chevron.right")
-                                .labelStyle(.iconOnly)
-                                .frame(width: 44, height: 44)
-                        }
-                        .disabled(!canGoForward)
-                        .accessibilityIdentifier("nextSummaryWeek")
-                    }
-                    .buttonStyle(.borderless)
-                }
-
-                HStack(alignment: .bottom, spacing: 8) {
-                    ForEach(summary.days) { day in
-                        VStack(spacing: 8) {
-                            Text("\(day.completions.count)")
-                                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                            VStack(spacing: 0) {
-                                Spacer(minLength: 0)
-                                VStack(spacing: blockSpacing) {
-                                    ForEach(day.completions.reversed()) { completion in
-                                        WeeklyExerciseBlock(completion: completion,
-                                                            height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
-                                    }
-                                    if day.completions.isEmpty {
-                                        RoundedRectangle(cornerRadius: 2)
-                                            .fill(.quaternary).frame(height: 3)
-                                    }
-                                }
-                            }
-                            .frame(height: chartHeight)
-                            Text(day.date, format: .dateTime.weekday(.narrow))
-                                .font(.caption.weight(Calendar.current.isDate(day.date, inSameDayAs: today) ? .bold : .regular))
-                                .foregroundStyle(Calendar.current.isDate(day.date, inSameDayAs: today) ? Color.accentColor : .secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .accessibilityElement(children: .contain)
-                        .accessibilityLabel(day.date.formatted(.dateTime.weekday(.wide).month().day()))
-                        .accessibilityValue("\(day.completions.count) completed exercises")
-                    }
-                }
-                .accessibilityIdentifier("weeklyExerciseChart")
-                Text(summary.total == 0
-                     ? (isCurrentWeek ? "No completed exercises this week. Start an exercise and stop after more than 10 seconds to record it." : "No completed exercises this week.")
-                     : "Each block is one completed exercise. Colors follow its current tags.")
-                    .font(.caption).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(isCurrentWeek ? "This Week" : "Week Summary").font(.title3.bold())
+                Text(dateRange)
+                    .font(.subheadline).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(20)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .subtleCardShadow()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            let layout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
-            layout {
-                SummaryStatisticCard(title: "Completed Exercises", value: summary.total, symbol: "checkmark.circle")
-                SummaryStatisticCard(title: "Active Days", value: summary.activeDays, symbol: "calendar")
+            HStack(alignment: .bottom, spacing: 8) {
+                ForEach(summary.days) { day in
+                    VStack(spacing: 8) {
+                        Text("\(day.completions.count)")
+                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        VStack(spacing: 0) {
+                            Spacer(minLength: 0)
+                            VStack(spacing: blockSpacing) {
+                                ForEach(day.completions.reversed()) { completion in
+                                    WeeklyExerciseBlock(completion: completion,
+                                                        height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
+                                }
+                                if day.completions.isEmpty {
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(.quaternary).frame(height: 3)
+                                }
+                            }
+                        }
+                        .frame(height: chartHeight)
+                        Text(day.date, format: .dateTime.weekday(.narrow))
+                            .font(.caption.weight(Calendar.current.isDate(day.date, inSameDayAs: today) ? .bold : .regular))
+                            .foregroundStyle(Calendar.current.isDate(day.date, inSameDayAs: today) ? Color.accentColor : .secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel(day.date.formatted(.dateTime.weekday(.wide).month().day()))
+                    .accessibilityValue("\(day.completions.count) completed exercises")
+                }
             }
+            .accessibilityIdentifier("weeklyExerciseChart")
+        }
+        .padding(20)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .subtleCardShadow()
+    }
+}
+
+struct SummaryStatistics: View {
+    let summary: WeeklySummary
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+        layout {
+            SummaryStatisticCard(title: "Completed Exercises", value: summary.total, symbol: "checkmark.circle")
+            SummaryStatisticCard(title: "Active Days", value: summary.activeDays, symbol: "calendar")
         }
     }
 }

@@ -105,11 +105,31 @@ struct WeeklyExerciseBlock: View {
     var body: some View {
         Button { isPreviewPresented = true } label: {
             HStack(spacing: 0) {
-                let colors = completion.tagColors
-                if colors.isEmpty {
+                let tags = completion.exercise?.tags ?? []
+                if tags.isEmpty {
                     Color.gray.opacity(0.5)
                 } else {
-                    ForEach(Array(colors.enumerated()), id: \.offset) { _, hex in Color(hex: hex) }
+                    ForEach(tags) { tag in
+                        Color(hex: tag.colorHex)
+                            .overlay {
+                                if let icon = tag.muscleIcon {
+                                    GeometryReader { geometry in
+                                        let size = max(0, min(26, geometry.size.width - 4, geometry.size.height - 4))
+                                        ZStack {
+                                            Image(icon.baseAsset)
+                                                .resizable().scaledToFit()
+                                                .foregroundStyle(.black.opacity(0.5))
+                                            Image(icon.highlightAsset)
+                                                .resizable().scaledToFit()
+                                                .foregroundStyle(.white)
+                                        }
+                                        .frame(width: size, height: size)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    }
+                                    .accessibilityHidden(true)
+                                }
+                            }
+                    }
                 }
             }
             .frame(height: height)
@@ -124,7 +144,8 @@ struct WeeklyExerciseBlock: View {
                 .presentationCompactAdaptation(.popover)
         }
         .accessibilityLabel(completion.snapshot?.title ?? completion.exerciseTitle)
-        .accessibilityValue(completion.completedAt.formatted(.dateTime.hour().minute()))
+        .accessibilityValue(([completion.completedAt.formatted(.dateTime.hour().minute())]
+                             + (completion.exercise?.tags.map(\.name) ?? [])).joined(separator: ", "))
         .accessibilityHint("Shows the saved exercise details")
         .accessibilityIdentifier("weeklyExerciseBlock.\(completion.id)")
     }
