@@ -25,7 +25,7 @@ struct ExerciseLiveActivity: Widget {
                     ExerciseActivitySummary(state: context.state)
                 }
             } compactLeading: {
-                Image(systemName: "dumbbell.fill")
+                Image(systemName: context.state.isQueued == true ? "clock" : "dumbbell.fill")
                     .foregroundStyle(.white)
             } compactTrailing: {
                 Text("\(context.state.numberOfSets) x \(context.state.reps) • \((context.state.displayedWeight ?? context.state.weight).formatted(.number.precision(.fractionLength(0...2))))\(context.state.weightUnitSymbol ?? "kg")")
@@ -34,7 +34,7 @@ struct ExerciseLiveActivity: Widget {
                     .minimumScaleFactor(0.7)
                     .foregroundStyle(.white)
             } minimal: {
-                Image(systemName: "dumbbell.fill")
+                Image(systemName: context.state.isQueued == true ? "clock" : "dumbbell.fill")
                     .foregroundStyle(.white)
             }
         }
@@ -44,6 +44,11 @@ struct ExerciseLiveActivity: Widget {
 #Preview("Active Exercise", as: .content, using: ExerciseActivityAttributes()) {
     ExerciseLiveActivity()
 } contentStates: {
+    ExerciseActivityAttributes.ContentState(
+        exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
+        numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: false,
+        accentColorHex: "B784E8", displayedWeight: 32.5, weightUnitSymbol: "kg", status: .empty, isQueued: true
+    )
     ExerciseActivityAttributes.ContentState(
         exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
         numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,

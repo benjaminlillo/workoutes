@@ -55,7 +55,16 @@ struct ExerciseActivitySummary: View {
 
     @ViewBuilder
     private var statusControl: some View {
-        if status == .playing {
+        if state.isQueued == true {
+            VStack(spacing: 3) {
+                Image(systemName: "clock").font(.title3)
+                Text("Up Next").font(.caption2)
+            }
+            .foregroundStyle(accentColor)
+            .frame(minWidth: 44, minHeight: 44)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Exercise queued")
+        } else if status == .playing {
             Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, sessionID: state.sessionID, complete: true)) {
                 ExerciseStatusSymbol(status: status, accentColor: accentColor)
             }

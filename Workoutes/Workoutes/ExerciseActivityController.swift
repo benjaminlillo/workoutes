@@ -77,6 +77,13 @@ final class ExerciseActivityController {
         return result
     }
 
+    private var queuedActivityExercise: TrainingExercise? {
+        guard activeExerciseID == nil, let run = training?.run, run.isActive else { return nil }
+        return run.queuedExercise
+    }
+
+    private var liveActivityExerciseID: String? { activeExerciseID ?? queuedActivityExercise?.id }
+
     func isActive(_ exercise: WorkoutExercise) -> Bool {
         return activeExerciseID != nil && activeExerciseID == exercise.activityID
     }
@@ -87,7 +94,7 @@ final class ExerciseActivityController {
 
     func content(for exercise: WorkoutExercise) -> ExerciseActivityAttributes.ContentState {
         var state = exercise.activityContent
-        if let selected = currentTrainingResult?.exercise, selected.id == exercise.activityID {
+        if let selected = currentTrainingResult?.exercise ?? queuedActivityExercise, selected.id == exercise.activityID {
             state.title = selected.name
             state.numberOfSets = selected.sets
             state.reps = selected.repetitions
@@ -100,6 +107,9 @@ final class ExerciseActivityController {
             state.status = .playing
             state.startedAt = activeStartedAt
             state.sessionID = activeSessionID
+        } else if queuedActivityExercise?.id == exercise.activityID {
+            state.status = .empty
+            state.isQueued = true
         }
         return state
     }
@@ -169,11 +179,12 @@ final class ExerciseActivityController {
             do { try cancelSession() }
             catch { errorMessage = error.localizedDescription; return }
         }
-        guard let id = activeExerciseID else {
+        guard let id = liveActivityExerciseID else {
             if activity != nil { await finish() }
             return
         }
-        guard let exercise = exercises.first(where: { !$0.isDeleted && $0.activityID == id }), !exercise.isDone else {
+        guard let exercise = exercises.first(where: { !$0.isDeleted && $0.activityID == id }),
+              !exercise.isDone || queuedActivityExercise?.id == id else {
             do { try cancelSession() }
             catch { errorMessage = error.localizedDescription; return }
             await finish()
@@ -316,7 +327,7 @@ final class ExerciseActivityController {
     }
 
     private func publish(_ exercise: WorkoutExercise) async {
-        guard isActive(exercise), !exercise.isDeleted, liveActivitiesEnabled,
+        guard liveActivityExerciseID == exercise.activityID, !exercise.isDeleted, liveActivitiesEnabled,
               ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let state = content(for: exercise)
         let content = ActivityContent(state: state, staleDate: nil)

@@ -11,6 +11,7 @@ final class PhoneTrainingController {
     private(set) var isStarting = false
     var errorMessage: String?
     @ObservationIgnored private let store: TrainingStore
+    @ObservationIgnored private let commandSender: ((TrainingEnvelope) throws -> Void)?
     @ObservationIgnored private let connection = TrainingConnection()
     @ObservationIgnored private let healthStore = HKHealthStore()
     @ObservationIgnored private var context: ModelContext?
@@ -23,8 +24,10 @@ final class PhoneTrainingController {
     var plan: TrainingPlan { archive.plan }
     var history: [TrainingRun] { archive.history.sorted { $0.startedAt > $1.startedAt } }
 
-    init(store: TrainingStore? = nil, activate: Bool = true) {
+    init(store: TrainingStore? = nil, activate: Bool = true,
+         commandSender: ((TrainingEnvelope) throws -> Void)? = nil) {
         self.store = store ?? TrainingStore()
+        self.commandSender = commandSender
         do { archive = try self.store.read() }
         catch { archive = TrainingArchive(); errorMessage = "Couldn't restore training: \(error.localizedDescription)" }
         connection.onReceive = { [weak self] in self?.receive($0) }
@@ -141,7 +144,9 @@ final class PhoneTrainingController {
         guard let run else { throw TrainingFailure.noSession }
         let command = TrainingCommand(action: action, runID: run.id, revision: run.revision,
                                       exercise: exercise, effort: effort)
-        try connection.send(.init(kind: .command, command: command))
+        let envelope = TrainingEnvelope(kind: .command, command: command)
+        if let commandSender { try commandSender(envelope) }
+        else { try connection.send(envelope) }
     }
 
     // Also used by tests to deliver out-of-order, duplicate and restored snapshots.

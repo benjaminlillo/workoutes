@@ -21,6 +21,7 @@ nonisolated struct ExerciseActivityAttributes: ActivityAttributes {
         var sessionID: String? = nil
         var startedAt: Date? = nil
         var elapsedSeconds: Double? = nil
+        var isQueued: Bool? = nil
     }
 }
 
