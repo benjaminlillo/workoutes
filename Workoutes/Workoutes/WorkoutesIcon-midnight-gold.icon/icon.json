@@ -1,37 +1,59 @@
 {
-  "fill": {
-    "linear-gradient": [
-      "srgb:0.008,0.008,0.012,1",
-      "srgb:0.008,0.008,0.012,1"
-    ],
-    "orientation": {
-      "start": {
-        "x": 0,
-        "y": 0
-      },
-      "stop": {
-        "x": 1,
-        "y": 1
-      }
-    }
-  },
   "groups": [
     {
       "name": "W · logotipo original",
       "layers": [
         {
-          "name": "W original",
-          "image-name": "workoutes-w.png",
+          "name": "W · grafito / marfil",
           "fill": "automatic",
           "blend-mode": "normal",
           "glass": true,
-          "position": {
-            "scale": 0.8165869218500797,
-            "translation-in-points": [
-              0,
-              0
-            ]
-          }
+          "image-name-specializations": [
+            {
+              "appearance": "base",
+              "value": "workoutes-w-light.png"
+            },
+            {
+              "appearance": "dark",
+              "value": "workoutes-w.png"
+            },
+            {
+              "appearance": "tinted",
+              "value": "workoutes-w.png"
+            }
+          ],
+          "position-specializations": [
+            {
+              "appearance": "base",
+              "value": {
+                "scale": 0.8165869218500797,
+                "translation-in-points": [
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "scale": 0.8165869218500797,
+                "translation-in-points": [
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "scale": 0.8165869218500797,
+                "translation-in-points": [
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
         }
       ],
       "shadow": {
@@ -53,7 +75,45 @@
       ]
     },
     {
-      "name": "Fondo · Midnight Gold",
+      "name": "Textura clara · Midnight Gold",
+      "layers": [
+        {
+          "name": "Grano suave",
+          "image-name": "grain-atmosphere.png",
+          "fill": "automatic",
+          "blend-mode": "soft-light",
+          "glass": false,
+          "position": {
+            "scale": 0.8165869218500797,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          },
+          "opacity": 0.12
+        }
+      ],
+      "opacity-specializations": [
+        {
+          "appearance": "dark",
+          "value": 0
+        },
+        {
+          "appearance": "tinted",
+          "value": 0
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    },
+    {
+      "name": "Fondo oscuro · Midnight Gold",
       "layers": [
         {
           "name": "Colores del tema",
@@ -101,6 +161,14 @@
       ],
       "opacity-specializations": [
         {
+          "appearance": "base",
+          "value": 0
+        },
+        {
+          "appearance": "dark",
+          "value": 1
+        },
+        {
           "appearance": "tinted",
           "value": 0
         }
@@ -120,5 +188,64 @@
       "watchOS"
     ],
     "squares": "shared"
-  }
+  },
+  "fill-specializations": [
+    {
+      "appearance": "base",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.839765,0.851765,0.876471,1",
+          "srgb:0.985882,0.913725,0.749020,1"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0,
+            "y": 0
+          },
+          "stop": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.008,0.008,0.012,1",
+          "srgb:0.008,0.008,0.012,1"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0,
+            "y": 0
+          },
+          "stop": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "tinted",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.008,0.008,0.012,1",
+          "srgb:0.008,0.008,0.012,1"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0,
+            "y": 0
+          },
+          "stop": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      }
+    }
+  ]
 }

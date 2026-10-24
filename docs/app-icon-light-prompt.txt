@@ -1,0 +1,10 @@
+Tool: built-in image_gen.imagegen
+Input: WorkoutesIcon.icon/Assets/workoutes-w.png
+Transparent background: true
+
+Use case: precise-object-edit.
+Asset type: transparent foreground layer for light-mode Apple Icon Composer app icons.
+Input image: edit target, the exact original folded ribbon W logo.
+Primary request: change ONLY the material color of the ivory W to dark satin graphite for a light-mode version. Preserve the same folded ribbon construction, exact W silhouette, size, location, proportions, rounded ends and every overlap/fold. Retain dimensional soft shading and subtle fine grain: lit front faces graphite charcoal around #343641, interior folds deep near-black around #101218, subtle cool-gray highlights. The folds must remain clearly legible, premium soft matte/satin material, no harsh metallic shine.
+Composition: square canvas matching the reference framing; W centered horizontally and vertically at exactly the same relative scale and position, fully visible. Genuine transparent alpha background, nothing behind the W and no cast shadow outside it.
+Constraints: do not redraw into a different letter; no new shapes, no text, no border, no background color, no icon squircle, no glow. Keep the exact original logo geometry and only recolor its material.

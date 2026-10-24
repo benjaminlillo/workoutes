@@ -2,6 +2,7 @@
 """Build editable Icon Composer packages from the app's current theme palette."""
 
 import argparse
+from copy import deepcopy
 import json
 from pathlib import Path
 import re
@@ -21,8 +22,8 @@ def png_scale(data):
     return 1024 / width
 
 
-def srgb(hex_value):
-    values = [int(hex_value[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+def srgb(hex_value, white=0):
+    values = [int(hex_value[i:i + 2], 16) / 255 * (1 - white) + white for i in (0, 2, 4)]
     return "srgb:" + ",".join(f"{value:.6f}" for value in values) + ",1"
 
 
@@ -48,9 +49,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--foreground", type=Path, default=CANONICAL / "workoutes-w.png")
     parser.add_argument("--texture", type=Path, default=CANONICAL / "grain-atmosphere.png")
+    parser.add_argument("--light-foreground", type=Path, default=CANONICAL / "workoutes-w-light.png")
     args = parser.parse_args()
     foreground, texture = args.foreground.read_bytes(), args.texture.read_bytes()
+    light_foreground = args.light_foreground.read_bytes()
     foreground_scale, texture_scale = png_scale(foreground), png_scale(texture)
+    light_foreground_scale = png_scale(light_foreground)
 
     source = (APP / "ThemeColor.swift").read_text()
 
@@ -92,20 +96,66 @@ def main():
             ],
             "supported-platforms": {"circles": ["watchOS"], "squares": "shared"},
         }
-        destinations = [APP / (icon_name + ".icon")]
+        # watchOS has one appearance; retain the approved dark composition.
+        watch_document = deepcopy(document)
+        dark_fill = deepcopy(document["fill"])
+        document["fill"] = gradient(srgb(color, white=0.82), srgb(secondary[theme], white=0.60))
+        document["fill-specializations"] = [
+            {"appearance": appearance, "value": dark_fill} for appearance in ("dark", "tinted")
+        ]
+        foreground_layer = document["groups"][0]["layers"][0]
+        original_position = deepcopy(foreground_layer["position"])
+        foreground_layer["image-name"] = "workoutes-w-light.png"
+        foreground_layer["name"] = "W · grafito / marfil"
+        foreground_layer["position"]["scale"] = light_foreground_scale
+        foreground_layer["image-name-specializations"] = [
+            {"appearance": appearance, "value": "workoutes-w.png"} for appearance in ("dark", "tinted")
+        ]
+        foreground_layer["position-specializations"] = [
+            {"appearance": appearance, "value": original_position} for appearance in ("dark", "tinted")
+        ]
+        dark_background = document["groups"][1]
+        dark_background["name"] = "Fondo oscuro · " + names[theme]
+        dark_background["opacity"] = 0
+        dark_background["opacity-specializations"] = [
+            {"appearance": "dark", "value": 1}, {"appearance": "tinted", "value": 0}
+        ]
+        light_texture = layer("grain-atmosphere.png", "Grano suave", texture_scale, blend="soft-light")
+        light_texture["opacity"] = 0.12
+        document["groups"].insert(1, {
+            "name": "Textura clara · " + names[theme],
+            "layers": [light_texture],
+            "opacity-specializations": [
+                {"appearance": appearance, "value": 0} for appearance in ("dark", "tinted")
+            ],
+            "shadow": {"kind": "neutral", "opacity": 0},
+            "translucency": {"enabled": False, "value": 0},
+        })
+        # A standalone value overrides the specialization array in Icon Composer.
+        # Encode the inherited value in the array too when overriding an appearance.
+        for target, property_name in (
+            (document, "fill"), (foreground_layer, "image-name"),
+            (foreground_layer, "position"), (dark_background, "opacity"),
+        ):
+            target[property_name + "-specializations"].insert(
+                0, {"appearance": "base", "value": target.pop(property_name)}
+            )
+        destinations = [(APP / (icon_name + ".icon"), document)]
         if icon_name == "WorkoutesIcon":
-            destinations.append(ROOT / "Workoutes/WorkoutesWatch/WorkoutesIcon.icon")
-        for destination in destinations:
+            destinations.append((ROOT / "Workoutes/WorkoutesWatch/WorkoutesIcon.icon", watch_document))
+        for destination, destination_document in destinations:
             assets = destination / "Assets"
             assets.mkdir(parents=True, exist_ok=True)
             (assets / "workoutes-w.png").write_bytes(foreground)
             (assets / "grain-atmosphere.png").write_bytes(texture)
+            if destination_document is document:
+                (assets / "workoutes-w-light.png").write_bytes(light_foreground)
             (assets / "theme-colors.svg").write_text(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" '
                 'viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="white"/></svg>\n'
             )
             (assets / "09-barra-ez-w-contornos.svg").unlink(missing_ok=True)
-            (destination / "icon.json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n")
+            (destination / "icon.json").write_text(json.dumps(destination_document, ensure_ascii=False, indent=2) + "\n")
         print(names[theme] + " → " + icon_name + ".icon")
 
 
