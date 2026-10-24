@@ -85,7 +85,6 @@ private struct SummaryWeekView: View {
             VStack(spacing: 16) {
                 if let training { TrainingEntryView(controller: training) }
                 WeeklySummaryPager(today: today, selectedWeek: $selectedWeek)
-                    .staggeredTabAppearance()
                 SummaryStatistics(summary: WeeklySummary(completions: completions, date: date))
             }.padding(16)
         }
@@ -99,6 +98,7 @@ struct WeeklySummaryPager: View {
     @Binding var selectedWeek: Date?
     @State private var centeredWeek: Date?
     @State private var oldestWeek: Date
+    @State private var blockAppearance: WeeklyBlockAppearance?
 
     init(today: Date, selectedWeek: Binding<Date?>) {
         self.today = today
@@ -134,6 +134,10 @@ struct WeeklySummaryPager: View {
         .scrollIndicators(.hidden)
         .fixedSize(horizontal: false, vertical: true)
         .padding(.vertical, -5)
+        .environment(\.weeklyBlockAppearance, blockAppearance)
+        .staggeredTabAppearance { activation in
+            blockAppearance = WeeklyBlockAppearance(activationID: activation.id)
+        }
         .accessibilityIdentifier("weeklySummaryPager")
         .accessibilityAction(named: "Previous Week") { moveWeek(by: -1) }
         .accessibilityAction(named: "Next Week") { moveWeek(by: 1) }
@@ -213,9 +217,10 @@ struct WeeklyExerciseChart: View {
                         VStack(spacing: 0) {
                             Spacer(minLength: 0)
                             VStack(spacing: blockSpacing) {
-                                ForEach(day.completions.reversed()) { completion in
+                                ForEach(Array(day.completions.enumerated().reversed()), id: \.element.id) { level, completion in
                                     WeeklyExerciseBlock(completion: completion,
                                                         height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
+                                        .modifier(WeeklyBlockFade(level: level, levelCount: maximum))
                                 }
                                 if day.completions.isEmpty {
                                     RoundedRectangle(cornerRadius: 2)
