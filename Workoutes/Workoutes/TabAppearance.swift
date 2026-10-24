@@ -25,8 +25,8 @@ extension View {
         return environment(\.tabAppearance, value)
     }
 
-    func staggeredTabAppearance(onCompletion: ((TabAppearanceActivation) -> Void)? = nil) -> some View {
-        modifier(StaggeredTabAppearance(onCompletion: onCompletion))
+    func staggeredTabAppearance() -> some View {
+        modifier(StaggeredTabAppearance())
     }
 }
 
@@ -37,7 +37,6 @@ private final class AppearancePosition {
 }
 
 private struct StaggeredTabAppearance: ViewModifier {
-    var onCompletion: ((TabAppearanceActivation) -> Void)?
     @Environment(\.tabAppearance) private var activation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var position = AppearancePosition()
@@ -59,32 +58,20 @@ private struct StaggeredTabAppearance: ViewModifier {
             .task(id: activation) {
                 reset()
                 guard let activation, activation.isActive else { return }
-                guard !reduceMotion else {
-                    isVisible = true
-                    onCompletion?(activation)
-                    return
-                }
+                guard !reduceMotion else { isVisible = true; return }
 
                 do {
                     // Wait one frame for the incoming tab's visible geometry.
                     try await Task.sleep(for: .milliseconds(16))
                     let elapsed = Date.now.timeIntervalSince(activation.startedAt)
                     // Rows loaded later by scrolling or editing stay immediately visible.
-                    guard elapsed < 0.9 else {
-                        isVisible = true
-                        onCompletion?(activation)
-                        return
-                    }
+                    guard elapsed < 0.9 else { isVisible = true; return }
                     // Screen position also orders a list that was left scrolled down.
                     let delay = min(0.42, max(0, Double(position.top - 120) * 0.00055))
                     let remaining = max(0, delay - elapsed)
                     if remaining > 0 { try await Task.sleep(for: .seconds(remaining)) }
                     try Task.checkCancellation()
-                    withAnimation(.easeOut(duration: 0.28)) {
-                        isVisible = true
-                    } completion: {
-                        onCompletion?(activation)
-                    }
+                    withAnimation(.easeOut(duration: 0.28)) { isVisible = true }
                 } catch {
                     // Switching tabs cancels unfinished appearances.
                 }
