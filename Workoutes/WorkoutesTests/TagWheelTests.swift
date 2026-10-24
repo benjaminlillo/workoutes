@@ -190,13 +190,35 @@ final class TagWheelTests: XCTestCase {
             try snapshot(window, name: name)
         }
 
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
-        try await Task.sleep(for: .milliseconds(400))
+        let transition = try XCTUnwrap(findTransition(in: try XCTUnwrap(window.rootViewController).view))
         let list = try XCTUnwrap(findList(in: try XCTUnwrap(window.rootViewController).view))
+        // Give this assertion room to inspect multiple real updates in one fade.
+        transition.duration = 0.8
+        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        try await waitFor { transition.outgoing?.alpha == 0 }
+        let outgoing = try XCTUnwrap(transition.outgoing, "Outgoing cards must stay visible while the new filter enters")
+        XCTAssertFalse(outgoing.subviews.isEmpty)
+        XCTAssertEqual(outgoing.transform, .identity, "Crossfades must not slide the cards")
+        XCTAssertEqual(list.transform, .identity)
+        XCTAssertEqual(outgoing.alpha, 0)
+        XCTAssertTrue(outgoing.superview?.accessibilityElementsHidden == true,
+                      "Snapshots must not duplicate interactive or accessible cards")
+        navigation.selectedTagIDs = [tags[4].persistentModelID]
+        try await waitFor { rowCount(in: list) == titles.count }
+        XCTAssertTrue(transition.outgoing === outgoing, "Fast changes must reuse the original exit instead of recapturing ghosts")
+        XCTAssertTrue(transition.isActive)
+        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        try await waitFor { rowCount(in: list) == 0 }
+        XCTAssertTrue(transition.outgoing === outgoing, "Incoming content changes immediately without restarting its animation")
+        try await waitFor { transition.outgoing == nil }
+        transition.duration = ExerciseFilterTransition.duration
+        XCTAssertNil(transition.outgoing, "Only one temporary outgoing layer may exist, and it must be removed")
         XCTAssertEqual(rowCount(in: list), 0)
+        XCTAssertEqual(list.alpha, 1)
+        XCTAssertEqual(list.transform, .identity)
         try snapshot(window, name: "no-matches")
 
-        // A fast spin must cancel pending content changes and finish on the newest selection.
+        // A fast spin must apply each filter immediately and finish on the newest selection.
         navigation.selectedTagIDs = [tags[4].persistentModelID]
         try await Task.sleep(for: .milliseconds(30))
         navigation.selectedTagIDs = [tags[0].persistentModelID]
@@ -205,6 +227,9 @@ final class TagWheelTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(450))
         XCTAssertTrue(navigation.selectedTagIDs.isEmpty, "An external reset must not be overwritten by the wheel")
         XCTAssertEqual(rowCount(in: list), titles.count, "A cancelled transition must not restore stale rows")
+        XCTAssertEqual(list.alpha, 1)
+        XCTAssertEqual(list.transform, .identity)
+        XCTAssertNil(transition.outgoing)
         try snapshot(window, name: "all")
 
         for tag in tags { store.mainContext.delete(tag) }
@@ -217,6 +242,19 @@ final class TagWheelTests: XCTestCase {
     private func findList(in view: UIView) -> UICollectionView? {
         if let list = view as? UICollectionView { return list }
         return view.subviews.compactMap { findList(in: $0) }.first
+    }
+
+    private func findTransition(in view: UIView) -> ExerciseFilterViewport? {
+        if let viewport = view as? ExerciseFilterViewport { return viewport }
+        return view.subviews.compactMap { findTransition(in: $0) }.first
+    }
+
+    private func waitFor(_ condition: () -> Bool) async throws {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        while !condition(), ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        XCTAssertTrue(condition(), "The transition must finish within its bounded lifetime")
     }
 
     private func findHub(in view: UIView) -> TagWheelGripView? {

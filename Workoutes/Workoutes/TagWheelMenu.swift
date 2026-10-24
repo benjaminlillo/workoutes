@@ -7,7 +7,6 @@ import UIKit
 struct TagWheelMenu: UIViewRepresentable {
     let tags: [Tag]
     let selection: PersistentIdentifier?
-    let color: Color
     let onChoose: (Tag) -> Void
     let onDeselect: () -> Void
     let onAdd: () -> Void
@@ -26,7 +25,8 @@ struct TagWheelMenu: UIViewRepresentable {
 
     func updateUIView(_ button: TagWheelMenuButton, context: Context) {
         button.setEmpty(tags.isEmpty)
-        let tint = UIColor(color)
+        let theme = ThemeColor.resolve(accentColorRawValue)
+        let tint = UIColor(Color(hex: theme.hex(for: colorScheme)))
         if button.tintColor != tint {
             UIView.animate(withDuration: reduceMotion ? 0 : 0.35,
                            delay: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
@@ -35,7 +35,7 @@ struct TagWheelMenu: UIViewRepresentable {
         }
         button.accessibilityValue = tags.first { $0.persistentModelID == selection }?.name ?? "No Tag Selected"
 
-        updateMenu(button, coordinator: context.coordinator, theme: ThemeColor.resolve(accentColorRawValue),
+        updateMenu(button, coordinator: context.coordinator, theme: theme,
                    scheme: colorScheme, scale: displayScale)
     }
 

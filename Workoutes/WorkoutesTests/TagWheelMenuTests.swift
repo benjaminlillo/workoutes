@@ -121,7 +121,7 @@ final class TagWheelMenuTests: XCTestCase {
 
     private func menu(tags: [Tag], selection: PersistentIdentifier? = nil,
                       onChoose: @escaping (Tag) -> Void = { _ in }) -> TagWheelMenu {
-        TagWheelMenu(tags: tags, selection: selection, color: .blue, onChoose: onChoose,
+        TagWheelMenu(tags: tags, selection: selection, onChoose: onChoose,
                      onDeselect: {}, onAdd: {}, onEdit: { _ in }, onDelete: { _ in })
     }
 

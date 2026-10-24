@@ -18,7 +18,7 @@ struct ExerciseListView: View {
     @State private var revealPosition: ExerciseRevealPosition?
     @State private var viewportSize: CGSize = .zero
     @State private var displayedTagIDs: Set<PersistentIdentifier>?
-    @State private var isChangingTag = false
+    @State private var filterTransition = ExerciseFilterTransition()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var filterChange: FilterChange {
         FilterChange(tags: navigation.selectedTagIDs, reveal: navigation.revealRequest)
@@ -29,10 +29,6 @@ struct ExerciseListView: View {
     private var tagSelection: Binding<PersistentIdentifier?> {
         Binding(get: { navigation.selectedTagIDs.first },
                 set: { navigation.selectedTagIDs = $0.map { [$0] } ?? [] })
-    }
-    private var selectedTagColor: Color {
-        allTags.first { $0.persistentModelID == tagSelection.wrappedValue }
-            .map { Color(hex: $0.colorHex) } ?? .accentColor
     }
     
     var filteredExercises: [WorkoutExercise] {
@@ -62,8 +58,6 @@ struct ExerciseListView: View {
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                             .padding(.vertical, 10)
-                            .opacity(isChangingTag ? 0 : 1)
-                            .allowsHitTesting(!isChangingTag)
                             .background {
                                 if let request = navigation.revealRequest,
                                    request.exerciseID == exercise.persistentModelID {
@@ -84,7 +78,7 @@ struct ExerciseListView: View {
                 .coordinateSpace(name: "exerciseList")
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { viewportSize = $0 }
                 .onPreferenceChange(ExerciseRevealPositionKey.self) { revealPosition = $0 }
-                .task(id: filterChange) { await transitionFilter() }
+                .onChange(of: filterChange, initial: true) { _, _ in transitionFilter() }
                 .task(id: FilterChange(tags: displayedTagIDs ?? navigation.selectedTagIDs,
                                        reveal: navigation.revealRequest)) {
                     guard let request = navigation.revealRequest,
@@ -116,12 +110,9 @@ struct ExerciseListView: View {
                 .transparentNavigationChrome()
                 .scrollContentBackground(.hidden)
                 .overlay {
-                    if filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty {
-                        ContentUnavailableView("No Exercises", systemImage: "dumbbell",
-                                               description: Text("No exercises with this tag."))
-                            .opacity(isChangingTag ? 0 : 1)
-                            .allowsHitTesting(false)
-                    }
+                    ExerciseFilterTransitionLayer(transition: filterTransition,
+                        showsEmptyMessage: filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty)
+                        .allowsHitTesting(false)
                 }
                 .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
                 .navigationTitle("All Exercises")
@@ -130,8 +121,8 @@ struct ExerciseListView: View {
                     navigation.selectedTagIDs.formIntersection(ids)
                 }
                 .onDisappear {
+                    filterTransition.cancel()
                     displayedTagIDs = nil
-                    isChangingTag = false
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -140,7 +131,7 @@ struct ExerciseListView: View {
                         Button(action: { showingAddExerciseSheet = true }) {
                             Label("Add Exercise", systemImage: "plus")
                         }
-                        TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue, color: selectedTagColor,
+                        TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue,
                                      onChoose: { tag in
                                          let id = tag.persistentModelID
                                          tagSelection.wrappedValue = tagSelection.wrappedValue == id ? nil : id
@@ -197,23 +188,22 @@ struct ExerciseListView: View {
         }
     }
 
-    private func transitionFilter() async {
+    private func transitionFilter() {
         let change = filterChange
-        guard displayedTagIDs != nil,
-              displayedTagIDs != change.tags,
-              !reduceMotion, change.reveal == nil else {
-            displayedTagIDs = change.tags
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.24)) { isChangingTag = false }
+        guard displayedTagIDs != nil, !reduceMotion, change.reveal == nil else {
+            filterTransition.cancel()
+            withoutFilterAnimation { displayedTagIDs = change.tags }
             return
         }
+        guard displayedTagIDs != change.tags else { return }
+        filterTransition.begin()
+        withoutFilterAnimation { displayedTagIDs = change.tags }
+    }
 
-        // Keep the old rows until they have faded, and cancel intermediate filters during a fast spin.
-        withAnimation(.easeIn(duration: 0.1)) { isChangingTag = true }
-        do { try await Task.sleep(for: .milliseconds(100)) }
-        catch { return }
-        guard !Task.isCancelled else { return }
-        displayedTagIDs = change.tags
-        withAnimation(.easeOut(duration: 0.24)) { isChangingTag = false }
+    private func withoutFilterAnimation(_ update: () -> Void) {
+        var transaction = Transaction(animation: nil)
+        transaction.disablesAnimations = true
+        withTransaction(transaction, update)
     }
 
     private struct FilterChange: Equatable {
