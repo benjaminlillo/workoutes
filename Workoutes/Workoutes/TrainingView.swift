@@ -29,6 +29,7 @@ struct TrainingEntryView: View {
             .padding(20)
             .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24))
             .subtleCardShadow()
+            .staggeredTabAppearance()
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("watchTrainingEntry")
