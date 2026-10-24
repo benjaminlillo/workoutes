@@ -1,0 +1,4 @@
+<full-backup-content>
+    <include domain="file" path="workoutes.json" />
+    <include domain="file" path="backgrounds/" />
+</full-backup-content>

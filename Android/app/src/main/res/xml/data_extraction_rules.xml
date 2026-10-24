@@ -1,0 +1,4 @@
+<data-extraction-rules>
+    <cloud-backup><include domain="file" path="workoutes.json" /><include domain="file" path="backgrounds/" /></cloud-backup>
+    <device-transfer><include domain="file" path="workoutes.json" /><include domain="file" path="backgrounds/" /></device-transfer>
+</data-extraction-rules>
