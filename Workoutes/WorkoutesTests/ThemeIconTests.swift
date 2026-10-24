@@ -23,9 +23,10 @@ final class ThemeIconTests: XCTestCase {
     }
 
     func testEveryThemeIconIsRegisteredForIPhoneAndIPad() throws {
-        let expected = Set(["WorkoutesIcon-majorelle-blue", "WorkoutesIcon-frozen-water",
-                            "WorkoutesIcon-midnight-violet", "WorkoutesIcon-blazing-flame"])
-        XCTAssertNil(ThemeColor.primary.alternateIconName)
+        let expected = Set(["WorkoutesIcon-electric-rush", "WorkoutesIcon-sunset-pop",
+                            "WorkoutesIcon-ultravolt", "WorkoutesIcon-cobalt-heat",
+                            "WorkoutesIcon-cherry-ice", "WorkoutesIcon-midnight-gold"])
+        XCTAssertNil(ThemeColor.indigo.alternateIconName)
         XCTAssertEqual(Set(ThemeColor.allCases.compactMap(\.alternateIconName)), expected)
         let data = try Data(contentsOf: Bundle.main.bundleURL.appendingPathComponent("Info.plist"))
         let info = try XCTUnwrap(PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
@@ -41,55 +42,74 @@ final class ThemeIconTests: XCTestCase {
         }
     }
 
-    func testKeepsTheCurrentIconAndCanReturnToBlueSlate() async {
+    func testKeepsTheCurrentIconAndCanReturnToVioletAura() async {
         let application = IconApplication()
-        application.alternateIconName = ThemeColor.purple.alternateIconName
+        application.alternateIconName = ThemeColor.ultravolt.alternateIconName
         let controller = ThemeIconController(application: application)
-        await controller.update(for: .purple)
+        await controller.update(for: .ultravolt)
         XCTAssertTrue(application.requests.isEmpty)
-        await controller.update(for: .primary)
+        await controller.update(for: .indigo)
         XCTAssertEqual(application.requests.count, 1)
         XCTAssertNil(application.requests[0])
         XCTAssertNil(application.alternateIconName)
+    }
+
+    func testRetiredThemeIconsMigrateToVioletAura() async {
+        let previous: [(String, String?)] = [
+            ("primary", nil),
+            ("mint", "WorkoutesIcon-frozen-water"),
+            ("purple", "WorkoutesIcon-midnight-violet"),
+            ("orange", "WorkoutesIcon-blazing-flame"),
+            ("indigo", "WorkoutesIcon-majorelle-blue")
+        ]
+        for (stored, icon) in previous {
+            let application = IconApplication()
+            application.alternateIconName = icon
+            let controller = ThemeIconController(application: application)
+            await controller.update(for: ThemeColor.resolve(stored))
+            XCTAssertNil(application.alternateIconName)
+            XCTAssertEqual(application.requests.count, icon == nil ? 0 : 1)
+            XCTAssertNil(controller.errorMessage)
+        }
     }
 
     func testQuickSelectionsAreSerializedAndTheLatestThemeWins() async throws {
         let application = IconApplication()
         application.blockNextRequest = true
         let controller = ThemeIconController(application: application)
-        let first = Task { await controller.update(for: .indigo) }
+        let first = Task { await controller.update(for: .electricRush) }
         for _ in 0..<100 {
             if application.continuation != nil { break }
             await Task.yield()
         }
         let continuation = try XCTUnwrap(application.continuation)
-        await controller.update(for: .mint)
-        await controller.update(for: .purple)
+        await controller.update(for: .cherryIce)
+        await controller.update(for: .ultravolt)
         continuation.resume()
         application.continuation = nil
         await first.value
-        XCTAssertEqual(application.requests, [ThemeColor.indigo.alternateIconName, ThemeColor.purple.alternateIconName])
-        XCTAssertEqual(application.alternateIconName, ThemeColor.purple.alternateIconName)
+        XCTAssertEqual(application.requests, [ThemeColor.electricRush.alternateIconName, ThemeColor.ultravolt.alternateIconName])
+        XCTAssertEqual(application.alternateIconName, ThemeColor.ultravolt.alternateIconName)
     }
 
     func testReportsFailuresAndRecoversOnAnotherThemeSelection() async {
         let application = IconApplication()
         application.shouldFail = true
         let controller = ThemeIconController(application: application)
-        await controller.update(for: .mint)
+        await controller.update(for: .cherryIce)
         XCTAssertNotNil(controller.errorMessage)
         XCTAssertNil(application.alternateIconName)
         application.shouldFail = false
-        await controller.update(for: .orange)
+        await controller.update(for: .sunsetPop)
         XCTAssertNil(controller.errorMessage)
-        XCTAssertEqual(application.alternateIconName, ThemeColor.orange.alternateIconName)
+        XCTAssertEqual(application.alternateIconName, ThemeColor.sunsetPop.alternateIconName)
     }
 
     func testDoesNotRequestAnIconOnAnUnsupportedPlatform() async {
         let application = IconApplication()
         application.supportsAlternateIcons = false
         let controller = ThemeIconController(application: application)
-        await controller.update(for: .indigo)
+        await controller.update(for: .electricRush)
         XCTAssertTrue(application.requests.isEmpty)
         XCTAssertNil(controller.errorMessage)
     }

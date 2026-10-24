@@ -1,13 +1,17 @@
 import SwiftUI
 import SwiftData
+import HealthKit
+import UIKit
 
 @main
 struct WorkoutesApp: App {
+    @UIApplicationDelegateAdaptor(TrainingPhoneDelegate.self) private var delegate
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @State private var exerciseBackground = ExerciseBackgroundStore()
     @State private var exerciseActivity = ExerciseActivityRuntime.shared.controller
     @State private var themeIcon = ThemeIconController()
+    @State private var training = ExerciseActivityRuntime.shared.training
     
     let sharedModelContainer = ExerciseActivityRuntime.shared.container
 
@@ -16,6 +20,7 @@ struct WorkoutesApp: App {
             ContentView()
                 .environment(exerciseActivity)
                 .environment(exerciseBackground)
+                .environment(\.trainingController, training)
                 .tint(ThemeColor.resolve(accentColorRawValue).color)
                 .onChange(of: accentColorRawValue, initial: true) {
                     let resolved = ThemeColor.resolve(accentColorRawValue).rawValue
@@ -40,5 +45,16 @@ struct WorkoutesApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
+    }
+}
+
+final class TrainingPhoneDelegate: NSObject, UIApplicationDelegate {
+    private let healthStore = HKHealthStore()
+
+    func applicationShouldRequestHealthAuthorization(_ application: UIApplication) {
+        // HealthKit can forward a companion/extension authorization request to its host.
+        healthStore.handleAuthorizationForExtension { _, error in
+            if let error { NSLog("Health authorization could not be presented: %@", error.localizedDescription) }
+        }
     }
 }

@@ -46,47 +46,41 @@ struct CreateExerciseSheet: View {
                                         .foregroundColor(.blue)
                                 }
                             }
-                            .subtleFormRowBorder(.row(at: index, count: availableExercises.count))
+                            .subtleFormRowShadow(.row(at: index, count: availableExercises.count))
                         }
                     }
                 }
                 
                 Section(header: Text("Create New Exercise")) {
                     TextField("Title", text: $title)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     TextField("Subtitle (Optional)", text: $subtitle)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     TextField("Details (Optional)", text: $details)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Text("Targets")
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     Stepper("Reps: \(reps)", value: $reps, in: 1...100)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     
                     if !allTags.isEmpty {
                         Text("Tags")
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                         Group {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
                                     ForEach(allTags) { tag in
                                         let isSelected = selectedTags.contains(tag)
-                                        Text(tag.name)
-                                            .font(.subheadline)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 6)
-                                            .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
-                                            .foregroundColor(isSelected ? .white : .primary)
-                                            .cornerRadius(16)
+                                        TagSelectionLabel(tag: tag, isSelected: isSelected)
                                             .onTapGesture {
                                                 if isSelected { selectedTags.remove(tag) } else { selectedTags.insert(tag) }
                                             }
                                     }
                                 }
                             }
-                            .subtleFormRowBorder(.middle)
+                            .subtleFormRowShadow(.middle)
                         }
                     }
                     
@@ -97,7 +91,7 @@ struct CreateExerciseSheet: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
-                    .subtleFormRowBorder(.middle)
+                    .subtleFormRowShadow(.middle)
                     
                     Button("Create and Add") {
                         createNewExercise()
@@ -105,7 +99,7 @@ struct CreateExerciseSheet: View {
                     .disabled(title.isEmpty)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(title.isEmpty ? .gray : .blue)
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
                 }
             }
             .transparentNavigationChrome()

@@ -3,47 +3,62 @@ import UIKit
 
 enum ThemeColor: String, CaseIterable, Identifiable {
     // Preserve the stored identifiers for existing selections.
-    case primary, indigo, mint, purple, orange
+    case indigo, electricRush, sunsetPop
+    case ultravolt, cobaltHeat, cherryIce, midnightGold
     
     var id: Self { self }
     
     var hex: String {
         switch self {
-        case .primary: "326884"
-        case .indigo: "6155F5"
-        case .mint: "92DDBE"
-        case .purple: "42213D"
-        case .orange: "F15025"
+        case .indigo: "6C3DD1"
+        case .electricRush: "3D52F5"
+        case .sunsetPop: "D12D78"
+        case .ultravolt: "5621B6"
+        case .cobaltHeat: "1745A3"
+        case .cherryIce: "AE194F"
+        case .midnightGold: "1C2D50"
         }
     }
 
     func hex(for scheme: ColorScheme) -> String {
-        guard scheme == .dark else { return hex }
+        scheme == .dark ? secondaryHex : hex
+    }
+
+    /// A lighter accent for dark surfaces and the first color of the background gradient.
+    var secondaryHex: String {
         switch self {
-        case .mint: return "D2F1E4"
-        case .purple: return "88447E"
-        default: return hex
+        case .indigo: "B784E8"
+        case .electricRush: "32D5E5"
+        case .sunsetPop: "FF8059"
+        case .ultravolt: "B9EE4A"
+        case .cobaltHeat: "FF985C"
+        case .cherryIce: "55D6CF"
+        case .midnightGold: "F6C85F"
         }
     }
 
-    /// Used only as the second color of the theme's default background gradient.
-    var secondaryHex: String {
+    /// The supporting color of the theme's background gradient.
+    var tertiaryHex: String {
         switch self {
-        case .primary: "63B7AF"
-        case .indigo: "AB78DD"
-        case .mint: "83C8DB"
-        case .purple: "C27D98"
-        case .orange: "F5B84B"
+        case .indigo: "F3DDF2"
+        case .electricRush: "D5F66A"
+        case .sunsetPop: "FFD65C"
+        case .ultravolt: "F0FFD0"
+        case .cobaltHeat: "FFF1CB"
+        case .cherryIce: "D9FFF7"
+        case .midnightGold: "FFF1C7"
         }
     }
 
     var alternateIconName: String? {
         switch self {
-        case .primary: nil
-        case .indigo: "WorkoutesIcon-majorelle-blue"
-        case .mint: "WorkoutesIcon-frozen-water"
-        case .purple: "WorkoutesIcon-midnight-violet"
-        case .orange: "WorkoutesIcon-blazing-flame"
+        case .indigo: nil
+        case .electricRush: "WorkoutesIcon-electric-rush"
+        case .sunsetPop: "WorkoutesIcon-sunset-pop"
+        case .ultravolt: "WorkoutesIcon-ultravolt"
+        case .cobaltHeat: "WorkoutesIcon-cobalt-heat"
+        case .cherryIce: "WorkoutesIcon-cherry-ice"
+        case .midnightGold: "WorkoutesIcon-midnight-gold"
         }
     }
 
@@ -57,35 +72,24 @@ enum ThemeColor: String, CaseIterable, Identifiable {
     
     var name: String {
         switch self {
-        case .primary: "Blue Slate"
-        case .indigo: "Majorelle Blue"
-        case .mint: "Frozen Water"
-        case .purple: "Midnight Violet"
-        case .orange: "Blazing Flame"
+        case .indigo: "Violet Aura"
+        case .electricRush: "Electric Rush"
+        case .sunsetPop: "Sunset Pop"
+        case .ultravolt: "Ultravolt"
+        case .cobaltHeat: "Cobalt Heat"
+        case .cherryIce: "Cherry Ice"
+        case .midnightGold: "Midnight Gold"
         }
     }
 
     static func resolve(_ rawValue: String?) -> Self {
         if let rawValue, let theme = Self(rawValue: rawValue) { return theme }
-        switch rawValue {
-        case "blue": return .indigo
-        case "green": return .mint
-        case "red": return .orange
-        default: return .primary
-        }
+        // Retired palettes and older aliases migrate to Violet Aura.
+        return .indigo
     }
 
-    /// Pastel versions of the theme's primary and secondary colors.
-    func defaultGradientColors(for scheme: ColorScheme) -> [String] {
-        zip([hex(for: scheme), secondaryHex], [0.35, 0.5]).map { hex, strength in
-            let color = UIColor(Color(hex: hex))
-            var red: CGFloat = 0
-            var green: CGFloat = 0
-            var blue: CGFloat = 0
-            guard color.getRed(&red, green: &green, blue: &blue, alpha: nil) else { return hex }
-            return Color(red: 1 - Double(1 - red) * strength,
-                         green: 1 - Double(1 - green) * strength,
-                         blue: 1 - Double(1 - blue) * strength).toHex()
-        }
+    /// Both appearances use the full palette for the atmospheric background.
+    func defaultGradientColors(for _: ColorScheme) -> [String] {
+        [hex, secondaryHex, tertiaryHex]
     }
 }

@@ -13,7 +13,7 @@ final class ThemeColorTests: XCTestCase {
             if let previous { defaults.set(previous, forKey: "appAccentColor") }
             else { defaults.removeObject(forKey: "appAccentColor") }
         }
-        defaults.set(ThemeColor.orange.rawValue, forKey: "appAccentColor")
+        defaults.set(ThemeColor.sunsetPop.rawValue, forKey: "appAccentColor")
         let container = try ModelContainer(for: Workout.self, WorkoutExercise.self, Tag.self,
                                            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
@@ -24,7 +24,7 @@ final class ThemeColorTests: XCTestCase {
         window.makeKeyAndVisible()
         defer { window.isHidden = true }
         try await Task.sleep(for: .milliseconds(300))
-        // Reuse the same visible Settings screen, reproducing the cached orange label.
+        // Reuse the same visible Settings screen to catch cached accent labels.
         for theme in ThemeColor.allCases {
             defaults.set(theme.rawValue, forKey: "appAccentColor")
             for scheme in [ColorScheme.light, .dark] {
@@ -67,13 +67,19 @@ final class ThemeColorTests: XCTestCase {
     }
 
     func testPaletteMatchesProvidedColorsInLightAndDarkMode() {
-        let light = ["326884", "6155F5", "92DDBE", "42213D", "F15025"]
-        let dark = ["326884", "6155F5", "D2F1E4", "88447E", "F15025"]
+        let light = ["6C3DD1", "3D52F5", "D12D78",
+                     "5621B6", "1745A3", "AE194F", "1C2D50"]
+        let dark = ["B784E8", "32D5E5", "FF8059",
+                    "B9EE4A", "FF985C", "55D6CF", "F6C85F"]
         XCTAssertEqual(ThemeColor.allCases.map(\.hex), light)
         XCTAssertEqual(ThemeColor.allCases.map(\.secondaryHex),
-                       ["63B7AF", "AB78DD", "83C8DB", "C27D98", "F5B84B"])
+                       dark)
+        XCTAssertEqual(ThemeColor.allCases.map(\.tertiaryHex),
+                       ["F3DDF2", "D5F66A", "FFD65C",
+                        "F0FFD0", "FFF1CB", "D9FFF7", "FFF1C7"])
         XCTAssertEqual(ThemeColor.allCases.map(\.name),
-                       ["Blue Slate", "Majorelle Blue", "Frozen Water", "Midnight Violet", "Blazing Flame"])
+                       ["Violet Aura", "Electric Rush", "Sunset Pop",
+                        "Ultravolt", "Cobalt Heat", "Cherry Ice", "Midnight Gold"])
         for style in [UIUserInterfaceStyle.light, .dark] {
             let actual = ThemeColor.allCases.map { theme in
                 Color(uiColor: UIColor(theme.color).resolvedColor(with: UITraitCollection(userInterfaceStyle: style))).toHex()
@@ -87,11 +93,12 @@ final class ThemeColorTests: XCTestCase {
         for theme in ThemeColor.allCases {
             XCTAssertEqual(ThemeColor.resolve(theme.rawValue), theme)
         }
-        XCTAssertEqual(ThemeColor.resolve("blue"), .indigo)
-        XCTAssertEqual(ThemeColor.resolve("green"), .mint)
-        XCTAssertEqual(ThemeColor.resolve("red"), .orange)
-        XCTAssertEqual(ThemeColor.resolve(nil), .primary)
-        XCTAssertEqual(ThemeColor.resolve("unknown-color"), .primary)
+        for retired in ["primary", "mint", "purple", "orange", "blue", "green", "red"] {
+            XCTAssertNil(ThemeColor(rawValue: retired))
+            XCTAssertEqual(ThemeColor.resolve(retired), .indigo)
+        }
+        XCTAssertEqual(ThemeColor.resolve(nil), .indigo)
+        XCTAssertEqual(ThemeColor.resolve("unknown-color"), .indigo)
     }
 
     func testLiveActivityUsesResolvedPaletteHex() {
@@ -103,8 +110,11 @@ final class ThemeColorTests: XCTestCase {
         }
         let exercise = WorkoutExercise(title: "Bench Press", subtitle: "Chest", details: "",
                                        numberOfSets: 3, reps: 10, increaseLoadNextTime: false, weight: 20)
-        for (stored, expected) in [("indigo", "6155F5"), ("mint", "D2F1E4"), ("purple", "88447E"),
-                                   ("orange", "F15025"), ("blue", "6155F5"), ("green", "D2F1E4"), ("red", "F15025")] {
+        for (stored, expected) in [("primary", "B784E8"), ("indigo", "B784E8"), ("mint", "B784E8"),
+                                   ("purple", "B784E8"), ("orange", "B784E8"), ("electricRush", "32D5E5"),
+                                   ("sunsetPop", "FF8059"), ("ultravolt", "B9EE4A"), ("cobaltHeat", "FF985C"),
+                                   ("cherryIce", "55D6CF"), ("midnightGold", "F6C85F"),
+                                   ("blue", "B784E8"), ("green", "B784E8"), ("red", "B784E8")] {
             defaults.set(stored, forKey: "appAccentColor")
             XCTAssertEqual(exercise.activityContent.accentColorHex, expected)
         }

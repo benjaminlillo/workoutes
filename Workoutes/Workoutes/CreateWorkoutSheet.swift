@@ -14,7 +14,7 @@ struct CreateWorkoutSheet: View {
             Form {
                 Section(header: Text("Workout Details")) {
                     TextField("Workout Name", text: $name)
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                 }
                 
                 if !allTags.isEmpty {
@@ -23,13 +23,7 @@ struct CreateWorkoutSheet: View {
                             HStack {
                                 ForEach(allTags) { tag in
                                     let isSelected = selectedTags.contains(tag)
-                                    Text(tag.name)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
-                                        .foregroundColor(isSelected ? .white : .primary)
-                                        .cornerRadius(16)
+                                    TagSelectionLabel(tag: tag, isSelected: isSelected)
                                         .onTapGesture {
                                             if isSelected {
                                                 selectedTags.remove(tag)
@@ -40,7 +34,7 @@ struct CreateWorkoutSheet: View {
                                 }
                             }
                         }
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                     }
                 }
             }

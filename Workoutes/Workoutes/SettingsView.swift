@@ -15,12 +15,13 @@ struct ShareSheet: UIViewControllerRepresentable {
 }
 
 struct SettingsView: View {
+    @Environment(\.trainingController) private var training
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     @State private var shareURL: IdentifiableURL?
     @State private var showingExportOptions = false
     @State private var exportError: String?
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
 
     private var accentColor: Color {
@@ -34,6 +35,12 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let training {
+                    Section("Apple Watch") {
+                        NavigationLink("Training Structure and History") { TrainingView(controller: training) }
+                            .subtleFormRowShadow()
+                    }
+                }
                 Section("Appearance") {
                     NavigationLink(destination: ThemeSelectionView()) {
                         HStack {
@@ -44,7 +51,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityIdentifier("settingsTheme")
-                    .subtleFormRowBorder()
+                    .subtleFormRowShadow()
                 }
                 Section("Units") {
                     Picker(selection: $weightUnit) {
@@ -58,17 +65,22 @@ struct SettingsView: View {
                     .tint(accentColor)
                     // The native menu picker caches its selected-label style.
                     .id(pickerStyleID)
-                    .subtleFormRowBorder()
+                    .subtleFormRowShadow()
                 }
                 Section("Data") {
+                    NavigationLink(destination: ExerciseHistoryView()) {
+                        HStack { Text("Exercise History"); Spacer(); Image(systemName: "clock.arrow.circlepath") }
+                    }
+                    .accessibilityIdentifier("settingsExerciseHistory")
+                    .subtleFormRowShadow(.first)
                     Button { showingExportOptions = true } label: {
                         HStack { Text("Export Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.up") }
                     }
-                    .subtleFormRowBorder(.first)
+                    .subtleFormRowShadow(.middle)
                     NavigationLink(destination: ImportDataView()) {
                         HStack { Text("Import Data (JSON)"); Spacer(); Image(systemName: "square.and.arrow.down") }
                     }
-                    .subtleFormRowBorder(.last)
+                    .subtleFormRowShadow(.last)
                 }
             }
             .transparentNavigationChrome()

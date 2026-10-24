@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct ThemeSelectionView: View {
-    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.displayScale) private var displayScale
     @State private var centeredTheme: ThemeColor?
 
     private var selectedTheme: ThemeColor { ThemeColor.resolve(accentColorRawValue) }
@@ -75,16 +76,13 @@ struct ThemeSelectionView: View {
         return Button(action: select) {
             VStack(spacing: 16) {
                 ThemeExercisePreview(theme: theme)
+                    // Compensate for the silhouette's magnification so grain stays one physical pixel.
+                    .environment(\.displayScale, displayScale * (width - 8) / 140)
                     .scaleEffect((width - 8) / 140)
                     .frame(width: width - 8, height: (width - 8) * 272 / 140)
                     .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-                    .shadow(color: .black.opacity(colorScheme == .dark ? 0.25 : 0.12), radius: 12, y: 6)
+                    .subtleCardShadow()
                     .padding(4)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 34, style: .continuous)
-                            .strokeBorder(isSelected ? accent : Color.primary.opacity(0.1),
-                                          lineWidth: isSelected ? 2.5 : 1)
-                    }
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(accent)
@@ -131,10 +129,6 @@ struct ThemeExercisePreview: View {
             ForEach(0..<3) { _ in
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.07), lineWidth: 0.5)
-                    }
                     .overlay(alignment: .topTrailing) {
                         ExerciseStatusSymbol(status: .done, accentColor: accent)
                             .scaleEffect(0.5)
@@ -142,6 +136,7 @@ struct ThemeExercisePreview: View {
                             .padding(5)
                     }
                     .frame(height: 51)
+                    .subtleCardShadow()
             }
 
             Spacer(minLength: 0)
@@ -155,6 +150,7 @@ struct ThemeExercisePreview: View {
             }
             .frame(height: 25)
             .background(Color.primary.opacity(0.05), in: Capsule())
+            .subtleCardShadow()
         }
         .padding(10)
         .frame(width: 140, height: 272)

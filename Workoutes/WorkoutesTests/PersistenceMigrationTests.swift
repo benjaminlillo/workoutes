@@ -84,6 +84,7 @@ final class PersistenceMigrationTests: XCTestCase {
         XCTAssertEqual(item.workouts.first?.name, "Legacy Workout")
         XCTAssertEqual(item.workouts.first?.backgroundID, "legacy-background")
         XCTAssertEqual(item.tags.first?.colorHex, "FF8800")
+        XCTAssertNil(item.tags.first?.iconName)
         XCTAssertNil(item.stableID)
         try CatalogIdentity.backfill(in: context)
         let id = try XCTUnwrap(item.stableID)

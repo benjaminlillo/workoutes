@@ -22,14 +22,19 @@ final class Tag {
     @Attribute(.unique) var stableID: String?
     var name: String
     var colorHex: String
+    // Optional so existing stores and tags retain their color-only appearance.
+    var iconName: String?
+
+    var muscleIcon: MuscleIcon? { iconName.flatMap(MuscleIcon.init(rawValue:)) }
     
     @Relationship(inverse: \WorkoutExercise.tags)
     var exercises: [WorkoutExercise] = []
     
-    init(name: String, colorHex: String) {
+    init(name: String, colorHex: String, iconName: String? = nil) {
         self.stableID = UUID().uuidString
         self.name = name
         self.colorHex = colorHex
+        self.iconName = iconName
     }
 }
 
@@ -83,11 +88,21 @@ final class ExerciseCompletion {
     @Attribute(.unique) var id: String
     var completedAt: Date
     var exercise: WorkoutExercise?
+    // Optional for lightweight migration. Existing records must not acquire invented historical values.
+    var snapshotData: Data? = nil
 
-    init(id: String, completedAt: Date, exercise: WorkoutExercise?) {
+    init(id: String, completedAt: Date, exercise: WorkoutExercise?, snapshot: ExerciseCompletionSnapshot? = nil) {
         self.id = id
         self.completedAt = completedAt
         self.exercise = exercise
+        self.snapshotData = snapshot.flatMap { try? JSONEncoder().encode($0) }
+    }
+
+    var snapshot: ExerciseCompletionSnapshot? {
+        guard let snapshotData,
+              let snapshot = try? JSONDecoder().decode(ExerciseCompletionSnapshot.self, from: snapshotData),
+              snapshot.isValid else { return nil }
+        return snapshot
     }
 
     var exerciseTitle: String { exercise?.title ?? "Exercise deleted" }

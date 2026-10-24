@@ -4,10 +4,11 @@ import SwiftData
 struct ExerciseCardView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @Bindable var exercise: WorkoutExercise
     var workout: Workout? = nil
+    var revealHighlight: UUID? = nil
     
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
@@ -19,67 +20,56 @@ struct ExerciseCardView: View {
     }
 
     private var isPlaying: Bool { exerciseActivity.isActive(exercise) && !exercise.isDone }
+    private var isQueued: Bool { !isPlaying && exerciseActivity.isQueued(exercise) }
 
     private var stateValue: String {
-        exercise.isDone ? "Completed" : (isPlaying ? "Active" : "Not started")
+        isQueued ? "Queued for next exercise block" : (exercise.isDone ? "Completed" : (isPlaying ? "Active" : "Not started"))
     }
 
     private var stateHint: String {
-        exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop: completes after more than 10 seconds, otherwise cancels" : "Start this exercise")
+        if exerciseActivity.training?.hasActiveSession == true {
+            if isQueued { return "Remove this exercise from the queue" }
+            if isPlaying { return "Finish this series or skip the current rest" }
+            return exerciseActivity.training?.run?.progress.stage == .choosingExercise
+                ? "Use this exercise in the current training block" : "Queue this exercise for the next available exercise block"
+        }
+        return exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop: completes after more than 10 seconds, otherwise cancels" : "Start this exercise")
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(exercise.title)
-                        .font(.title3.weight(.bold))
-
-                    if !exercise.subtitle.isEmpty {
-                        Text(exercise.subtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if !exercise.details.isEmpty {
-                        HStack(alignment: .firstTextBaseline, spacing: 7) {
-                            Image(systemName: "doc.text")
-                            Text(exercise.details)
-                                .lineLimit(2)
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 4)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                VStack(spacing: 5) {
-                    Button {
-                        exerciseActivity.advanceState(exercise, context: modelContext)
-                    } label: {
+            ExerciseCardHeader(
+                title: exercise.title, subtitle: exercise.subtitle, details: exercise.details,
+                increaseLoadNextTime: exercise.increaseLoadNextTime, accentColor: accentColor,
+                tagColors: exercise.tags.map(\.colorHex), tagIconNames: exercise.tags.map(\.iconName),
+                tagNames: exercise.tags.map(\.name)
+            ) {
+                Button {
+                    exerciseActivity.advanceState(exercise, context: modelContext)
+                } label: {
+                    if isQueued {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 28, weight: .semibold)).foregroundStyle(accentColor)
+                            .frame(width: 44, height: 44)
+                    } else {
                         ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
                                              accentColor: accentColor)
                     }
-                    .buttonStyle(.borderless)
-                    .disabled(exerciseActivity.isUpdating)
-                    .accessibilityLabel("Exercise status")
-                    .accessibilityValue(stateValue)
-                    .accessibilityHint(stateHint)
-                    .accessibilityAddTraits(exercise.isDone || isPlaying ? .isSelected : [])
-                    .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
-                    .sensoryFeedback(.selection, trigger: stateValue)
-
-                    if !exercise.tags.isEmpty || exercise.increaseLoadNextTime {
-                        HStack(spacing: 4) {
-                            tagBars
-                            if exercise.increaseLoadNextTime {
-                                ExerciseBumpBadge(color: accentColor)
-                            }
-                        }
-                    }
                 }
-                .frame(minWidth: 44)
+                .buttonStyle(.borderless)
+                .disabled(exerciseActivity.isUpdating)
+                .accessibilityLabel("Exercise status")
+                .accessibilityValue(stateValue)
+                .accessibilityHint(stateHint)
+                .accessibilityAddTraits(exercise.isDone || isPlaying || isQueued ? .isSelected : [])
+                .accessibilityIdentifier("exerciseCompletion.\(exercise.title)")
+                .sensoryFeedback(.selection, trigger: stateValue)
+            }
+
+            if isQueued {
+                Label("Queued · Exercise \(exerciseActivity.training?.run?.queuedExerciseNumber ?? 0)", systemImage: "text.line.first.and.arrowtriangle.forward")
+                    .font(.caption.weight(.medium)).foregroundStyle(accentColor)
+                    .accessibilityIdentifier("queuedExercise.\(exercise.title)")
             }
 
             Divider()
@@ -142,7 +132,10 @@ struct ExerciseCardView: View {
         .padding()
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .subtleCardBorder()
+        .subtleCardShadow()
+        .overlay {
+            ExerciseRevealHighlight(color: accentColor, trigger: revealHighlight)
+        }
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
             Button {
@@ -167,7 +160,6 @@ struct ExerciseCardView: View {
                 Label("Delete Permanently", systemImage: "trash")
             }
         }
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         .padding(.horizontal)
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button {
@@ -203,18 +195,6 @@ struct ExerciseCardView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-    }
-
-    private var tagBars: some View {
-        HStack(spacing: 3) {
-            ForEach(exercise.tags) { tag in
-                Circle()
-                    .fill(Color(hex: tag.colorHex))
-                    .frame(width: 7, height: 7)
-                    .accessibilityLabel("Tag: \(tag.name)")
-            }
-        }
-        .fixedSize()
     }
 
     private var metricDivider: some View {

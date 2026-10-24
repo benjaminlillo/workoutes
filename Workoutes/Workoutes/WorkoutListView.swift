@@ -5,7 +5,7 @@ struct WorkoutListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [Workout]
     @State private var showingAddSheet = false
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     
     var body: some View {
         NavigationStack {
@@ -22,7 +22,7 @@ struct WorkoutListView: View {
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
                             .fill(Color(UIColor.secondarySystemGroupedBackground))
-                            .subtleCardBorder()
+                            .subtleCardShadow()
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                     )

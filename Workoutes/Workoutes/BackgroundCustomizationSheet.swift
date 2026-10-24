@@ -13,7 +13,7 @@ struct BackgroundCustomizationSheet: View {
     let background: ExerciseBackgroundStore
     let title: String
     let tagColors: [String]
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @State private var colors: [String] = ExerciseBackgroundStore.defaultGradientColors
@@ -52,14 +52,14 @@ struct BackgroundCustomizationSheet: View {
                     }
                     .pickerStyle(.segmented)
                     .disabled(isLoading)
-                    .subtleFormRowBorder()
+                    .subtleFormRowShadow()
                 }
 
                 Section("Preview") {
                     preview
                         .frame(height: 140)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                 }
 
                 if mode == .wallpaper {
@@ -67,17 +67,17 @@ struct BackgroundCustomizationSheet: View {
                         PhotosPicker(selection: $selectedPhoto, matching: .images, preferredItemEncoding: .compatible) {
                             Label("Choose from Photos", systemImage: "photo.on.rectangle")
                         }
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                         Button {
                             Task { await openCamera() }
                         } label: {
                             Label("Take Photo", systemImage: "camera")
                         }
                         .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
-                        .subtleFormRowBorder(isLoading ? .middle : .last)
+                        .subtleFormRowShadow(isLoading ? .middle : .last)
                         if isLoading {
                             ProgressView("Saving background…")
-                                .subtleFormRowBorder(.last)
+                                .subtleFormRowShadow(.last)
                         }
                     } footer: {
                         Text(UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -110,11 +110,11 @@ struct BackgroundCustomizationSheet: View {
                                     .accessibilityLabel("Remove color \(index + 1)")
                                 }
                             }
-                            .subtleFormRowBorder(.row(at: index, count: colors.count + (colors.count < 3 ? 1 : 0)))
+                            .subtleFormRowShadow(.row(at: index, count: colors.count + (colors.count < 3 ? 1 : 0)))
                         }
                         if colors.count < 3 {
                             Button("Add Color", systemImage: "plus") { colors = displayedColors + ["F4D8BD"] }
-                                .subtleFormRowBorder(.last)
+                                .subtleFormRowShadow(.last)
                         }
                     } header: {
                         Text("Soft Gradient")
@@ -129,7 +129,7 @@ struct BackgroundCustomizationSheet: View {
                     Section {
                         Text("The gradient follows the colors of the selected tags. Without tags, it uses the default gradient.")
                             .foregroundStyle(.secondary)
-                            .subtleFormRowBorder()
+                            .subtleFormRowShadow()
                     }
                 }
 
@@ -144,7 +144,7 @@ struct BackgroundCustomizationSheet: View {
                             catch { errorMessage = error.localizedDescription }
                         }
                         .disabled(isLoading)
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                     }
                 }
             }

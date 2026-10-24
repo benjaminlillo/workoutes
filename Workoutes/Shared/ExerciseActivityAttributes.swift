@@ -12,6 +12,8 @@ nonisolated struct ExerciseActivityAttributes: ActivityAttributes {
         var increaseLoadNextTime: Bool
         var details: String? = nil
         var tagColors: [String]? = nil
+        // Aligned with tagColors; older activities without icons keep their colored dots.
+        var tagIconNames: [String?]? = nil
         var accentColorHex: String? = nil
         var displayedWeight: Double? = nil
         var weightUnitSymbol: String? = nil

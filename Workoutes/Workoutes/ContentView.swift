@@ -3,55 +3,56 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.trainingController) private var training
     @Environment(\.scenePhase) private var scenePhase
     @Query private var exercises: [WorkoutExercise]
-    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.primary.rawValue
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @State private var motivationalPull = MotivationalPullState()
+    @State var navigation = ExerciseNavigation()
     
     private var activeExercise: WorkoutExercise? {
         exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
     }
 
+    private var activeExerciseRole: TabRole {
+        if #available(iOS 27.0, *) { .prominent } else { .search }
+    }
+
     var body: some View {
-        TabView {
-            Tab {
+        TabView(selection: $navigation.selectedTab) {
+            Tab(value: AppTab.summary) {
                 SummaryView(pull: $motivationalPull)
             } label: {
-                Image(systemName: "house.fill")
-                    .accessibilityLabel("Summary")
+                Image(systemName: "house.fill").accessibilityLabel("Summary")
             }
-            Tab {
+            Tab(value: AppTab.workouts) {
                 WorkoutListView()
             } label: {
-                Image(systemName: "list.bullet.clipboard")
-                    .accessibilityLabel("Workouts")
+                Image(systemName: "list.bullet.clipboard").accessibilityLabel("Workouts")
             }
-            Tab {
-                ExerciseListView()
+            Tab(value: AppTab.exercises) {
+                ExerciseListView(navigation: navigation)
             } label: {
-                Image(systemName: "dumbbell")
-                    .accessibilityLabel("Exercises")
+                Image(systemName: "dumbbell").accessibilityLabel("Exercises")
             }
-            Tab {
+            Tab(value: AppTab.settings) {
                 SettingsView()
             } label: {
-                Image(systemName: "gearshape")
-                    .accessibilityLabel("Settings")
+                Image(systemName: "gearshape").accessibilityLabel("Settings")
             }
+            Tab(value: AppTab.activeExercise, role: activeExerciseRole) {
+                // Selection is redirected after the native tab controller records the tap.
+                EmptyView()
+            } label: {
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .accessibilityLabel(activeExercise?.title ?? "No Active Exercise")
+            }
+            .disabled(activeExercise == nil)
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
-        .tabViewBottomAccessory {
-            NativeExerciseAccessory(
-                content: activeExercise.map { exerciseActivity.content(for: $0) },
-                isUpdating: exerciseActivity.isUpdating,
-                accentColor: ThemeColor.resolve(accentColorRawValue).color
-            ) {
-                if let exercise = activeExercise {
-                    exerciseActivity.toggle(exercise, context: modelContext)
-                }
-            }
+        .tabBarMinimizeBehavior(.never)
+        .onChange(of: navigation.selectedTab) { previousTab, _ in
+            navigation.resolveActiveExerciseShortcut(activeExercise, previousTab: previousTab)
         }
         .overlay {
             MotivationalPullOverlay(pull: motivationalPull)
@@ -61,19 +62,20 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                training?.refresh()
                 exerciseActivity.restore()
                 exerciseActivity.synchronize(exercises: exercises)
             }
         }
         .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
         .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
-        .alert("Exercise Session", isPresented: Binding(
-            get: { exerciseActivity.errorMessage != nil },
-            set: { if !$0 { exerciseActivity.errorMessage = nil } }
+        .alert(training?.errorMessage != nil ? "Training" : "Exercise Session", isPresented: Binding(
+            get: { exerciseActivity.errorMessage != nil || training?.errorMessage != nil },
+            set: { if !$0 { exerciseActivity.errorMessage = nil; training?.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { exerciseActivity.errorMessage = nil }
+            Button("OK", role: .cancel) { exerciseActivity.errorMessage = nil; training?.errorMessage = nil }
         } message: {
-            Text(exerciseActivity.errorMessage ?? "")
+            Text(training?.errorMessage ?? exerciseActivity.errorMessage ?? "")
         }
     }
 }

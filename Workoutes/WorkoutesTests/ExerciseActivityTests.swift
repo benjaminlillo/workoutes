@@ -46,6 +46,44 @@ final class ExerciseActivityTests: XCTestCase {
         XCTAssertEqual(exercise.activityContent.weight, 0)
     }
 
+    func testTagIconsStayAlignedWithColorsAndFitTheActivityPayload() throws {
+        let container = try makeContainer()
+        let item = exercise(String(repeating: "💪", count: 5_000))
+        item.subtitle = String(repeating: "💪", count: 5_000)
+        item.details = String(repeating: "💪", count: 5_000)
+        container.mainContext.insert(item)
+        for index in 0..<20 {
+            let tag = Tag(name: "Tag \(index)", colorHex: String(format: "%06X", index + 1),
+                          iconName: index.isMultiple(of: 3) ? MuscleIcon.chest.rawValue
+                            : index.isMultiple(of: 2) ? "future-icon" : nil)
+            container.mainContext.insert(tag)
+            item.tags.append(tag)
+        }
+        try container.mainContext.save()
+
+        let state = item.activityContent
+        XCTAssertEqual(state.tagColors, item.tags.prefix(12).map(\.colorHex))
+        XCTAssertEqual(state.tagIconNames, item.tags.prefix(12).map { $0.muscleIcon?.rawValue })
+        XCTAssertEqual(state.tagIconNames?.count, 12)
+        let data = try JSONEncoder().encode(state)
+        XCTAssertLessThan(data.count, 4_096)
+        XCTAssertEqual(try JSONDecoder().decode(ExerciseActivityAttributes.ContentState.self, from: data), state)
+
+        item.tags[0].iconName = MuscleIcon.back.rawValue
+        XCTAssertNotEqual(item.activityContent, state, "Editing a tag icon must trigger a Live Activity update")
+        XCTAssertEqual(item.activityContent.tagIconNames?.first, MuscleIcon.back.rawValue)
+    }
+
+    func testLiveActivityExtensionContainsTheSharedMuscleAssets() throws {
+        let plugins = try XCTUnwrap(Bundle.main.builtInPlugInsURL)
+        let url = plugins.appendingPathComponent("WorkoutesLiveActivity.appex")
+        let widget = try XCTUnwrap(Bundle(url: url))
+        for icon in MuscleIcon.allCases {
+            XCTAssertNotNil(UIImage(named: icon.baseAsset, in: widget, compatibleWith: nil), icon.rawValue)
+            XCTAssertNotNil(UIImage(named: icon.highlightAsset, in: widget, compatibleWith: nil), icon.rawValue)
+        }
+    }
+
     func testThreeStateControlStartsCompletesAndResetsExercise() async throws {
         let container = try makeContainer()
         let item = exercise("Three State Exercise")
@@ -99,9 +137,19 @@ final class ExerciseActivityTests: XCTestCase {
         first.reps = 8
         first.numberOfSets = 4
         first.increaseLoadNextTime = true
+        let tag = Tag(name: "Chest", colorHex: "FF8800", iconName: MuscleIcon.chest.rawValue)
+        container.mainContext.insert(tag)
+        first.tags = [tag]
         controller.synchronize(exercises: [first, second])
         await controller.waitForPendingUpdates()
         try await waitForContent(controller.content(for: first), in: initial)
+        XCTAssertEqual(initial.content.state.tagIconNames, [MuscleIcon.chest.rawValue])
+
+        tag.iconName = MuscleIcon.back.rawValue
+        controller.synchronize(exercises: [first, second])
+        await controller.waitForPendingUpdates()
+        try await waitForContent(controller.content(for: first), in: initial)
+        XCTAssertEqual(initial.content.state.tagIconNames, [MuscleIcon.back.rawValue])
 
         // Switching updates the same card instead of leaving a second activity behind.
         second.isDone = true
@@ -186,6 +234,7 @@ final class ExerciseActivityTests: XCTestCase {
         XCTAssertNil(state.weightUnitSymbol)
         XCTAssertNil(state.startedAt)
         XCTAssertNil(state.sessionID)
+        XCTAssertNil(state.tagIconNames)
         XCTAssertEqual(state.weight, 20)
     }
 
@@ -195,14 +244,16 @@ final class ExerciseActivityTests: XCTestCase {
                 exerciseID: "preview", title: "Bench Press", subtitle: "Controlled movement",
                 numberOfSets: 3, reps: 10, weight: 32.5, increaseLoadNextTime: true,
                 details: "Pause at the bottom", tagColors: ["FF8800", "5599FF"],
+                tagIconNames: [MuscleIcon.chest.rawValue, nil],
                 accentColorHex: "326884", displayedWeight: 32.5, weightUnitSymbol: "kg", status: status,
                 sessionID: "preview-session", startedAt: status == .playing ? .now.addingTimeInterval(-125) : nil
             )
             let renderer = ImageRenderer(content: ExerciseActivitySummary(state: state)
-                .padding(16).frame(width: 398).background(.black))
+                .padding(.horizontal, 16).padding(.vertical, 7).frame(width: 398).background(.black))
             renderer.scale = 3
             let image = try XCTUnwrap(renderer.uiImage)
             XCTAssertGreaterThan(image.size.height, 100)
+            XCTAssertLessThanOrEqual(image.size.height, 160, "The normal card must fit the Lock Screen's height")
             let data = try XCTUnwrap(image.pngData())
             try data.write(to: URL(fileURLWithPath: "/tmp/workoutes-live-card-\(status.rawValue).png"))
         }
@@ -219,7 +270,7 @@ final class ExerciseActivityTests: XCTestCase {
             increaseLoadNextTime: true,
             weight: 60
         )
-        let chest = Tag(name: "Chest", colorHex: "FF8800")
+        let chest = Tag(name: "Chest", colorHex: "FF8800", iconName: MuscleIcon.chest.rawValue)
         let strength = Tag(name: "Strength", colorHex: "5599FF")
         item.tags = [chest, strength]
         container.mainContext.insert(item)

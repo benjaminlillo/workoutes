@@ -20,18 +20,18 @@ struct CreateGlobalExerciseSheet: View {
             Form {
                 Section(header: Text("Basic Info")) {
                     TextField("Title", text: $title)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     TextField("Subtitle (Optional)", text: $subtitle)
-                        .subtleFormRowBorder(.middle)
+                        .subtleFormRowShadow(.middle)
                     TextField("Details (Optional)", text: $details)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
                 
                 Section(header: Text("Targets")) {
                     Stepper("Sets: \(numberOfSets)", value: $numberOfSets, in: 1...20)
-                        .subtleFormRowBorder(.first)
+                        .subtleFormRowShadow(.first)
                     Stepper("Reps: \(reps)", value: $reps, in: 1...100)
-                        .subtleFormRowBorder(.last)
+                        .subtleFormRowShadow(.last)
                 }
                 
                 if !allTags.isEmpty {
@@ -40,20 +40,14 @@ struct CreateGlobalExerciseSheet: View {
                             HStack {
                                 ForEach(allTags) { tag in
                                     let isSelected = selectedTags.contains(tag)
-                                    Text(tag.name)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(isSelected ? Color(hex: tag.colorHex) : Color.gray.opacity(0.2))
-                                        .foregroundColor(isSelected ? .white : .primary)
-                                        .cornerRadius(16)
+                                    TagSelectionLabel(tag: tag, isSelected: isSelected)
                                         .onTapGesture {
                                             if isSelected { selectedTags.remove(tag) } else { selectedTags.insert(tag) }
                                         }
                                 }
                             }
                         }
-                        .subtleFormRowBorder()
+                        .subtleFormRowShadow()
                     }
                 }
                 
@@ -65,7 +59,7 @@ struct CreateGlobalExerciseSheet: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
-                    .subtleFormRowBorder()
+                    .subtleFormRowShadow()
                 }
             }
             .transparentNavigationChrome()
