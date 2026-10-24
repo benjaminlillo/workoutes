@@ -13,6 +13,7 @@ struct TrainingBlock: Codable, Equatable, Identifiable, Sendable {
 struct TrainingPlan: Codable, Equatable, Sendable {
     var name = "Daily Training"
     var blocks: [TrainingBlock]
+    var asksForEffortRating = true
 
     static var daily: Self {
         Self(blocks: (0..<4).flatMap { index in
@@ -26,6 +27,18 @@ struct TrainingPlan: Codable, Equatable, Sendable {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && name.count <= 100 &&
         !blocks.isEmpty && blocks.count <= 40 && exerciseCount > 0 &&
         Set(blocks.map(\.id)).count == blocks.count && blocks.allSatisfy(\.isValid)
+    }
+}
+
+extension TrainingPlan {
+    private enum CodingKeys: String, CodingKey { case name, blocks, asksForEffortRating }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        name = try values.decode(String.self, forKey: .name)
+        blocks = try values.decode([TrainingBlock].self, forKey: .blocks)
+        // Existing plans and historical sessions retain the previous behavior.
+        asksForEffortRating = try values.decodeIfPresent(Bool.self, forKey: .asksForEffortRating) ?? true
     }
 }
 

@@ -253,7 +253,7 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
             progress.phaseStartedAt = progress.phaseStartedAt.addingTimeInterval(interval)
         }
         self.pausedAt = nil
-        self.effort = effort.map { min(10, max(1, $0)) }
+        self.effort = plan.asksForEffortRating ? effort.map { min(10, max(1, $0)) } : nil
         endedAt = date; progress.stage = .finished; progress.queuedExercise = nil; undo = nil; revision += 1
     }
 

@@ -92,6 +92,84 @@ final class TrainingTests: XCTestCase {
         XCTAssertTrue(run.canSelectExercise)
     }
 
+    func testLegacyArchiveKeepsEffortEnabledAndPreservesHistoricalRatings() throws {
+        var finished = try makeRun()
+        finished.finish(effort: 7, at: date(80))
+        var archive = TrainingArchive()
+        archive.current = try makeRun()
+        archive.history = [finished]
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(archive)) as? [String: Any])
+        func legacyPlan(_ value: Any?) throws -> [String: Any] {
+            var plan = try XCTUnwrap(value as? [String: Any])
+            plan.removeValue(forKey: "asksForEffortRating")
+            return plan
+        }
+        json["plan"] = try legacyPlan(json["plan"])
+        var current = try XCTUnwrap(json["current"] as? [String: Any])
+        current["plan"] = try legacyPlan(current["plan"])
+        json["current"] = current
+        var history = try XCTUnwrap(json["history"] as? [[String: Any]])
+        history[0]["plan"] = try legacyPlan(history[0]["plan"])
+        json["history"] = history
+
+        let restored = try JSONDecoder().decode(TrainingArchive.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertTrue(restored.plan.asksForEffortRating)
+        XCTAssertEqual(restored.current, archive.current)
+        XCTAssertEqual(restored.history, archive.history)
+        XCTAssertEqual(restored.history.first?.effort, 7)
+    }
+
+    func testEffortPreferencePersistsAndTravelsWithTheWatchStartPlan() throws {
+        let disk = store()
+        let phone = PhoneTrainingController(store: disk, activate: false)
+        var plan = phone.plan
+        XCTAssertTrue(plan.asksForEffortRating)
+        plan.asksForEffortRating = false
+        try phone.savePlan(plan)
+        let restored = PhoneTrainingController(store: disk, activate: false)
+        XCTAssertEqual(restored.plan, plan)
+
+        let message = TrainingEnvelope(kind: .command, command: .init(action: .start, plan: restored.plan))
+        let decoded = try JSONDecoder().decode(TrainingEnvelope.self, from: JSONEncoder().encode(message))
+        var run = try TrainingRun(plan: XCTUnwrap(decoded.command?.plan), at: origin)
+        run.finish(effort: nil, at: date(80))
+        restored.receive(.init(kind: .snapshot, run: run))
+        let relaunched = PhoneTrainingController(store: disk, activate: false)
+        XCTAssertEqual(relaunched.history.first?.plan.asksForEffortRating, false)
+        XCTAssertNil(relaunched.history.first?.effort)
+    }
+
+    func testDisabledEffortDiscardsEvenASuppliedRatingAndKeepsOtherResults() throws {
+        var plan = TrainingPlan.daily
+        plan.asksForEffortRating = false
+        var run = try TrainingRun(plan: plan, at: origin)
+        try run.select(exercise(sets: 1), at: date(10))
+        try run.advance(at: date(40))
+        run.metrics.activeCalories = 20
+        run.finish(effort: 8, at: date(80))
+        XCTAssertFalse(run.isActive)
+        XCTAssertNil(run.effort)
+        XCTAssertFalse(run.effortSaved)
+        XCTAssertEqual(run.elapsed(at: date(100)), 80)
+        XCTAssertEqual(run.metrics.activeCalories, 20)
+        XCTAssertEqual(run.progress.results.first?.sets.count, 1)
+        XCTAssertEqual(run.progress.results.first?.isComplete, true)
+    }
+
+    func testChangingEffortTemplateOnlyAffectsNewSessions() throws {
+        var plan = TrainingPlan.daily
+        var existing = try TrainingRun(plan: plan, at: origin)
+        plan.asksForEffortRating = false
+        var next = try TrainingRun(plan: plan, at: date(100))
+        existing.finish(effort: 6, at: date(80))
+        next.finish(effort: 6, at: date(180))
+        XCTAssertEqual(existing.effort, 6)
+        XCTAssertNil(next.effort)
+        plan.asksForEffortRating = true
+        let data = try JSONEncoder().encode(plan)
+        XCTAssertTrue(try JSONDecoder().decode(TrainingPlan.self, from: data).asksForEffortRating)
+    }
+
     func testSelectionStartsFirstSeriesAndUsesExerciseSnapshot() throws {
         var run = try TrainingRun(plan: .daily, at: origin)
         var selected = exercise(sets: 4)
