@@ -1,0 +1,5 @@
+Tool: built-in image_gen.imagegen
+Input: 1CE02E88-5251-4EFD-BDDC-DEBD23EBB88B.PNG
+Transparent background: false
+
+Use case: precise-object-edit. Asset type: neutral texture layer inside an Apple Icon Composer app icon. Edit target: the single provided square background image. Change ONLY its color to neutral grayscale / monochrome. Preserve exactly the original composition: nearly black center and lower left; broad softly glowing upper left; brighter diffuse lower-right corner; the very fine rough photographic film grain / embossed surface texture throughout. Keep all luminance detail, fine grain and light/shadow placement as close to the original as possible. Remove the yellow-green hue completely so the entire image is neutral gray, silver and black. No letter, W, symbol, border, rounded corners, text, other shape or new object. Full-bleed square texture only. This grayscale image will be colorized deterministically by separate theme color layers in Icon Composer; do not add any color.
