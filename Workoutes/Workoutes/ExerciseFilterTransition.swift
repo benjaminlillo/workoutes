@@ -1,18 +1,13 @@
 import SwiftUI
 import UIKit
 
-/// Crossfades visible content without moving it or clearing the viewport.
-/// Fast filter updates inherit the current fade instead of restarting it.
+/// Keeps at most one outgoing snapshot and one pending entrance for the latest filter.
 @MainActor
 final class ExerciseFilterTransition {
     weak var viewport: ExerciseFilterViewport?
-    static let duration = 0.2
+    static let duration = 0.12
 
-    func begin() {
-        guard viewport?.prepare() == true else { return }
-        viewport?.fadeAfterUpdate()
-    }
-
+    func begin() { viewport?.changeSelection() }
     func cancel() { viewport?.clear() }
 }
 
@@ -38,14 +33,21 @@ struct ExerciseFilterTransitionLayer: UIViewRepresentable {
 final class ExerciseFilterViewport: UIView {
     private(set) var outgoing: UIView?
     private(set) var isActive = false
+    private(set) var isEntering = false
     var duration = ExerciseFilterTransition.duration
     var showsEmptyMessage = false {
         didSet { emptyMessage.isHidden = !showsEmptyMessage }
     }
     private weak var list: UICollectionView?
     private let emptyMessage: UIContentUnavailableView
-    private var animator: UIViewPropertyAnimator?
+    private var exitAnimator: UIViewPropertyAnimator?
+    private var entranceAnimators: [UIViewPropertyAnimator] = []
+    private var animatedCells: [UICollectionViewCell] = []
     private var pendingStart: Task<Void, Never>?
+    private var generation = 0
+    private var isExiting = false
+    private var lastSelection = ContinuousClock.now
+    private let settlingInterval: Duration = .milliseconds(60)
 
     override init(frame: CGRect) {
         var configuration = UIContentUnavailableConfiguration.empty()
@@ -68,58 +70,133 @@ final class ExerciseFilterViewport: UIView {
         emptyMessage.frame = bounds
     }
 
-    func prepare() -> Bool {
-        // Selection still changes immediately during this interval. Only its
-        // container animation is reused; there is no queue or repeated snapshot.
+    func changeSelection() {
         let attachedList = list?.window == nil ? nil : list
-        guard !isActive, window != nil, let list = attachedList ?? findList() else { return false }
+        guard window != nil, let list = attachedList ?? findList() else { return }
         self.list = list
-        capture(list)
+        generation += 1
+        lastSelection = .now
+        pendingStart?.cancel()
+        pendingStart = nil
         isActive = true
+
+        // Rapid wheel changes reuse this exit and never restart its clock.
+        guard !isExiting else { return }
+        if list.alpha > 0 { capture(list) }
         UIView.performWithoutAnimation {
             list.alpha = 0
             emptyMessage.alpha = 0
         }
-        return true
+        stopEntrance()
+
+        guard outgoing != nil else { scheduleEntrance(); return }
+        isExiting = true
+        let animator = UIViewPropertyAnimator(duration: duration, curve: .easeOut) { [weak self] in
+            self?.outgoing?.alpha = 0
+        }
+        exitAnimator = animator
+        animator.addCompletion { [weak self, weak animator] _ in
+            guard let self, let animator, self.exitAnimator === animator, self.isExiting else { return }
+            self.removeOutgoing()
+            self.exitAnimator = nil
+            self.isExiting = false
+            self.scheduleEntrance()
+        }
+        animator.startAnimation()
     }
 
-    func fadeAfterUpdate() {
-        // Let SwiftUI commit the new rows once. This task belongs to the native
-        // transition, so subsequent filter changes cannot cancel its entrance.
+    private func scheduleEntrance() {
+        pendingStart?.cancel()
+        let request = generation
+        let deadline = lastSelection.advanced(by: settlingInterval)
         pendingStart = Task { [weak self] in
-            do { try await Task.sleep(for: .milliseconds(16)) }
-            catch { return }
-            guard !Task.isCancelled, let self else { return }
+            do {
+                if deadline > .now { try await Task.sleep(until: deadline, clock: .continuous) }
+                // Commit the newest SwiftUI rows while the live list is hidden.
+                try await Task.sleep(for: .milliseconds(16))
+            } catch { return }
+            guard !Task.isCancelled, let self, self.generation == request else { return }
             self.pendingStart = nil
-            guard self.isActive, let list = self.list else { self.clear(); return }
-            let animator = UIViewPropertyAnimator(duration: self.duration, curve: .easeInOut) {
-                list.alpha = 1
-                self.emptyMessage.alpha = 1
-                self.outgoing?.alpha = 0
-            }
-            self.animator = animator
-            animator.addCompletion { [weak self] _ in self?.clear() }
-            animator.startAnimation()
+            self.enter(request: request)
         }
     }
 
+    private func enter(request: Int) {
+        guard let list, window != nil else { clear(); return }
+        list.layoutIfNeeded()
+        let visible = list.bounds.inset(by: list.adjustedContentInset)
+        let cells = list.visibleCells.filter { $0.frame.intersects(visible) }
+            .sorted { $0.frame.minY < $1.frame.minY }
+        animatedCells = cells
+        isEntering = true
+        UIView.performWithoutAnimation {
+            for cell in cells { cell.alpha = 0 }
+            list.alpha = 1
+            emptyMessage.alpha = 0
+        }
+
+        let targets: [(UIView, TimeInterval)] = cells.map { cell in
+            // Exercise cards have ten points of vertical padding inside their list row.
+            let top = cell.convert(cell.bounds, to: window).minY + 10
+            return (cell, ContainerAppearanceTiming.delay(at: top))
+        } + (showsEmptyMessage ? [(emptyMessage, 0)] : [])
+        guard !targets.isEmpty else { finishEntrance(request: request); return }
+        var remaining = targets.count
+        for (view, delay) in targets {
+            let animator = UIViewPropertyAnimator(duration: ContainerAppearanceTiming.duration, curve: .easeOut) {
+                view.alpha = 1
+            }
+            animator.addCompletion { [weak self] _ in
+                guard let self, self.generation == request else { return }
+                remaining -= 1
+                if remaining == 0 { self.finishEntrance(request: request) }
+            }
+            entranceAnimators.append(animator)
+            animator.startAnimation(afterDelay: delay)
+        }
+    }
+
+    private func finishEntrance(request: Int) {
+        guard generation == request else { return }
+        entranceAnimators.removeAll()
+        animatedCells.removeAll()
+        emptyMessage.alpha = 1
+        isEntering = false
+        isActive = false
+    }
+
     func clear() {
+        generation += 1
         pendingStart?.cancel()
         pendingStart = nil
-        if animator?.state == .active { animator?.stopAnimation(true) }
-        animator = nil
-        outgoing?.superview?.removeFromSuperview()
-        outgoing = nil
+        isExiting = false
+        if exitAnimator?.state == .active { exitAnimator?.stopAnimation(true) }
+        exitAnimator = nil
+        stopEntrance()
+        removeOutgoing()
         UIView.performWithoutAnimation {
             list?.alpha = 1
+            list?.visibleCells.forEach { $0.alpha = 1 }
             emptyMessage.alpha = 1
         }
         isActive = false
     }
 
+    private func stopEntrance() {
+        for animator in entranceAnimators where animator.state == .active { animator.stopAnimation(true) }
+        entranceAnimators.removeAll()
+        UIView.performWithoutAnimation { animatedCells.forEach { $0.alpha = 1 } }
+        animatedCells.removeAll()
+        isEntering = false
+    }
+
+    private func removeOutgoing() {
+        outgoing?.superview?.removeFromSuperview()
+        outgoing = nil
+    }
+
     private func capture(_ list: UICollectionView) {
-        // Only settled, visible content is captured, never another snapshot.
-        // Exclude navigation and tab chrome even when scrolled underneath them.
+        // Capture only visible live cells, never another snapshot or the wheel/chrome.
         let visible = list.convert(list.bounds.inset(by: list.adjustedContentInset), to: self).intersection(bounds)
         guard !visible.isNull, !visible.isEmpty else { return }
         let clip = UIView(frame: visible)
@@ -130,11 +207,16 @@ final class ExerciseFilterViewport: UIView {
         clip.addSubview(content)
         for cell in list.visibleCells {
             let frame = cell.convert(cell.bounds, to: clip)
-            guard frame.intersects(clip.bounds), let snapshot = cell.snapshotView(afterScreenUpdates: false) else { continue }
+            let alpha = CGFloat(cell.layer.presentation()?.opacity ?? Float(cell.alpha))
+            guard frame.intersects(clip.bounds), alpha > 0.01,
+                  let snapshot = cell.snapshotView(afterScreenUpdates: false) else { continue }
             snapshot.frame = frame
+            // UIKit already captures the currently displayed opacity, including an interrupted fade.
             content.addSubview(snapshot)
         }
-        if showsEmptyMessage, let snapshot = emptyMessage.snapshotView(afterScreenUpdates: false) {
+        let emptyAlpha = emptyMessage.layer.presentation()?.opacity ?? Float(emptyMessage.alpha)
+        if showsEmptyMessage, emptyAlpha > 0.01,
+           let snapshot = emptyMessage.snapshotView(afterScreenUpdates: false) {
             snapshot.frame = emptyMessage.convert(emptyMessage.bounds, to: clip)
             content.addSubview(snapshot)
         }

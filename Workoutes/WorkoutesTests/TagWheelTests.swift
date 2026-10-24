@@ -192,13 +192,13 @@ final class TagWheelTests: XCTestCase {
 
         let transition = try XCTUnwrap(findTransition(in: try XCTUnwrap(window.rootViewController).view))
         let list = try XCTUnwrap(findList(in: try XCTUnwrap(window.rootViewController).view))
-        // Give this assertion room to inspect multiple real updates in one fade.
-        transition.duration = 0.8
+        // Intermediate wheel selections must share one bounded exit.
+        transition.duration = 0.3
         navigation.selectedTagIDs = [tags[0].persistentModelID]
         try await waitFor { transition.outgoing?.alpha == 0 }
-        let outgoing = try XCTUnwrap(transition.outgoing, "Outgoing cards must stay visible while the new filter enters")
+        let outgoing = try XCTUnwrap(transition.outgoing, "Outgoing cards must fade before the next entrance")
         XCTAssertFalse(outgoing.subviews.isEmpty)
-        XCTAssertEqual(outgoing.transform, .identity, "Crossfades must not slide the cards")
+        XCTAssertEqual(outgoing.transform, .identity, "The fade must not slide the cards")
         XCTAssertEqual(list.transform, .identity)
         XCTAssertEqual(outgoing.alpha, 0)
         XCTAssertTrue(outgoing.superview?.accessibilityElementsHidden == true,
@@ -209,8 +209,9 @@ final class TagWheelTests: XCTestCase {
         XCTAssertTrue(transition.isActive)
         navigation.selectedTagIDs = [tags[0].persistentModelID]
         try await waitFor { rowCount(in: list) == 0 }
-        XCTAssertTrue(transition.outgoing === outgoing, "Incoming content changes immediately without restarting its animation")
+        XCTAssertTrue(transition.outgoing === outgoing, "Intermediate selections must not restart the exit")
         try await waitFor { transition.outgoing == nil }
+        try await waitFor { !transition.isActive }
         transition.duration = ExerciseFilterTransition.duration
         XCTAssertNil(transition.outgoing, "Only one temporary outgoing layer may exist, and it must be removed")
         XCTAssertEqual(rowCount(in: list), 0)
@@ -218,19 +219,55 @@ final class TagWheelTests: XCTestCase {
         XCTAssertEqual(list.transform, .identity)
         try snapshot(window, name: "no-matches")
 
-        // A fast spin must apply each filter immediately and finish on the newest selection.
+        // A fast spin can remain blank and must finish on the newest selection.
         navigation.selectedTagIDs = [tags[4].persistentModelID]
         try await Task.sleep(for: .milliseconds(30))
         navigation.selectedTagIDs = [tags[0].persistentModelID]
         try await Task.sleep(for: .milliseconds(30))
         navigation.selectedTagIDs = []
-        try await Task.sleep(for: .milliseconds(450))
+        try await waitFor { !transition.isActive }
         XCTAssertTrue(navigation.selectedTagIDs.isEmpty, "An external reset must not be overwritten by the wheel")
         XCTAssertEqual(rowCount(in: list), titles.count, "A cancelled transition must not restore stale rows")
         XCTAssertEqual(list.alpha, 1)
         XCTAssertEqual(list.transform, .identity)
         XCTAssertNil(transition.outgoing)
+        XCTAssertTrue(list.visibleCells.allSatisfy { $0.alpha == 1 })
         try snapshot(window, name: "all")
+
+        // Interrupt an actual entrance, including rows still waiting for their stagger.
+        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        try await waitFor { !transition.isActive && rowCount(in: list) == 0 }
+        navigation.selectedTagIDs = [tags[4].persistentModelID]
+        try await waitFor { transition.isEntering }
+        try await Task.sleep(for: .milliseconds(100))
+        let visibleBounds = list.bounds.inset(by: list.adjustedContentInset)
+        let visibleCards = list.visibleCells.filter { $0.frame.intersects(visibleBounds) }
+            .sorted { $0.frame.minY < $1.frame.minY }
+        XCTAssertGreaterThan(visibleCards.count, 1)
+        let top = try XCTUnwrap(visibleCards.first)
+        let bottom = try XCTUnwrap(visibleCards.last)
+        XCTAssertGreaterThan(top.layer.presentation()?.opacity ?? Float(top.alpha),
+                             bottom.layer.presentation()?.opacity ?? Float(bottom.alpha),
+                             "Upper cards must appear before lower cards")
+        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        try await waitFor { transition.outgoing != nil }
+        XCTAssertFalse(transition.isEntering, "An interrupted entrance must not keep revealing pending cards")
+        navigation.selectedTagIDs = []
+        try await waitFor { !transition.isActive }
+        XCTAssertEqual(rowCount(in: list), titles.count)
+        XCTAssertTrue(list.visibleCells.allSatisfy { $0.alpha == 1 })
+        XCTAssertNil(transition.outgoing)
+
+        // Leaving the screen cancels both scheduled cards and outgoing snapshots.
+        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        try await waitFor { transition.isActive }
+        navigation.selectedTab = .settings
+        try await waitFor { !transition.isActive }
+        XCTAssertNil(transition.outgoing)
+        XCTAssertEqual(list.alpha, 1)
+        navigation.selectedTab = .exercises
+        navigation.selectedTagIDs = []
+        try await waitFor { rowCount(in: list) == titles.count && !transition.isActive }
 
         for tag in tags { store.mainContext.delete(tag) }
         try store.mainContext.save()

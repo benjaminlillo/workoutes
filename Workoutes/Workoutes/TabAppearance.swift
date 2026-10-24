@@ -1,5 +1,13 @@
 import SwiftUI
 
+enum ContainerAppearanceTiming {
+    static let duration = 0.28
+
+    static func delay(at top: CGFloat) -> TimeInterval {
+        min(0.42, max(0, Double(top - 120) * 0.00055))
+    }
+}
+
 /// A new activation replays the fade without replacing a tab's navigation or list state.
 struct TabAppearanceActivation: Equatable {
     let id = UUID()
@@ -67,11 +75,11 @@ private struct StaggeredTabAppearance: ViewModifier {
                     // Rows loaded later by scrolling or editing stay immediately visible.
                     guard elapsed < 0.9 else { isVisible = true; return }
                     // Screen position also orders a list that was left scrolled down.
-                    let delay = min(0.42, max(0, Double(position.top - 120) * 0.00055))
+                    let delay = ContainerAppearanceTiming.delay(at: position.top)
                     let remaining = max(0, delay - elapsed)
                     if remaining > 0 { try await Task.sleep(for: .seconds(remaining)) }
                     try Task.checkCancellation()
-                    withAnimation(.easeOut(duration: 0.28)) { isVisible = true }
+                    withAnimation(.easeOut(duration: ContainerAppearanceTiming.duration)) { isVisible = true }
                 } catch {
                     // Switching tabs cancels unfinished appearances.
                 }
