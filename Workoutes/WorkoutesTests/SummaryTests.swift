@@ -295,6 +295,7 @@ final class SummaryTests: XCTestCase {
             let summary = WeeklySummary(completions: history, date: date)
             let renderer = ImageRenderer(content: VStack(spacing: 16) {
                 WeeklyExerciseChart(summary: summary, today: date)
+                WeeklyTagDistributionChart(summary: summary)
                 SummaryStatistics(summary: summary)
             }
                 .padding(16).frame(width: 398).background(DefaultScreenBackground())

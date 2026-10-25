@@ -13,6 +13,15 @@ struct WeeklySummary {
     var total: Int { days.reduce(0) { $0 + $1.completions.count } }
     var activeDays: Int { days.filter { !$0.completions.isEmpty }.count }
 
+    func dateRange(relativeTo today: Date, calendar: Calendar = .current) -> String {
+        let lastDay = days.last!.date
+        let showYear = !calendar.isDate(interval.start, equalTo: today, toGranularity: .year)
+            || !calendar.isDate(lastDay, equalTo: today, toGranularity: .year)
+        let format = showYear ? Date.FormatStyle.dateTime.month(.abbreviated).day().year()
+            : Date.FormatStyle.dateTime.month(.abbreviated).day()
+        return "\(interval.start.formatted(format)) – \(lastDay.formatted(format))"
+    }
+
     static func interval(containing date: Date, calendar: Calendar = .current) -> DateInterval {
         let today = calendar.startOfDay(for: date)
         let offset = (calendar.component(.weekday, from: today) + 5) % 7
@@ -81,11 +90,13 @@ private struct SummaryWeekView: View {
     }
 
     var body: some View {
+        let summary = WeeklySummary(completions: completions, date: date)
         MotivationalScrollView(pull: $pull) {
             VStack(spacing: 16) {
                 if let training { TrainingEntryView(controller: training) }
                 WeeklySummaryPager(today: today, selectedWeek: $selectedWeek)
-                SummaryStatistics(summary: WeeklySummary(completions: completions, date: date))
+                WeeklyTagDistributionChart(summary: summary)
+                SummaryStatistics(summary: summary)
             }.padding(16)
         }
         .defaultScreenBackground()
@@ -185,20 +196,11 @@ struct WeeklyExerciseChart: View {
     private var blockSpacing: CGFloat { min(2, chartHeight / CGFloat(maximum) * 0.12) }
     private var isCurrentWeek: Bool { summary.interval.start == WeeklySummary.interval(containing: today).start }
 
-    private var dateRange: String {
-        let calendar = Calendar.current
-        let showYear = !calendar.isDate(summary.interval.start, equalTo: today, toGranularity: .year)
-            || !calendar.isDate(summary.days.last!.date, equalTo: today, toGranularity: .year)
-        let format = showYear ? Date.FormatStyle.dateTime.month(.abbreviated).day().year()
-            : Date.FormatStyle.dateTime.month(.abbreviated).day()
-        return "\(summary.interval.start.formatted(format)) – \(summary.days.last!.date.formatted(format))"
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(isCurrentWeek ? "This Week" : "Week Summary").font(.title3.bold())
-                Text(dateRange)
+                Text(summary.dateRange(relativeTo: today))
                     .font(.subheadline).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
