@@ -98,7 +98,6 @@ struct ThemeSelectionView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .staggeredTabAppearance()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(theme.name)
         .accessibilityValue(isSelected ? "Selected" : "")

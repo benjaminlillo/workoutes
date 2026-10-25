@@ -85,7 +85,6 @@ private struct SummaryWeekView: View {
             VStack(spacing: 16) {
                 if let training { TrainingEntryView(controller: training) }
                 WeeklySummaryPager(today: today, selectedWeek: $selectedWeek)
-                    .staggeredTabAppearance()
                 SummaryStatistics(summary: WeeklySummary(completions: completions, date: date))
             }.padding(16)
         }
@@ -276,7 +275,6 @@ struct SummaryStatisticCard: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .subtleCardShadow()
-            .staggeredTabAppearance()
             .accessibilityElement(children: .combine)
     }
 }

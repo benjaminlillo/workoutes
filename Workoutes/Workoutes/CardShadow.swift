@@ -29,14 +29,12 @@ extension View {
     }
 
     func subtleFormRowShadow(_ position: CardRowPosition = .single) -> some View {
-        staggeredTabAppearance()
-            .listRowBackground(
-                position.backgroundShape
-                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                    .subtleCardShadow()
-                    .clipShape(FormRowShadowClip(position: position))
-                    .staggeredTabAppearance()
-            )
+        listRowBackground(
+            position.backgroundShape
+                .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                .subtleCardShadow()
+                .clipShape(FormRowShadowClip(position: position))
+        )
     }
 }
 

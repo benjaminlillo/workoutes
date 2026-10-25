@@ -138,12 +138,12 @@ final class ExerciseFilterViewport: UIView {
         let targets: [(UIView, TimeInterval)] = cells.map { cell in
             // Exercise cards have ten points of vertical padding inside their list row.
             let top = cell.convert(cell.bounds, to: window).minY + 10
-            return (cell, ContainerAppearanceTiming.delay(at: top))
+            return (cell, ExerciseFilterAppearanceTiming.delay(at: top))
         } + (showsEmptyMessage ? [(emptyMessage, 0)] : [])
         guard !targets.isEmpty else { finishEntrance(request: request); return }
         var remaining = targets.count
         for (view, delay) in targets {
-            let animator = UIViewPropertyAnimator(duration: ContainerAppearanceTiming.duration, curve: .easeOut) {
+            let animator = UIViewPropertyAnimator(duration: ExerciseFilterAppearanceTiming.duration, curve: .easeOut) {
                 view.alpha = 1
             }
             animator.addCompletion { [weak self] _ in
@@ -239,5 +239,13 @@ final class ExerciseFilterViewport: UIView {
             ancestor = view.superview
         }
         return nil
+    }
+}
+
+private enum ExerciseFilterAppearanceTiming {
+    static let duration = 0.28
+
+    static func delay(at top: CGFloat) -> TimeInterval {
+        min(0.42, max(0, Double(top - 120) * 0.00055))
     }
 }

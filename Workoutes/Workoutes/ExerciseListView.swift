@@ -19,8 +19,6 @@ struct ExerciseListView: View {
     @State private var viewportSize: CGSize = .zero
     @State private var displayedTagIDs: Set<PersistentIdentifier>?
     @State private var filterTransition = ExerciseFilterTransition()
-    @State private var usesFilterAppearance = false
-    @Environment(\.tabAppearance) private var tabAppearance
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var filterChange: FilterChange {
         FilterChange(tags: navigation.selectedTagIDs, reveal: navigation.revealRequest)
@@ -55,7 +53,6 @@ struct ExerciseListView: View {
                             revealHighlight: highlightedRequest?.exerciseID == exercise.persistentModelID
                                 ? highlightedRequest?.id : nil
                         )
-                            .environment(\.tabAppearance, usesFilterAppearance ? nil : tabAppearance)
                             .id(exercise.persistentModelID)
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.clear)
@@ -125,7 +122,6 @@ struct ExerciseListView: View {
                 }
                 .onDisappear {
                     filterTransition.cancel()
-                    usesFilterAppearance = false
                     displayedTagIDs = nil
                 }
                 .toolbar {
@@ -197,7 +193,6 @@ struct ExerciseListView: View {
         guard displayedTagIDs != nil, !reduceMotion, change.reveal == nil else {
             filterTransition.cancel()
             withoutFilterAnimation {
-                usesFilterAppearance = false
                 displayedTagIDs = change.tags
             }
             return
@@ -205,8 +200,6 @@ struct ExerciseListView: View {
         guard displayedTagIDs != change.tags else { return }
         filterTransition.begin()
         withoutFilterAnimation {
-            // The native transition owns these rows, including changes during the tab's fade.
-            usesFilterAppearance = true
             displayedTagIDs = change.tags
         }
     }

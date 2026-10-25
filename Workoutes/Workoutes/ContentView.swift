@@ -9,7 +9,6 @@ struct ContentView: View {
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @State private var motivationalPull = MotivationalPullState()
-    @State private var tabAppearance = TabAppearanceActivation()
     @State var navigation = ExerciseNavigation()
     
     private var activeExercise: WorkoutExercise? {
@@ -24,25 +23,21 @@ struct ContentView: View {
         TabView(selection: $navigation.selectedTab) {
             Tab(value: AppTab.summary) {
                 SummaryView(pull: $motivationalPull)
-                    .tabAppearance(tabAppearance, isActive: navigation.selectedTab == .summary)
             } label: {
                 Image(systemName: "house.fill").accessibilityLabel("Summary")
             }
             Tab(value: AppTab.workouts) {
                 WorkoutListView()
-                    .tabAppearance(tabAppearance, isActive: navigation.selectedTab == .workouts)
             } label: {
                 Image(systemName: "list.bullet.clipboard").accessibilityLabel("Workouts")
             }
             Tab(value: AppTab.exercises) {
                 ExerciseListView(navigation: navigation)
-                    .tabAppearance(tabAppearance, isActive: navigation.selectedTab == .exercises)
             } label: {
                 Image(systemName: "dumbbell").accessibilityLabel("Exercises")
             }
             Tab(value: AppTab.settings) {
                 SettingsView()
-                    .tabAppearance(tabAppearance, isActive: navigation.selectedTab == .settings)
             } label: {
                 Image(systemName: "gearshape").accessibilityLabel("Settings")
             }
@@ -57,7 +52,6 @@ struct ContentView: View {
         }
         .tabBarMinimizeBehavior(.never)
         .onChange(of: navigation.selectedTab) { previousTab, _ in
-            tabAppearance = TabAppearanceActivation()
             navigation.resolveActiveExerciseShortcut(activeExercise, previousTab: previousTab)
         }
         .overlay {

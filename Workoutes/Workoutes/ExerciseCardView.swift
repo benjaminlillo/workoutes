@@ -133,7 +133,6 @@ struct ExerciseCardView: View {
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .subtleCardShadow()
-        .staggeredTabAppearance()
         .overlay {
             ExerciseRevealHighlight(color: accentColor, trigger: revealHighlight)
         }

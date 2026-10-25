@@ -17,7 +17,6 @@ struct WorkoutListView: View {
                         Text(workout.name)
                             .font(.headline)
                     }
-                    .staggeredTabAppearance()
                     .listRowInsets(EdgeInsets(top: 26, leading: 32, bottom: 26, trailing: 32))
                     .listRowSeparator(.hidden)
                     .listRowBackground(
@@ -26,7 +25,6 @@ struct WorkoutListView: View {
                             .subtleCardShadow()
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .staggeredTabAppearance()
                     )
                 }
                 .onDelete(perform: deleteWorkouts)
