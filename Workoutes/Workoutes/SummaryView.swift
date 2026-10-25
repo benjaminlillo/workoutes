@@ -71,6 +71,7 @@ struct SummaryView: View {
 
 private struct SummaryWeekView: View {
     @Environment(\.trainingController) private var training
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let date: Date
     let today: Date
     @Binding var selectedWeek: Date?
@@ -93,11 +94,23 @@ private struct SummaryWeekView: View {
         let summary = WeeklySummary(completions: completions, date: date)
         MotivationalScrollView(pull: $pull) {
             VStack(spacing: 16) {
-                if let training { TrainingEntryView(controller: training) }
+                if let training {
+                    TrainingEntryView(controller: training)
+                        .padding(.horizontal, 16)
+                }
                 WeeklySummaryPager(today: today, selectedWeek: $selectedWeek)
-                WeeklyTagDistributionChart(summary: summary)
-                SummaryStatistics(summary: summary)
-            }.padding(16)
+                ZStack(alignment: .top) {
+                    VStack(spacing: 16) {
+                        WeeklyTagDistributionChart(summary: summary)
+                        SummaryStatistics(summary: summary)
+                    }
+                    .id(summary.interval.start)
+                    .transition(.opacity)
+                }
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: summary.interval.start)
+                .padding(.horizontal, 16)
+            }
+            .padding(.vertical, 16)
         }
         .defaultScreenBackground()
     }
@@ -131,6 +144,9 @@ struct WeeklySummaryPager: View {
             LazyHStack(alignment: .top, spacing: 0) {
                 ForEach(weeks, id: \.self) { week in
                     WeeklySummaryPage(week: week, today: today)
+                        // The page spans the screen; its card retains Home's side margins.
+                        // Adjacent pages therefore leave 32 points between their cards.
+                        .padding(.horizontal, 16)
                         .padding(.vertical, 5)
                         .containerRelativeFrame(.horizontal)
                         .id(week)

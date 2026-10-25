@@ -307,7 +307,76 @@ final class SummaryTests: XCTestCase {
         }
     }
 
-    func testFullTabIntegrationPreservesAccessoryAndRendersSessionAndSummary() async throws {
+    func testWeeklyPagerFillsHomeWidthAndSeparatesCardsDuringScrolling() async throws {
+        let store = try container()
+        let root = UIHostingController(rootView: SummaryView().modelContainer(store))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = root
+        window.overrideUserInterfaceStyle = .light
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+
+        func findPager(_ view: UIView) -> UIScrollView? {
+            if let scroll = view as? UIScrollView, scroll.contentSize.width > scroll.bounds.width * 2 {
+                return scroll
+            }
+            return view.subviews.compactMap { findPager($0) }.first
+        }
+        try await Task.sleep(for: .milliseconds(400))
+        window.layoutIfNeeded()
+        let pager = try XCTUnwrap(findPager(root.view))
+        let viewport = pager.convert(pager.bounds, to: window)
+        XCTAssertEqual(viewport.minX, 0, accuracy: 0.5)
+        XCTAssertEqual(viewport.width, window.bounds.width, accuracy: 0.5)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        func snapshot(_ name: String) throws -> CGImage {
+            let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-weekly-pager-\(name).png"))
+            return try XCTUnwrap(image.cgImage)
+        }
+        func brightness(_ image: CGImage, x: CGFloat) throws -> Double {
+            let patch = try XCTUnwrap(image.cropping(to: CGRect(x: x - 1, y: viewport.midY - 1, width: 3, height: 3)))
+            var bytes = [UInt8](repeating: 0, count: 36)
+            try bytes.withUnsafeMutableBytes { buffer in
+                let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 3, height: 3,
+                    bitsPerComponent: 8, bytesPerRow: 12, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+                context.draw(patch, in: CGRect(x: 0, y: 0, width: 3, height: 3))
+            }
+            var total = 0
+            for pixel in 0..<9 {
+                for channel in 0..<3 { total += Int(bytes[pixel * 4 + channel]) }
+            }
+            return Double(total) / 27
+        }
+        let initial = try snapshot("aligned")
+        // The resting card aligns with Home's 16-point margins on both sides.
+        XCTAssertGreaterThan(try brightness(initial, x: 24), try brightness(initial, x: 3) + 2)
+        XCTAssertGreaterThan(try brightness(initial, x: window.bounds.width - 24),
+                             try brightness(initial, x: window.bounds.width - 3) + 2)
+
+        let original = pager.contentOffset
+        let stride = viewport.width
+        pager.setContentOffset(CGPoint(x: original.x - stride / 2, y: original.y), animated: false)
+        try await Task.sleep(for: .milliseconds(60))
+        let halfway = try snapshot("halfway")
+        // Halfway through, the gap is at screen center and cards reach both screen edges.
+        XCTAssertGreaterThan(try brightness(halfway, x: viewport.midX - 20),
+                             try brightness(halfway, x: viewport.midX) + 2)
+        XCTAssertGreaterThan(try brightness(halfway, x: viewport.midX + 20),
+                             try brightness(halfway, x: viewport.midX) + 2)
+        XCTAssertGreaterThan(try brightness(halfway, x: 3), 250)
+        XCTAssertGreaterThan(try brightness(halfway, x: viewport.width - 3), 250)
+        pager.setContentOffset(CGPoint(x: original.x - stride, y: original.y), animated: false)
+        try await Task.sleep(for: .milliseconds(350))
+        _ = try snapshot("previous-week")
+    }
+
+    func testFullTabIntegrationPreservesActiveExerciseTabAndRendersSummary() async throws {
         let store = try container()
         let context = store.mainContext
         let item = exercise()
@@ -330,12 +399,12 @@ final class SummaryTests: XCTestCase {
             return root.children.compactMap { findTabs($0) }.first
         }
         for _ in 0..<100 {
-            if findTabs(root)?.bottomAccessory != nil { break }
+            if findTabs(root)?.tabs.count == 5 { break }
             try await Task.sleep(for: .milliseconds(20))
         }
         let tabs = try XCTUnwrap(findTabs(root))
-        XCTAssertEqual(tabs.tabs.count, 4)
-        let accessory = try XCTUnwrap(tabs.bottomAccessory)
+        XCTAssertEqual(tabs.tabs.count, 5)
+        XCTAssertFalse(try XCTUnwrap(tabs.tabBar.items?.last).isEnabled)
 
         func snapshot(_ name: String) throws {
             window.layoutIfNeeded()
@@ -352,7 +421,7 @@ final class SummaryTests: XCTestCase {
         tabs.selectedTab = tabs.tabs[2]
         try await Task.sleep(for: .milliseconds(500))
         XCTAssertTrue(tabs.selectedTab === tabs.tabs[2])
-        XCTAssertTrue(tabs.bottomAccessory === accessory)
+        XCTAssertTrue(try XCTUnwrap(tabs.tabBar.items?.last).isEnabled)
         XCTAssertTrue(controller.isActive(item))
         try snapshot("active")
         now = now.addingTimeInterval(11)
@@ -361,7 +430,7 @@ final class SummaryTests: XCTestCase {
         tabs.selectedTab = tabs.tabs[0]
         try await Task.sleep(for: .milliseconds(500))
         XCTAssertTrue(tabs.selectedTab === tabs.tabs[0])
-        XCTAssertTrue(tabs.bottomAccessory === accessory)
+        XCTAssertFalse(try XCTUnwrap(tabs.tabBar.items?.last).isEnabled)
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<ExerciseCompletion>()), 1)
         XCTAssertTrue(item.isDone)
         try snapshot("summary-completed")
