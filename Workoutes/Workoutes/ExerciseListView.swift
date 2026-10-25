@@ -122,9 +122,7 @@ struct ExerciseListView: View {
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         ResetCompletedExercisesButton(exercises: allExercises)
-                        Button(action: { showingAddExerciseSheet = true }) {
-                            Label("Add Exercise", systemImage: "plus")
-                        }
+                            .tint(.primary)
                         TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue,
                                      onChoose: { tag in
                                          let id = tag.persistentModelID
@@ -133,7 +131,14 @@ struct ExerciseListView: View {
                                      onAdd: { showingAddTagSheet = true },
                                      onEdit: { editingTag = $0 },
                                      onDelete: { tagPendingDeletion = $0 })
-                            .frame(width: 44, height: 44)
+                            .frame(width: ExerciseToolbarStyle.targetSize, height: ExerciseToolbarStyle.targetSize)
+                    }
+                    ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showingAddExerciseSheet = true }) {
+                            ExerciseToolbarLabel(title: "Add Exercise", systemImage: "plus")
+                        }
+                        .tint(.primary)
                     }
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()

@@ -24,13 +24,15 @@ struct TagWheelMenu: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func updateUIView(_ button: TagWheelMenuButton, context: Context) {
-        button.setEmpty(tags.isEmpty)
         let theme = ThemeColor.resolve(accentColorRawValue)
-        let tint = UIColor(Color(hex: theme.hex(for: colorScheme)))
-        if button.tintColor != tint {
+        let tint = selection == nil ? UIColor.label : UIColor(Color(hex: theme.hex(for: colorScheme)))
+        button.setSymbolColor(tint.resolvedColor(with: UITraitCollection(
+            userInterfaceStyle: colorScheme == .dark ? .dark : .light)))
+        if button.tintColor != tint || button.configuration?.baseForegroundColor != tint {
             UIView.animate(withDuration: reduceMotion ? 0 : 0.35,
                            delay: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
                 button.tintColor = tint
+                button.configuration?.baseForegroundColor = tint
             }
         }
         button.accessibilityValue = tags.first { $0.persistentModelID == selection }?.name ?? "No Tag Selected"
@@ -171,43 +173,33 @@ struct TagWheelMenu: UIViewRepresentable {
 }
 
 final class TagWheelMenuButton: UIButton {
-    private let symbol = UIImageView()
-    private let chevron = UIImageView(image: UIImage(systemName: "chevron.down",
-                                                    withConfiguration: UIImage.SymbolConfiguration(pointSize: 8, weight: .bold)))
     private var menuIsPresented = false
     private var pendingAction: (() -> Void)?
-    private var emptyLabel: Bool?
+    private var symbolColor: UIColor?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         var configuration = UIButton.Configuration.plain()
         configuration.contentInsets = .zero
+        configuration.baseForegroundColor = .label
+        configuration.image = UIImage(systemName: "tag")
+        configuration.preferredSymbolConfigurationForImage = ExerciseToolbarStyle.symbolConfiguration
         self.configuration = configuration
+        tintColor = .label
         showsMenuAsPrimaryAction = true
         preferredMenuElementOrder = .fixed
         accessibilityLabel = "Filter and Manage Tags"
         accessibilityIdentifier = "tag-management-menu"
-
-        let label = UIStackView(arrangedSubviews: [symbol, chevron])
-        label.alignment = .center
-        label.spacing = 3
-        label.isUserInteractionEnabled = false
-        label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor)
-        ])
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func setEmpty(_ isEmpty: Bool) {
-        guard emptyLabel != isEmpty else { return }
-        emptyLabel = isEmpty
-        symbol.image = UIImage(systemName: isEmpty ? "plus" : "tag",
-                               withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .regular))
-        chevron.isHidden = isEmpty
+    func setSymbolColor(_ color: UIColor) {
+        guard symbolColor != color else { return }
+        symbolColor = color
+        // Preserve the selected-filter indicator when the navigation bar applies its own tint.
+        configuration?.image = UIImage(systemName: "tag", withConfiguration: ExerciseToolbarStyle.symbolConfiguration)?
+            .withTintColor(color, renderingMode: .alwaysOriginal)
     }
 
     func performAfterMenuDismissal(_ action: @escaping () -> Void) {
