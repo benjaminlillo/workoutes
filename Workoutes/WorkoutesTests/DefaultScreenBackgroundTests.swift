@@ -194,13 +194,13 @@ final class DefaultScreenBackgroundTests: XCTestCase {
             ("weight", AnyView(ExerciseWeightSheet(exercise: exercise, unit: .metric))),
             ("sets", AnyView(ExerciseCountSheet(exercise: exercise, metric: .sets))),
             ("reps", AnyView(ExerciseCountSheet(exercise: exercise, metric: .repetitions))),
-            ("background-editor", AnyView(BackgroundCustomizationSheet(background: background, title: "Exercises Background"))),
-            ("custom-exercises", AnyView(ExerciseListView())),
+            ("background-editor", AnyView(BackgroundCustomizationSheet(background: background, title: "Workout Background"))),
+            ("exercises", AnyView(ExerciseListView())),
             ("workout-detail", AnyView(NavigationStack { WorkoutDetailView(workout: workout) }))
         ]
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         for (name, view) in screens {
-            let root = UIHostingController(rootView: view.environment(controller).environment(background).modelContainer(container))
+            let root = UIHostingController(rootView: view.environment(controller).modelContainer(container))
             let window = UIWindow(windowScene: scene)
             window.rootViewController = root
             window.overrideUserInterfaceStyle = .light

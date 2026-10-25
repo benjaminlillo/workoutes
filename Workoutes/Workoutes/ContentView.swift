@@ -87,7 +87,6 @@ private struct ExerciseSnapshot: Equatable {
 
 #Preview {
     ContentView()
-        .environment(ExerciseBackgroundStore())
         .environment(ExerciseActivityController())
         .modelContainer(for: Workout.self, inMemory: true)
 }

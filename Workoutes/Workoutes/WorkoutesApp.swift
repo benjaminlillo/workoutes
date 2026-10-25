@@ -8,7 +8,6 @@ struct WorkoutesApp: App {
     @UIApplicationDelegateAdaptor(TrainingPhoneDelegate.self) private var delegate
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
-    @State private var exerciseBackground = ExerciseBackgroundStore()
     @State private var exerciseActivity = ExerciseActivityRuntime.shared.controller
     @State private var themeIcon = ThemeIconController()
     @State private var training = ExerciseActivityRuntime.shared.training
@@ -19,7 +18,6 @@ struct WorkoutesApp: App {
         WindowGroup {
             ContentView()
                 .environment(exerciseActivity)
-                .environment(exerciseBackground)
                 .environment(\.trainingController, training)
                 .tint(ThemeColor.resolve(accentColorRawValue).color)
                 .onChange(of: accentColorRawValue, initial: true) {

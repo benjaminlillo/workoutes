@@ -2,12 +2,10 @@ import SwiftUI
 import SwiftData
 
 struct ExerciseListView: View {
-    @Environment(ExerciseBackgroundStore.self) private var background
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutExercise.title) private var allExercises: [WorkoutExercise]
     @Query(sort: \Tag.name) private var allTags: [Tag]
     
-    @State private var showingBackgroundSheet = false
     @State private var showingAddExerciseSheet = false
     @State private var showingAddTagSheet = false
     @State private var editingTag: Tag?
@@ -22,9 +20,6 @@ struct ExerciseListView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var filterChange: FilterChange {
         FilterChange(tags: navigation.selectedTagIDs, reveal: navigation.revealRequest)
-    }
-    private var backgroundTagColors: [String] {
-        allTags.filter { navigation.selectedTagIDs.contains($0.persistentModelID) }.map(\.colorHex)
     }
     private var tagSelection: Binding<PersistentIdentifier?> {
         Binding(get: { navigation.selectedTagIDs.first },
@@ -114,7 +109,7 @@ struct ExerciseListView: View {
                         showsEmptyMessage: filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty)
                         .allowsHitTesting(false)
                 }
-                .background { ScreenBackgroundView(background: background, tagColors: backgroundTagColors).ignoresSafeArea() }
+                .background { DefaultScreenBackground().ignoresSafeArea() }
                 .navigationTitle("All Exercises")
                 .navigationBarTitleDisplayMode(.large)
                 .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
@@ -126,7 +121,6 @@ struct ExerciseListView: View {
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        Button("Customize Background", systemImage: "paintpalette") { showingBackgroundSheet = true }
                         ResetCompletedExercisesButton(exercises: allExercises)
                         Button(action: { showingAddExerciseSheet = true }) {
                             Label("Add Exercise", systemImage: "plus")
@@ -147,11 +141,6 @@ struct ExerciseListView: View {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         }
                     }
-                }
-                .sheet(isPresented: $showingBackgroundSheet) {
-                    BackgroundCustomizationSheet(background: background, title: "Exercises Background", tagColors: backgroundTagColors)
-                        .presentationDetents([.medium, .large])
-                        .presentationDragIndicator(.visible)
                 }
                 .sheet(isPresented: $showingAddExerciseSheet) {
                     CreateGlobalExerciseSheet()
