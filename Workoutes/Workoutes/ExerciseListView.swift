@@ -25,6 +25,10 @@ struct ExerciseListView: View {
         Binding(get: { navigation.selectedTagIDs.first },
                 set: { navigation.selectedTagIDs = $0.map { [$0] } ?? [] })
     }
+    private var pageTitle: String {
+        allTags.first { $0.persistentModelID == tagSelection.wrappedValue }?.name
+            ?? String(localized: "All Exercises")
+    }
     
     var filteredExercises: [WorkoutExercise] {
         let tagIDs = displayedTagIDs ?? navigation.selectedTagIDs
@@ -110,7 +114,7 @@ struct ExerciseListView: View {
                         .allowsHitTesting(false)
                 }
                 .background { DefaultScreenBackground().ignoresSafeArea() }
-                .navigationTitle("All Exercises")
+                .navigationTitle(pageTitle)
                 .navigationBarTitleDisplayMode(.large)
                 .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
                     navigation.selectedTagIDs.formIntersection(ids)
