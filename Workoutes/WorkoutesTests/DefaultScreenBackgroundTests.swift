@@ -35,7 +35,7 @@ final class DefaultScreenBackgroundTests: XCTestCase {
         }
     }
 
-    func testDefaultDistributesEachThemeAcrossTheScreenInBothColorSchemes() throws {
+    func testDefaultConcentratesEachThemeAboveANeutralBaseInBothColorSchemes() throws {
         let previous = UserDefaults.standard.object(forKey: "appAccentColor")
         defer { restoreAccent(previous) }
         for scheme in [ColorScheme.light, .dark] {
@@ -44,11 +44,26 @@ final class DefaultScreenBackgroundTests: XCTestCase {
                 UserDefaults.standard.set(theme.rawValue, forKey: "appAccentColor")
                 let rendered = try render(DefaultScreenBackground(), scheme: scheme)
                 try rendered.write(to: URL(fileURLWithPath: "/tmp/workoutes-film-background-\(theme.rawValue)-\(scheme).png"))
-                let top = try averageRGB(rendered, x: 8, y: 8)
-                let bottom = try averageRGB(rendered, x: 389, y: 835)
-                XCTAssertGreaterThan(zip(top, bottom).map { abs($0 - $1) }.reduce(0, +), 5)
-                // The reference places softer, lighter colors above the deeper lower color fields.
-                XCTAssertGreaterThan(top.reduce(0, +), bottom.reduce(0, +), "\(theme.name) in \(scheme)")
+                let baseHex = theme.backgroundBaseHex(for: scheme)
+                let base = stride(from: 0, to: 6, by: 2).map { offset in
+                    Int(String(baseHex.dropFirst(offset).prefix(2)), radix: 16)!
+                }
+                let distance: ([Int]) -> Int = { sample in
+                    zip(sample, base).map { abs($0 - $1) }.reduce(0, +)
+                }
+                let topLeft = try averageRGB(rendered, x: 8, y: 8)
+                let topRight = try averageRGB(rendered, x: 389, y: 8)
+                let bottomLeft = try averageRGB(rendered, x: 8, y: 835)
+                let bottomRight = try averageRGB(rendered, x: 389, y: 835)
+                // Both upper fields are visible; the lower corners retain the neutral base.
+                for top in [topLeft, topRight] {
+                    XCTAssertGreaterThan(distance(top), max(distance(bottomLeft), distance(bottomRight)) + 5,
+                                         "\(theme.name) in \(scheme)")
+                }
+                for bottom in [bottomLeft, bottomRight] {
+                    XCTAssertLessThan(zip(bottom, base).map { abs($0 - $1) }.max()!, 8,
+                                      "\(theme.name) in \(scheme)")
+                }
                 backgrounds.insert(rendered)
             }
             XCTAssertEqual(backgrounds.count, ThemeColor.allCases.count)

@@ -12,10 +12,9 @@ struct DefaultScreenBackground: View {
 /// The same background renderer is used for app screens and independent theme previews.
 struct ThemeBackgroundGradient: View {
     let theme: ThemeColor
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        AtmosphericBackgroundGradient(colors: theme.defaultGradientColors(for: colorScheme))
+        ThemeAtmosphericBackground(theme: theme)
     }
 }
 

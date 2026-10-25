@@ -1,5 +1,51 @@
 import SwiftUI
 
+/// Two soft upper color fields over a neutral base, using the existing static grain.
+struct ThemeAtmosphericBackground: View {
+    let theme: ThemeColor
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var isDark: Bool { colorScheme == .dark }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color(hex: theme.backgroundBaseHex(for: colorScheme))
+
+                // Match the preview's layering: the left field sits over the right field.
+                colorField(Color(hex: theme.secondaryHex),
+                           opacities: isDark ? [0.21, 0.08, 0.012, 0] : [0.17, 0.055, 0.012, 0],
+                           locations: [0, 0.38, 0.65, 0.85],
+                           radiusX: geometry.size.width * 1.05,
+                           radiusY: geometry.size.height * 0.65)
+                    .position(x: geometry.size.width, y: geometry.size.height * 0.10)
+
+                colorField(Color(hex: theme.hex),
+                           opacities: isDark ? [0.34, 0.14, 0.025, 0] : [0.19, 0.08, 0.018, 0],
+                           locations: [0, 0.38, 0.68, 0.88],
+                           radiusX: geometry.size.width * 1.15,
+                           radiusY: geometry.size.height * 0.70)
+                    .position(x: 0, y: geometry.size.height * 0.03)
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .overlay { BackgroundFilmGrain() }
+            .compositingGroup()
+            .clipped()
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func colorField(_ color: Color, opacities: [Double], locations: [CGFloat],
+                            radiusX: CGFloat, radiusY: CGFloat) -> some View {
+        RadialGradient(stops: zip(opacities, locations).map { opacity, location in
+            .init(color: color.opacity(opacity), location: location)
+        }, center: .center, startRadius: 0, endRadius: radiusX)
+        .frame(width: radiusX * 2, height: radiusX * 2)
+        .scaleEffect(x: 1, y: radiusY / max(radiusX, 1))
+    }
+}
+
 /// Static color fields over a vertical gradient, finished with a reusable PNG grain overlay.
 struct AtmosphericBackgroundGradient: View {
     let colors: [String]

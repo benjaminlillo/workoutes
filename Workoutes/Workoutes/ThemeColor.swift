@@ -24,7 +24,7 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         scheme == .dark ? secondaryHex : hex
     }
 
-    /// A lighter accent for dark surfaces and the first color of the background gradient.
+    /// A lighter accent for dark surfaces and the upper-right background field.
     var secondaryHex: String {
         switch self {
         case .indigo: "B784E8"
@@ -37,7 +37,7 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         }
     }
 
-    /// The supporting color of the theme's background gradient.
+    /// The supporting color available for custom gradients and icon artwork.
     var tertiaryHex: String {
         switch self {
         case .indigo: "F3DDF2"
@@ -88,7 +88,19 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         return .indigo
     }
 
-    /// Both appearances use the full palette for the atmospheric background.
+    func backgroundBaseHex(for scheme: ColorScheme) -> String {
+        switch self {
+        case .indigo: scheme == .dark ? "0C0B12" : "F8F7FA"
+        case .electricRush: scheme == .dark ? "090D14" : "F7F9FA"
+        case .sunsetPop: scheme == .dark ? "110C10" : "FAF8F6"
+        case .ultravolt: scheme == .dark ? "0C0D12" : "F8F9F6"
+        case .cobaltHeat: scheme == .dark ? "090E18" : "F9F9F7"
+        case .cherryIce: scheme == .dark ? "0B0E13" : "F7FAF9"
+        case .midnightGold: scheme == .dark ? "090E18" : "FAF9F5"
+        }
+    }
+
+    /// The complete palette remains available in the background editor.
     func defaultGradientColors(for _: ColorScheme) -> [String] {
         [hex, secondaryHex, tertiaryHex]
     }
