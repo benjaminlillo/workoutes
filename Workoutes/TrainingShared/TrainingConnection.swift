@@ -26,12 +26,23 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
         }
         session?.delegate = self
         session?.activate()
+        onReachability?(isReachable)
     }
     func refresh() {
-        if session?.activationState != .activated { activate() }
+        if session?.activationState != .activated || session?.delegate !== self { activate() }
         onReachability?(isReachable)
         if let context = receivedContext() { onReceive?(context) }
     }
+    #if os(iOS)
+    func prepareForWorkoutStart() async throws {
+        try await TrainingStartReadiness.prepare(activate: { self.refresh() }, state: {
+            guard let session = self.session, session.activationState == .activated else { return .activating }
+            guard session.isPaired else { return .unpaired }
+            // A live counterpart is also evidence of installation while its metadata catches up.
+            return session.isWatchAppInstalled || session.isReachable ? .ready : .appNotInstalled
+        })
+    }
+    #endif
     func publish(_ envelope: TrainingEnvelope, durable: Bool = false, replacesContext: Bool = true) throws {
         let data = try JSONEncoder().encode(envelope)
         var contextError: Error?
@@ -101,7 +112,21 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) { receive(applicationContext) }
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) { receive(userInfo) }
     #if os(iOS)
-    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
-    nonisolated func sessionDidDeactivate(_ session: WCSession) { session.activate() }
+    nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
+        Task { @MainActor [weak self] in self?.refresh() }
+    }
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.onReachability?(self.isReachable)
+        }
+    }
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {
+        Task { @MainActor [weak self] in self?.activate() }
+    }
+    #else
+    nonisolated func sessionCompanionAppInstalledDidChange(_ session: WCSession) {
+        Task { @MainActor [weak self] in self?.refresh() }
+    }
     #endif
 }

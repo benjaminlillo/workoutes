@@ -58,6 +58,15 @@ final class TrainingLiveActivityTests: XCTestCase {
         XCTAssertEqual(activity.content.state, expected)
     }
 
+    private func waitForEnd(_ activity: Activity<ExerciseActivityAttributes>) async throws {
+        // ActivityKit can publish its final state after end() has returned.
+        for _ in 0..<100 {
+            if activity.activityState == .ended || activity.activityState == .dismissed { return }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        XCTFail("The Live Activity must end")
+    }
+
     func testLocalActivitySurvivesTrackerStartAndFinishWithoutAnExerciseSelection() async throws {
         let f = try await fixture()
         f.activity.toggle(f.first, context: f.context)
@@ -110,7 +119,7 @@ final class TrainingLiveActivityTests: XCTestCase {
         f.phone.receive(.init(kind: .snapshot, run: run))
         await f.activity.waitForPendingUpdates()
         XCTAssertNil(f.activity.activeExerciseID)
-        XCTAssertTrue(live.activityState == .ended || live.activityState == .dismissed)
+        try await waitForEnd(live)
         XCTAssertEqual(try f.context.fetchCount(FetchDescriptor<ExerciseCompletion>()), 0)
     }
 
@@ -128,7 +137,7 @@ final class TrainingLiveActivityTests: XCTestCase {
         XCTAssertNil(f.phone.errorMessage)
         XCTAssertTrue(f.phone.hasActiveSession)
         XCTAssertEqual(f.phone.run?.progress.stage, .choosingExercise)
-        XCTAssertTrue(live.activityState == .ended || live.activityState == .dismissed)
+        try await waitForEnd(live)
     }
 
     func testWatchSelectionReusesLocalActivityAndCatalogEditsStillRefreshIt() async throws {
@@ -228,7 +237,7 @@ final class TrainingLiveActivityTests: XCTestCase {
         run.finish(effort: nil, at: .now)
         f.phone.receive(.init(kind: .snapshot, run: run))
         await f.activity.waitForPendingUpdates()
-        XCTAssertTrue(live.activityState == .ended || live.activityState == .dismissed)
+        try await waitForEnd(live)
     }
 
     func testQueuedActivitySupportsReplacementRestoreAndRemovalIncludingCompletedCatalogExercise() async throws {
@@ -270,7 +279,7 @@ final class TrainingLiveActivityTests: XCTestCase {
         try run.clearQueuedExercise(at: .now)
         f.phone.receive(.init(kind: .snapshot, run: run))
         await restored.waitForPendingUpdates()
-        XCTAssertTrue(live.activityState == .ended || live.activityState == .dismissed)
+        try await waitForEnd(live)
         XCTAssertEqual(try f.context.fetchCount(FetchDescriptor<ExerciseSession>()), 0)
         XCTAssertEqual(try f.context.fetchCount(FetchDescriptor<ExerciseCompletion>()), 1)
     }

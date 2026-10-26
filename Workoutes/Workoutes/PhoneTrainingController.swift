@@ -69,13 +69,12 @@ final class PhoneTrainingController {
 
     func start() async {
         guard !hasActiveSession, !isStarting else { return }
-        guard connection.isWatchInstalled else {
-            errorMessage = "Install Workoutes on your paired Apple Watch, then open it to connect."
-            return
-        }
         guard plan.isValid else { errorMessage = TrainingFailure.invalidPlan.localizedDescription; return }
         isStarting = true
         do {
+            try await connection.prepareForWorkoutStart()
+            // A workout started on the watch while activating needs no second start request.
+            guard !hasActiveSession else { isStarting = false; return }
             #if targetEnvironment(simulator)
             guard isConnected else {
                 throw NSError(domain: "Training", code: 4, userInfo: [NSLocalizedDescriptionKey:
@@ -86,6 +85,7 @@ final class PhoneTrainingController {
             // An OK button on our error alert does not grant Health authorization.
             try await TrainingHealthAuthorization.request(using: healthStore)
             #endif
+            guard !hasActiveSession else { isStarting = false; return }
             let command = TrainingCommand(action: .start, plan: plan)
             pendingStartID = command.id
             // This short-lived request lets the HealthKit launch handler find the exact plan.
