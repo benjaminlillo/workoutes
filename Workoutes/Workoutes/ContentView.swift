@@ -60,11 +60,10 @@ struct ContentView: View {
         .onChange(of: exercises.map { ExerciseSnapshot(content: $0.activityContent, isDone: $0.isDone) }, initial: true) {
             exerciseActivity.synchronize(exercises: exercises)
         }
-        .onChange(of: scenePhase) { _, phase in
+        .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 training?.refresh()
                 exerciseActivity.restore()
-                exerciseActivity.synchronize(exercises: exercises)
             }
         }
         .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }

@@ -8,6 +8,15 @@ struct TrainingArchive: Codable, Sendable {
     // Persist receipts so a reconnect doesn't recreate history the user deliberately deleted.
     var reconciledRevisions: [String: Int]? = [:]
     var receivedSnapshotDates: [String: Date]? = [:]
+    var receivedPlanDate: Date?
+
+    mutating func receivePlan(_ envelope: TrainingEnvelope) -> Bool {
+        guard envelope.kind == .plan, let plan = envelope.plan, plan.isValid,
+              receivedPlanDate.map({ envelope.sentAt > $0 }) ?? true else { return false }
+        self.plan = plan
+        receivedPlanDate = envelope.sentAt
+        return true
+    }
 }
 
 @MainActor

@@ -21,6 +21,10 @@ final class PhoneTrainingController {
 
     var run: TrainingRun? { archive.current }
     var hasActiveSession: Bool { run?.isActive == true }
+    var lastSyncedAt: Date? {
+        guard let run else { return nil }
+        return archive.receivedSnapshotDates?[run.id.uuidString]
+    }
     var plan: TrainingPlan { archive.plan }
     var history: [TrainingRun] { archive.history.sorted { $0.startedAt > $1.startedAt } }
 
@@ -36,6 +40,7 @@ final class PhoneTrainingController {
             if reachable { self?.requestSnapshot() }
         }
         connection.onError = { [weak self] in self?.errorMessage = $0 }
+        connection.onActivation = { [weak self] in self?.publishPlan() }
         if activate {
             connection.workoutChannel.listen(using: healthStore)
             connection.activate()
@@ -64,7 +69,7 @@ final class PhoneTrainingController {
         var next = archive; next.plan = plan
         try store.write(next); archive = next
         // The phone owns the template; the active watch run keeps its original snapshot.
-        if connection.isWatchInstalled { try connection.publish(.init(kind: .plan, plan: plan)) }
+        publishPlan()
     }
 
     func start() async {
@@ -128,12 +133,20 @@ final class PhoneTrainingController {
     func keepLocalRecord() { perform(.keepLocalRecord) }
     func refresh() {
         connection.refresh()
+        requestSnapshot()
+    }
+    private func publishPlan() {
+        // Keep the persisted phone template available after activation/relaunch,
+        // including while the watch UI is asleep. Don't overwrite a start request
+        // that the HealthKit launch handler still needs to consume.
+        guard !isStarting, connection.isWatchInstalled else { return }
+        do { try connection.publish(.init(kind: .plan, plan: plan)) }
+        catch { errorMessage = error.localizedDescription }
     }
     private func requestSnapshot() {
         guard isConnected else { return }
         do {
             try connection.send(.init(kind: .requestSnapshot))
-            try connection.send(.init(kind: .plan, plan: plan))
         } catch { errorMessage = error.localizedDescription }
     }
 
@@ -192,6 +205,7 @@ final class PhoneTrainingController {
         let affectsCurrent = archive.current == nil || incoming.startedAt >= archive.current!.startedAt
         try context.save()
         let exercises = try context.fetch(FetchDescriptor<WorkoutExercise>())
+        let localExerciseIDs = Set(try context.fetch(FetchDescriptor<ExerciseSession>()).compactMap { $0.exercise?.stableID })
         let completed = incoming.progress.results.filter(\.isComplete)
         for result in completed where previous?.progress.results.contains(where: { $0.id == result.id && $0.isComplete }) != true {
             let id = result.id
@@ -201,7 +215,9 @@ final class PhoneTrainingController {
                 // The watch run retains the values selected for this block, even if the catalog changes.
                 context.insert(ExerciseCompletion(id: id, completedAt: completedAt, exercise: exercise,
                                                   snapshot: result.exercise.historySnapshot))
-                if affectsCurrent { exercise.isDone = true }
+                // A delayed watch completion must not stop a newer standalone
+                // exercise on the phone. Its history can still be reconciled.
+                if affectsCurrent, !localExerciseIDs.contains(result.exercise.id) { exercise.isDone = true }
             }
         }
         // Undo removes only the completion created by this block, never older exercise history.

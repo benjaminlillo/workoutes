@@ -38,8 +38,9 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
         }
         connection.onReachability = { [weak self] reachable in
             self?.isConnected = reachable
-            if reachable { self?.publish() }
+            if reachable { self?.publishRestoredState() }
         }
+        connection.onActivation = { [weak self] in self?.publishRestoredState() }
         // A broken phone connection doesn't interrupt the workout or display repeated alerts.
         connection.onError = { _ in }
         connection.activate()
@@ -193,8 +194,20 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
 
     func refreshConnection() {
         connection.refresh()
-        Task { await connection.workoutChannel.reconnect() }
-        publish()
+        Task {
+            await restore()
+            await connection.workoutChannel.reconnect()
+            publish()
+        }
+    }
+
+    private func publishRestoredState() {
+        Task {
+            // Activation can finish before HealthKit recovery. Don't advertise
+            // an archived workout as running before recovery has confirmed it.
+            await restore()
+            publish()
+        }
     }
 
     private func receive(_ envelope: TrainingEnvelope) async {
@@ -207,9 +220,9 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             }
             return
         }
-        if envelope.kind == .plan, let plan = envelope.plan, plan.isValid {
+        if envelope.kind == .plan {
             let previous = archive
-            archive.plan = plan
+            guard archive.receivePlan(envelope) else { return }
             do { try persist() } catch { archive = previous; fail(error.localizedDescription) }
             return
         }

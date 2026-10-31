@@ -115,6 +115,57 @@ final class ExerciseActivityTests: XCTestCase {
         XCTAssertNil(controller.activeExerciseID)
     }
 
+    func testStandaloneExerciseRequestsActivityBeforeReturningFromTap() async throws {
+        let container = try makeContainer()
+        let item = exercise("Immediate Lock Screen Activity")
+        container.mainContext.insert(item)
+        let controller = ExerciseActivityController(context: container.mainContext)
+
+        controller.toggle(item, context: container.mainContext)
+
+        // No await/yield: the user can lock the phone as soon as the tap returns.
+        XCTAssertTrue(controller.isActive(item))
+        XCTAssertNil(controller.training)
+        XCTAssertTrue(Activity<ExerciseActivityAttributes>.activities.contains {
+            $0.content.state.exerciseID == item.activityID && $0.activityState == .active
+        })
+        await controller.waitForPendingUpdates()
+        controller.toggle(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+    }
+
+    func testOutdatedQueryCannotCancelPersistedActiveExercise() async throws {
+        let container = try makeContainer()
+        let item = exercise("Recently Inserted Exercise")
+        container.mainContext.insert(item)
+        let controller = ExerciseActivityController(context: container.mainContext, liveActivitiesEnabled: false)
+        controller.toggle(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+
+        // SwiftUI can still have the query from before the insert.
+        controller.synchronize(exercises: [])
+        await controller.waitForPendingUpdates()
+        XCTAssertTrue(controller.isActive(item))
+        XCTAssertEqual(try container.mainContext.fetchCount(FetchDescriptor<ExerciseSession>()), 1)
+
+        container.mainContext.delete(item)
+        try container.mainContext.save()
+        controller.synchronize(exercises: [])
+        await controller.waitForPendingUpdates()
+        XCTAssertNil(controller.activeExerciseID, "An actual deletion still cancels the activity")
+    }
+
+    func testQueuedSynchronizationKeepsItsModelContainerAlive() async throws {
+        var container: ModelContainer? = try makeContainer()
+        weak var retainedContainer = container
+        let controller = ExerciseActivityController(context: container?.mainContext, liveActivitiesEnabled: false)
+        controller.synchronize(exercises: [])
+        container = nil
+        XCTAssertNotNil(retainedContainer)
+        await controller.waitForPendingUpdates()
+        XCTAssertNil(controller.errorMessage)
+    }
+
     func testLiveActivityLifecycle() async throws {
         XCTAssertTrue(ActivityAuthorizationInfo().areActivitiesEnabled, "The test device must allow Live Activities")
         let container = try makeContainer()

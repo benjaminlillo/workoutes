@@ -5,8 +5,11 @@ import WatchConnectivity
 final class TrainingConnection: NSObject, WCSessionDelegate {
     var onReceive: ((TrainingEnvelope) -> Void)?
     var onReachability: ((Bool) -> Void)?
+    // Activation permits background transfers even when live messaging is unavailable.
+    var onActivation: (() -> Void)?
     var onError: ((String) -> Void)?
     let workoutChannel = TrainingWorkoutChannel()
+    private var reportedReachability: Bool?
     private var session: WCSession? { WCSession.isSupported() ? .default : nil }
     var isReachable: Bool { workoutChannel.isReachable || isWatchConnectivityReachable }
     private var isWatchConnectivityReachable: Bool { session?.activationState == .activated && session?.isReachable == true }
@@ -22,16 +25,23 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
         workoutChannel.onReceive = { [weak self] in self?.onReceive?($0) }
         workoutChannel.onAvailability = { [weak self] in
             guard let self else { return }
-            self.onReachability?(self.isReachable)
+            self.reportReachability()
         }
         session?.delegate = self
         session?.activate()
-        onReachability?(isReachable)
+        reportReachability()
     }
     func refresh() {
         if session?.activationState != .activated || session?.delegate !== self { activate() }
-        onReachability?(isReachable)
+        reportReachability()
+        if session?.activationState == .activated { onActivation?() }
         if let context = receivedContext() { onReceive?(context) }
+    }
+    private func reportReachability() {
+        let reachable = isReachable
+        guard reportedReachability != reachable else { return }
+        reportedReachability = reachable
+        onReachability?(reachable)
     }
     #if os(iOS)
     func prepareForWorkoutStart() async throws {
@@ -53,10 +63,10 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
             }
             if durable { session.transferUserInfo(payload) }
         } else if !isReachable { throw TrainingFailure.notConnected }
-        if isReachable { deliver(data) }
+        if isReachable { deliver(data, reportsErrors: contextError != nil || envelope.kind == .command) }
         else if let contextError { throw contextError }
     }
-    private func deliver(_ data: Data, allowsWorkoutChannel: Bool = true) {
+    private func deliver(_ data: Data, allowsWorkoutChannel: Bool = true, reportsErrors: Bool = true) {
         Task { [weak self] in
             guard let self else { return }
             do {
@@ -65,7 +75,12 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
                                      send: { try await self.workoutChannel.send($0) }),
                     fallback: .init(isAvailable: { self.isWatchConnectivityReachable },
                                     send: { try await self.sendWatchConnectivity($0) }))
-            } catch { self.onError?(error.localizedDescription) }
+            } catch {
+                self.reportReachability()
+                // State is also in applicationContext; a temporary live-channel
+                // failure must not look like a failed user command.
+                if reportsErrors { self.onError?(error.localizedDescription) }
+            }
         }
     }
     private func sendWatchConnectivity(_ data: Data) async throws {
@@ -80,33 +95,38 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
         guard (allowsWorkoutChannel && workoutChannel.isReachable) || isWatchConnectivityReachable else {
             throw TrainingFailure.notConnected
         }
-        deliver(try JSONEncoder().encode(envelope), allowsWorkoutChannel: allowsWorkoutChannel)
+        deliver(try JSONEncoder().encode(envelope), allowsWorkoutChannel: allowsWorkoutChannel,
+                reportsErrors: envelope.kind == .command)
     }
     func receivedContext() -> TrainingEnvelope? {
         guard let data = session?.receivedApplicationContext["training"] as? Data else { return nil }
         return try? JSONDecoder().decode(TrainingEnvelope.self, from: data)
     }
 
-    nonisolated private func receive(_ payload: [String: Any]) {
+    nonisolated private func receive(_ payload: [String: Any], interactive: Bool = false) {
         guard let data = payload["training"] as? Data, data.count < 1_000_000 else { return }
         Task { @MainActor [weak self] in
             guard let envelope = try? JSONDecoder().decode(TrainingEnvelope.self, from: data) else { return }
+            // Refresh from the real transports; receiving a deferred context is
+            // not evidence that commands can currently travel back to the watch.
+            if interactive { self?.reportReachability() }
             self?.onReceive?(envelope)
         }
     }
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         Task { @MainActor [weak self] in
             if let error { self?.onError?(error.localizedDescription) }
-            self?.onReachability?(self?.isReachable == true)
+            self?.reportReachability()
+            if activationState == .activated { self?.onActivation?() }
             if let envelope = self?.receivedContext() { self?.onReceive?(envelope) }
         }
     }
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
-        Task { @MainActor [weak self] in self?.onReachability?(self?.isReachable == true) }
+        Task { @MainActor [weak self] in self?.reportReachability() }
     }
-    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) { receive(message) }
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) { receive(message, interactive: true) }
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        receive(message)
+        receive(message, interactive: true)
         replyHandler([:])
     }
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) { receive(applicationContext) }
@@ -118,7 +138,7 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.onReachability?(self.isReachable)
+            self.reportReachability()
         }
     }
     nonisolated func sessionDidDeactivate(_ session: WCSession) {

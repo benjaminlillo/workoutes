@@ -3,6 +3,7 @@ import Foundation
 import Observation
 import SwiftData
 import SwiftUI
+import UIKit
 
 extension WorkoutExercise {
     var activityID: String {
@@ -60,12 +61,16 @@ final class ExerciseActivityController {
     @ObservationIgnored private var awaitingForeground = false
     @ObservationIgnored private var queuedOperationCount = 0
     @ObservationIgnored private var context: ModelContext?
+    // ModelContext doesn't keep its container alive. Queued work may outlive
+    // the view/test that supplied it, so retain both for the controller lifetime.
+    @ObservationIgnored private var modelContainer: ModelContainer?
     @ObservationIgnored private var session: ExerciseSession?
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let liveActivitiesEnabled: Bool
 
     init(context: ModelContext? = nil, now: @escaping () -> Date = { .now }, liveActivitiesEnabled: Bool = true) {
         self.context = context
+        self.modelContainer = context?.container
         self.now = now
         self.liveActivitiesEnabled = liveActivitiesEnabled
         restoreSession()
@@ -143,6 +148,7 @@ final class ExerciseActivityController {
             return
         }
         self.context = context
+        self.modelContainer = context.container
         do {
             try context.save()
             try CatalogIdentity.backfill(in: context)
@@ -165,11 +171,21 @@ final class ExerciseActivityController {
             errorMessage = "Couldn't save the exercise session: \(error.localizedDescription)"
             return
         }
+        // Activity.request is synchronous and must happen before the user can
+        // background the app. Only updates/end operations need the async queue.
+        requestActivityIfNeeded(for: exercise)
         enqueue { await self.publish(exercise) }
     }
 
     func synchronize(exercises: [WorkoutExercise]) {
-        enqueue { await self.synchronizeCurrentExercise(exercises: exercises) }
+        enqueue {
+            do {
+                // A SwiftUI query captured before an insert can be out of date
+                // by the time this operation runs. It must not cancel a session.
+                let current = try self.context?.fetch(FetchDescriptor<WorkoutExercise>()) ?? exercises
+                await self.synchronizeCurrentExercise(exercises: current)
+            } catch { self.errorMessage = error.localizedDescription }
+        }
     }
 
     private func synchronizeCurrentExercise(exercises: [WorkoutExercise]) async {
@@ -331,14 +347,24 @@ final class ExerciseActivityController {
               ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let state = content(for: exercise)
         let content = ActivityContent(state: state, staleDate: nil)
+        requestActivityIfNeeded(for: exercise)
+        if let activity, isRunning(activity), state != activity.content.state {
+            await activity.update(content)
+        }
+    }
+
+    private func requestActivityIfNeeded(for exercise: WorkoutExercise) {
+        guard liveActivityExerciseID == exercise.activityID, !exercise.isDeleted, liveActivitiesEnabled,
+              ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        if let activity, isRunning(activity) { return }
+        // A previous background denial must not suppress a later foreground tap,
+        // even if SwiftUI hasn't delivered its scene-phase callback yet.
+        if UIApplication.shared.applicationState == .active { awaitingForeground = false }
+        guard !awaitingForeground else { return }
         do {
-            if let activity, isRunning(activity) {
-                if state != activity.content.state { await activity.update(content) }
-            } else {
-                guard !awaitingForeground else { return }
-                activity = try Activity.request(attributes: ExerciseActivityAttributes(), content: content, pushType: nil)
-                observeActivity()
-            }
+            activity = try Activity.request(attributes: ExerciseActivityAttributes(),
+                                            content: ActivityContent(state: content(for: exercise), staleDate: nil), pushType: nil)
+            observeActivity()
         } catch ActivityAuthorizationError.visibility {
             // iOS can deny a new activity from a background snapshot. Foreground
             // restoration retries it; repeated snapshots shouldn't produce alerts.

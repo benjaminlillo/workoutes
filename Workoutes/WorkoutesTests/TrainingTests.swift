@@ -681,6 +681,51 @@ final class TrainingTests: XCTestCase {
         XCTAssertEqual(restored.run?.metrics.averageHeartRate, 130)
     }
 
+    func testDelayedWatchCompletionPreservesStandaloneActiveExercise() async throws {
+        let container = try container()
+        let context = container.mainContext
+        let item = WorkoutExercise(title: "Bench Press", subtitle: "", details: "", numberOfSets: 1,
+                                   reps: 8, increaseLoadNextTime: false, weight: 40)
+        context.insert(item)
+        try context.save()
+        let phone = PhoneTrainingController(store: store(), activate: false)
+        let activity = ExerciseActivityController(context: context, liveActivitiesEnabled: false)
+        phone.attach(context: context, exerciseActivity: activity)
+        await activity.waitForPendingUpdates()
+        activity.toggle(item, context: context)
+        await activity.waitForPendingUpdates()
+        let sessionID = activity.activeSessionID
+
+        var old = try TrainingRun(plan: .daily, at: origin)
+        try old.select(exercise(sets: 1, id: try XCTUnwrap(item.stableID)), at: date(10))
+        try old.advance(at: date(40))
+        old.finish(effort: nil, at: date(50))
+        phone.receive(.init(kind: .snapshot, sentAt: date(51), run: old))
+        await activity.waitForPendingUpdates()
+
+        XCTAssertFalse(item.isDone)
+        XCTAssertTrue(activity.isActive(item))
+        XCTAssertEqual(activity.activeSessionID, sessionID)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<ExerciseCompletion>()), 1)
+        XCTAssertEqual(phone.lastSyncedAt, date(51))
+        XCTAssertFalse(phone.isConnected, "A background snapshot is not proof of a live command channel")
+    }
+
+    func testPlanSynchronizationIgnoresOlderContextAndDuplicatesAfterRelaunch() throws {
+        var archive = TrainingArchive()
+        var latest = TrainingPlan.daily
+        latest.name = "Latest Plan"
+        let message = TrainingEnvelope(kind: .plan, sentAt: date(100), plan: latest)
+        XCTAssertTrue(archive.receivePlan(message))
+        let data = try JSONEncoder().encode(archive)
+        var restored = try JSONDecoder().decode(TrainingArchive.self, from: data)
+        XCTAssertFalse(restored.receivePlan(.init(kind: .plan, sentAt: date(90), plan: .daily)))
+        XCTAssertFalse(restored.receivePlan(message))
+        XCTAssertEqual(restored.plan.name, "Latest Plan")
+        XCTAssertTrue(restored.receivePlan(.init(kind: .plan, sentAt: date(110), plan: .daily)))
+        XCTAssertEqual(restored.plan.name, TrainingPlan.daily.name)
+    }
+
     func testTrainingScreensRenderForVisualInspection() async throws {
         let controller = PhoneTrainingController(store: store(), activate: false)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)

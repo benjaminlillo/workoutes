@@ -49,9 +49,14 @@ struct TrainingView: View {
                     }
                     .subtleFormRowShadow(.first)
                     if !controller.isConnected {
-                        Label("Reconnecting to Apple Watch. Your workout continues there. Keep both devices nearby and tap Refresh if needed.", systemImage: "applewatch.slash")
+                        Label("Watch Controls Unavailable", systemImage: "applewatch")
                             .foregroundStyle(.secondary)
                             .subtleFormRowShadow(.middle)
+                        if let lastSync = controller.lastSyncedAt {
+                            LabeledContent("Last Sync") { Text(lastSync, style: .relative) }
+                                .foregroundStyle(.secondary)
+                                .subtleFormRowShadow(.middle)
+                        }
                     }
                     Button(run.pausedAt == nil ? "Pause Training" : "Resume Training") { controller.pause() }
                         .disabled(!controller.isConnected)

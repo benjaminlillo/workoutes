@@ -11,7 +11,7 @@ struct WorkoutesWatchApp: App {
         WindowGroup {
             WatchTrainingView(controller: controller)
                 .task { await controller.restore() }
-                .onChange(of: scenePhase) { _, phase in
+                .onChange(of: scenePhase, initial: true) { _, phase in
                     if phase == .active { controller.refreshConnection() }
                 }
         }
