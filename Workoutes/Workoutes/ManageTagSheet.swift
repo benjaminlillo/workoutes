@@ -36,7 +36,7 @@ struct ManageTagSheet: View {
                                 MuscleIconView(icon: selectedIcon, color: color)
                                     .frame(width: 24, height: 24)
                             }
-                            Text(selectedIcon?.name ?? "None").foregroundStyle(.secondary)
+                            Text(selectedIcon?.name ?? String(localized: "None")).foregroundStyle(.secondary)
                         }
                     }
                     .accessibilityIdentifier("tagMuscleIcon")

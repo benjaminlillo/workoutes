@@ -16,7 +16,7 @@ struct WatchActiveTrainingView: View {
                     WatchTrainingProgressPage(run: run, date: timeline.date)
                         .contentShape(Rectangle())
                         .onTapGesture(count: 2) { advance() }
-                        .accessibilityAction(named: Text("Advance")) { advance() }
+                        .accessibilityAction(named: Text(String(localized: "Advance"))) { advance() }
                 }
                 .accessibilityIdentifier("watchTrainingProgress")
                 .tag(0)
@@ -33,26 +33,26 @@ struct WatchActiveTrainingView: View {
     private var controls: some View {
         ScrollView {
             VStack(spacing: 8) {
-                Text("Controls").font(.headline).foregroundStyle(.secondary)
+                Text(String(localized: "Controls")).font(.headline).foregroundStyle(.secondary)
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 9) {
-                    control(run.pausedAt == nil ? "Pause" : "Resume",
+                    control(run.pausedAt == nil ? String(localized: "Pause") : String(localized: "Resume"),
                             symbol: run.pausedAt == nil ? "pause.fill" : "play.fill", color: .yellow) {
                         onAction(.pause)
                         showProgress()
                     }
-                    control("Finish", symbol: "xmark", color: .red, action: onFinish)
-                    control("Previous Block", symbol: "backward.end.fill", enabled: run.canReturnToPreviousBlock) {
+                    control(String(localized: "Finish"), symbol: "xmark", color: .red, action: onFinish)
+                    control(String(localized: "Previous Block"), symbol: "backward.end.fill", enabled: run.canReturnToPreviousBlock) {
                         onAction(.previousBlock)
                         showProgress()
                     }
                     .accessibilityIdentifier("watchPreviousBlock")
-                    control(run.progress.stage == .series ? "Finish Series" : "Skip Rest",
+                    control(run.progress.stage == .series ? String(localized: "Finish Series") : String(localized: "Skip Rest"),
                             symbol: "forward.end.fill", enabled: run.canAdvance) {
                         advance()
                         showProgress()
                     }
                 }
-                Button("Undo Last Transition", systemImage: "arrow.uturn.backward") {
+                Button(String(localized: "Undo Last Transition"), systemImage: "arrow.uturn.backward") {
                     onAction(.undo)
                     showProgress()
                 }
@@ -116,7 +116,7 @@ private struct WatchTrainingProgressPage: View {
                 exerciseSummary(compact: compact)
                 HStack(alignment: .center, spacing: 6) {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(run.pausedAt != nil ? "Paused" : (isResting ? "Rest" : "Training"))
+                        Text(run.pausedAt != nil ? String(localized: "Paused") : (isResting ? String(localized: "Rest") : String(localized: "Training")))
                             .font(.system(size: compact ? 13 : 14, weight: .medium))
                         Text(TrainingClock.label(run.remaining(at: date) ?? run.phaseElapsed(at: date)))
                             .font(.system(size: compact ? 46 : 52, weight: .medium, design: .rounded))
@@ -130,15 +130,15 @@ private struct WatchTrainingProgressPage: View {
                         Text(run.metrics.heartRate.map { "\(Int($0))" } ?? "—")
                             .font(.system(size: compact ? 21 : 23, weight: .semibold, design: .rounded))
                             .monospacedDigit()
-                        Text("BPM").font(.system(size: 11)).foregroundStyle(.secondary)
+                        Text(String(localized: "BPM")).font(.system(size: 11)).foregroundStyle(.secondary)
                     }
                     .font(.caption2)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Heart Rate")
-                    .accessibilityValue(run.metrics.heartRate.map { "\(Int($0)) BPM" } ?? "Unavailable")
+                    .accessibilityLabel(String(localized: "Heart Rate"))
+                    .accessibilityValue(run.metrics.heartRate.map { String(localized: "\(Int($0)) BPM") } ?? String(localized: "Unavailable"))
                 }
                 HStack {
-                    Text("Total").foregroundStyle(.secondary)
+                    Text(String(localized: "Total")).foregroundStyle(.secondary)
                     Spacer(minLength: 4)
                     Text(TrainingClock.label(run.elapsed(at: date))).monospacedDigit()
                 }
@@ -159,13 +159,13 @@ private struct WatchTrainingProgressPage: View {
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 0)
                 if run.isSimulatorPreview == true {
-                    Text("Preview").foregroundStyle(.orange)
+                    Text(String(localized: "Preview")).foregroundStyle(.orange)
                 }
             }
             .font(.system(size: compact ? 12 : 13, weight: .medium))
             .lineLimit(1).minimumScaleFactor(0.8)
-            Text(displayedExercise?.name ?? (run.progress.stage == .blockRest ? "Rest" :
-                 (run.progress.stage == .readyToFinish ? "All Blocks Complete" : "Choose an Exercise")))
+            Text(displayedExercise?.name ?? (run.progress.stage == .blockRest ? String(localized: "Rest") :
+                 (run.progress.stage == .readyToFinish ? String(localized: "All Blocks Complete") : String(localized: "Choose an Exercise"))))
                 .font(.system(size: compact ? 20 : 22, weight: .semibold))
                 .lineLimit(2).minimumScaleFactor(0.8)
                 .fixedSize(horizontal: false, vertical: true)
@@ -177,11 +177,11 @@ private struct WatchTrainingProgressPage: View {
                     Text("\(exercise.repetitions) reps")
                 }
                 .font(.system(size: compact ? 14 : 16)).lineLimit(1).minimumScaleFactor(0.8)
-                Text(showsQueuedExercise ? "Queued · \(exercise.sets) series" : run.phaseTitle)
+                Text(showsQueuedExercise ? String(localized: "Queued · \(exercise.sets) series") : run.phaseTitle)
                     .font(.system(size: compact ? 13 : 14, weight: .medium)).foregroundStyle(phaseColor)
                     .lineLimit(1).minimumScaleFactor(0.8)
             } else if run.progress.stage == .choosingExercise {
-                Text("Select on iPhone").font(.system(size: 14)).foregroundStyle(.secondary)
+                Text(String(localized: "Select on iPhone")).font(.system(size: 14)).foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -195,7 +195,7 @@ private struct WatchTrainingDetailsPage: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Details").font(.headline)
+                Text(String(localized: "Details")).font(.headline)
                 if let queued = run.queuedExercise, let number = run.queuedExerciseNumber {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Up Next · Exercise \(number)").font(.subheadline).foregroundStyle(.secondary)
@@ -205,10 +205,10 @@ private struct WatchTrainingDetailsPage: View {
                     }
                     Divider()
                 }
-                metric("Active Calories", value: run.metrics.activeCalories, unit: "kcal", symbol: "flame.fill", color: .pink)
-                metric("Total Calories", value: run.metrics.totalCalories, unit: "kcal", symbol: "flame", color: .pink)
-                metric("Average Heart Rate", value: run.metrics.averageHeartRate, unit: "BPM", symbol: "heart.fill", color: .red)
-                metric("Maximum Heart Rate", value: run.metrics.maximumHeartRate, unit: "BPM", symbol: "heart.fill", color: .red)
+                metric(String(localized: "Active Calories"), value: run.metrics.activeCalories, unit: "kcal", symbol: "flame.fill", color: .pink)
+                metric(String(localized: "Total Calories"), value: run.metrics.totalCalories, unit: "kcal", symbol: "flame", color: .pink)
+                metric(String(localized: "Average Heart Rate"), value: run.metrics.averageHeartRate, unit: String(localized: "BPM"), symbol: "heart.fill", color: .red)
+                metric(String(localized: "Maximum Heart Rate"), value: run.metrics.maximumHeartRate, unit: String(localized: "BPM"), symbol: "heart.fill", color: .red)
                 if let zone = run.metrics.currentZone {
                     Label("Zone \(zone + 1)", systemImage: "heart.text.clipboard")
                         .font(.subheadline)
@@ -224,7 +224,7 @@ private struct WatchTrainingDetailsPage: View {
                 Text("Block \(min(run.progress.blockIndex + 1, run.plan.blocks.count)) / \(run.plan.blocks.count)")
                     .font(.subheadline).foregroundStyle(.secondary)
                 if run.isSimulatorPreview == true {
-                    Text("Simulator Preview · No Health recording").font(.caption2).foregroundStyle(.orange)
+                    Text(String(localized: "Simulator Preview · No Health recording")).font(.caption2).foregroundStyle(.orange)
                 }
             }
             .padding(.horizontal, 4)

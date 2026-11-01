@@ -267,8 +267,8 @@ struct SummaryStatistics: View {
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
         layout {
-            SummaryStatisticCard(title: "Completed Exercises", value: summary.total, symbol: "checkmark.circle")
-            SummaryStatisticCard(title: "Active Days", value: summary.activeDays, symbol: "calendar")
+            SummaryStatisticCard(title: String(localized: "Completed Exercises"), value: summary.total, symbol: "checkmark.circle")
+            SummaryStatisticCard(title: String(localized: "Active Days"), value: summary.activeDays, symbol: "calendar")
         }
     }
 }

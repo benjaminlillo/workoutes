@@ -105,7 +105,7 @@ final class ExerciseCompletion {
         return snapshot
     }
 
-    var exerciseTitle: String { exercise?.title ?? "Exercise deleted" }
+    var exerciseTitle: String { exercise?.title ?? String(localized: "Exercise deleted") }
     var tagColors: [String] { exercise?.tags.map(\.colorHex) ?? [] }
 }
 

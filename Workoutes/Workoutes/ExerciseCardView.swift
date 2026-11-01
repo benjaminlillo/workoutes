@@ -23,17 +23,17 @@ struct ExerciseCardView: View {
     private var isQueued: Bool { !isPlaying && exerciseActivity.isQueued(exercise) }
 
     private var stateValue: String {
-        isQueued ? "Queued for next exercise block" : (exercise.isDone ? "Completed" : (isPlaying ? "Active" : "Not started"))
+        isQueued ? String(localized: "Queued for next exercise block") : (exercise.isDone ? String(localized: "Completed") : (isPlaying ? String(localized: "Active") : String(localized: "Not started")))
     }
 
     private var stateHint: String {
         if exerciseActivity.training?.hasActiveSession == true {
-            if isQueued { return "Remove this exercise from the queue" }
-            if isPlaying { return "Finish this series or skip the current rest" }
+            if isQueued { return String(localized: "Remove this exercise from the queue") }
+            if isPlaying { return String(localized: "Finish this series or skip the current rest") }
             return exerciseActivity.training?.run?.progress.stage == .choosingExercise
-                ? "Use this exercise in the current training block" : "Queue this exercise for the next available exercise block"
+                ? String(localized: "Use this exercise in the current training block") : String(localized: "Queue this exercise for the next available exercise block")
         }
-        return exercise.isDone ? "Unmark this exercise" : (isPlaying ? "Stop: completes after more than 10 seconds, otherwise cancels" : "Start this exercise")
+        return exercise.isDone ? String(localized: "Unmark this exercise") : (isPlaying ? String(localized: "Stop: completes after more than 10 seconds, otherwise cancels") : String(localized: "Start this exercise"))
     }
 
     var body: some View {
@@ -58,7 +58,7 @@ struct ExerciseCardView: View {
                 }
                 .buttonStyle(.borderless)
                 .disabled(exerciseActivity.isUpdating)
-                .accessibilityLabel("Exercise status")
+                .accessibilityLabel(String(localized: "Exercise status"))
                 .accessibilityValue(stateValue)
                 .accessibilityHint(stateHint)
                 .accessibilityAddTraits(exercise.isDone || isPlaying || isQueued ? .isSelected : [])
@@ -79,16 +79,16 @@ struct ExerciseCardView: View {
                     ExerciseMetricView(
                         systemImage: "dumbbell.fill",
                         value: weightUnit.label(for: exercise.weight),
-                        label: "Weight"
+                        label: String(localized: "Weight")
                     )
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
-                .accessibilityLabel("Weight")
+                .accessibilityLabel(String(localized: "Weight"))
                 .accessibilityValue("\(weightUnit.displayedWeight(from: exercise.weight).formatted()) \(weightUnit.accessibilityName)")
-                .accessibilityHint("Opens the weight selector")
+                .accessibilityHint(String(localized: "Opens the weight selector"))
                 .accessibilityIdentifier("exerciseWeight.\(exercise.title)")
 
                 metricDivider
@@ -97,16 +97,16 @@ struct ExerciseCardView: View {
                     ExerciseMetricView(
                         systemImage: "square.stack.3d.up.fill",
                         value: "\(exercise.numberOfSets) sets",
-                        label: "Sets"
+                        label: String(localized: "Sets")
                     )
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
-                .accessibilityLabel("Sets")
+                .accessibilityLabel(String(localized: "Sets"))
                 .accessibilityValue("\(exercise.numberOfSets)")
-                .accessibilityHint("Opens the sets selector")
+                .accessibilityHint(String(localized: "Opens the sets selector"))
                 .accessibilityIdentifier("exerciseSets.\(exercise.title)")
 
                 metricDivider
@@ -115,16 +115,16 @@ struct ExerciseCardView: View {
                     ExerciseMetricView(
                         systemImage: "repeat",
                         value: "\(exercise.reps) reps",
-                        label: "Repetitions"
+                        label: String(localized: "Repetitions")
                     )
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
-                .accessibilityLabel("Repetitions")
+                .accessibilityLabel(String(localized: "Repetitions"))
                 .accessibilityValue("\(exercise.reps)")
-                .accessibilityHint("Opens the repetitions selector")
+                .accessibilityHint(String(localized: "Opens the repetitions selector"))
                 .accessibilityIdentifier("exerciseRepetitions.\(exercise.title)")
             }
 
@@ -141,7 +141,7 @@ struct ExerciseCardView: View {
             Button {
                 showingEditSheet = true
             } label: {
-                Label("Edit Exercise", systemImage: "pencil")
+                Label(String(localized: "Edit Exercise"), systemImage: "pencil")
             }
             
             if let workout = workout {
@@ -150,14 +150,14 @@ struct ExerciseCardView: View {
                         workout.exercises.remove(at: index)
                     }
                 } label: {
-                    Label("Remove from Workout", systemImage: "minus.circle")
+                    Label(String(localized: "Remove from Workout"), systemImage: "minus.circle")
                 }
             }
             
             Button(role: .destructive) {
                 showingDeleteConfirmation = true
             } label: {
-                Label("Delete Permanently", systemImage: "trash")
+                Label(String(localized: "Delete Permanently"), systemImage: "trash")
             }
         }
         .padding(.horizontal)
@@ -165,10 +165,10 @@ struct ExerciseCardView: View {
             Button {
                 exercise.increaseLoadNextTime.toggle()
             } label: {
-                Label("Bump", systemImage: "arrow.up.right.circle")
+                Label(String(localized: "Bump"), systemImage: "arrow.up.right.circle")
             }
             .tint(accentColor)
-            .accessibilityHint(exercise.increaseLoadNextTime ? "Disables bump" : "Enables bump")
+            .accessibilityHint(exercise.increaseLoadNextTime ? String(localized: "Disables bump") : String(localized: "Enables bump"))
         }
         .sheet(isPresented: $showingEditSheet) {
             EditExerciseSheet(exercise: exercise)
@@ -186,14 +186,14 @@ struct ExerciseCardView: View {
                 .presentationDragIndicator(.visible)
         }
         .confirmationDialog(
-            "Are you sure you want to delete this exercise permanently? This will remove it from all workouts.",
+            String(localized: "Are you sure you want to delete this exercise permanently? This will remove it from all workouts."),
             isPresented: $showingDeleteConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Delete Permanently", role: .destructive) {
+            Button(String(localized: "Delete Permanently"), role: .destructive) {
                 modelContext.delete(exercise)
             }
-            Button("Cancel", role: .cancel) {}
+            Button(String(localized: "Cancel"), role: .cancel) {}
         }
     }
 

@@ -59,11 +59,11 @@ struct ExerciseCompletionCard: View {
             let layout = dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(spacing: 0))
             layout {
-                metric("Weight", systemImage: "dumbbell.fill", value: weightUnit.label(for: snapshot.weight))
+                metric(String(localized: "Weight"), systemImage: "dumbbell.fill", value: weightUnit.label(for: snapshot.weight))
                 metricDivider
-                metric("Sets", systemImage: "square.stack.3d.up.fill", value: "\(snapshot.numberOfSets) sets")
+                metric(String(localized: "Sets"), systemImage: "square.stack.3d.up.fill", value: String(localized: "\(snapshot.numberOfSets) sets"))
                 metricDivider
-                metric("Repetitions", systemImage: "repeat", value: "\(snapshot.reps) reps")
+                metric(String(localized: "Repetitions"), systemImage: "repeat", value: String(localized: "\(snapshot.reps) reps"))
             }
         }
         .padding()

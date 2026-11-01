@@ -5,14 +5,14 @@ struct MotivationalPullState {
     static let celebrationDuration: TimeInterval = 3
     static let emojis = ["💪", "🏋️", "🏃", "🤸", "🔥", "🏆"]
     static let phrases = [
-        "One rep at a time.",
-        "Small steps. Stronger you.",
-        "Show up for yourself.",
-        "Progress starts with movement.",
-        "Your pace. Your progress.",
-        "Every effort counts.",
-        "Build strength. Build confidence.",
-        "Consistency is your superpower."
+        String(localized: "One rep at a time."),
+        String(localized: "Small steps. Stronger you."),
+        String(localized: "Show up for yourself."),
+        String(localized: "Progress starts with movement."),
+        String(localized: "Your pace. Your progress."),
+        String(localized: "Every effort counts."),
+        String(localized: "Build strength. Build confidence."),
+        String(localized: "Consistency is your superpower.")
     ]
 
     private(set) var distance: CGFloat = 0

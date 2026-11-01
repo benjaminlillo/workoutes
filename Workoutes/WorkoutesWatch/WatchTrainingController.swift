@@ -31,7 +31,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
 
     override init() {
         do { archive = try store.read() }
-        catch { archive = TrainingArchive(); errorMessage = "Couldn't restore training: \(error.localizedDescription)" }
+        catch { archive = TrainingArchive(); errorMessage = String(localized: "Couldn't restore training: \(error.localizedDescription)") }
         super.init()
         connection.onReceive = { [weak self] envelope in
             Task { @MainActor in await self?.receive(envelope) }
@@ -95,7 +95,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
                     record(workout)
                 } else {
                     archive.current?.finish(effort: nil, at: .now)
-                    archive.current?.healthSaveError = "The workout was interrupted and its HealthKit session could not be recovered. Your exercise records are preserved."
+                    archive.current?.healthSaveError = String(localized: "The workout was interrupted and its HealthKit session could not be recovered. Your exercise records are preserved.")
                 }
                 try persist(); publish(durable: true)
             } else if let run, run.healthWorkoutID == nil {
@@ -110,7 +110,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
                 archive.current?.healthSaveError = error.localizedDescription
                 try? persist(); publish(durable: true)
             }
-            errorMessage = "Couldn't recover the workout: \(error.localizedDescription)"
+            errorMessage = String(localized: "Couldn't recover the workout: \(error.localizedDescription)")
         }
     }
 
@@ -130,7 +130,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
     private func start(plan: TrainingPlan, commandID: UUID? = nil) async {
         guard !isBusy, run?.isActive != true else { publish(); return }
         guard canStart else {
-            fail("Finish saving the previous workout before starting another one."); return
+            fail(String(localized: "Finish saving the previous workout before starting another one.")); return
         }
         isBusy = true
         let previous = archive
@@ -232,7 +232,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             guard abs(command.createdAt.timeIntervalSinceNow) < 120, let plan = command.plan else { return }
             await start(plan: plan, commandID: command.id); return
         }
-        guard !isBusy else { fail("Please wait while the workout is being saved."); return }
+        guard !isBusy else { fail(String(localized: "Please wait while the workout is being saved.")); return }
         guard var run = archive.current, command.runID == run.id,
               command.revision == run.revision, abs(command.createdAt.timeIntervalSinceNow) < 30 else {
             fail(TrainingFailure.staleCommand.localizedDescription); publish(); return
@@ -363,7 +363,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
                 finishedWorkout = workout
             }
             guard let workout else {
-                throw NSError(domain: "Training", code: 2, userInfo: [NSLocalizedDescriptionKey: "No saved Health workout or recoverable builder was found. Exercise records are preserved."])
+                throw NSError(domain: "Training", code: 2, userInfo: [NSLocalizedDescriptionKey: String(localized: "No saved Health workout or recoverable builder was found. Exercise records are preserved.")])
             }
             record(workout)
             archive.current?.healthSaveError = nil
@@ -373,7 +373,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             if let effort = run.effort, archive.current?.effortSaved != true {
                 let type = HKQuantityType(.workoutEffortScore)
                 guard healthStore.authorizationStatus(for: type) == .sharingAuthorized else {
-                    throw NSError(domain: "Training", code: 3, userInfo: [NSLocalizedDescriptionKey: "Workout saved. Allow effort ratings in Health to save your training effort."])
+                    throw NSError(domain: "Training", code: 3, userInfo: [NSLocalizedDescriptionKey: String(localized: "Workout saved. Allow effort ratings in Health to save your training effort.")])
                 }
                 let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
                     HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeySyncIdentifier,
@@ -403,7 +403,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             archive.current?.healthSaveError = error.localizedDescription
             archive.current?.revision += 1
             try? persist()
-            errorMessage = "Health save needs attention: \(error.localizedDescription)"
+            errorMessage = String(localized: "Health save needs attention: \(error.localizedDescription)")
         }
     }
 

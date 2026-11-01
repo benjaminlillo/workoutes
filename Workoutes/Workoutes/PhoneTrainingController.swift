@@ -33,7 +33,7 @@ final class PhoneTrainingController {
         self.store = store ?? TrainingStore()
         self.commandSender = commandSender
         do { archive = try self.store.read() }
-        catch { archive = TrainingArchive(); errorMessage = "Couldn't restore training: \(error.localizedDescription)" }
+        catch { archive = TrainingArchive(); errorMessage = String(localized: "Couldn't restore training: \(error.localizedDescription)") }
         connection.onReceive = { [weak self] in self?.receive($0) }
         connection.onReachability = { [weak self] reachable in
             self?.isConnected = reachable
@@ -83,7 +83,7 @@ final class PhoneTrainingController {
             #if targetEnvironment(simulator)
             guard isConnected else {
                 throw NSError(domain: "Training", code: 4, userInfo: [NSLocalizedDescriptionKey:
-                    "Open Workoutes on your paired Apple Watch simulator before starting a preview."])
+                    String(localized: "Open Workoutes on your paired Apple Watch simulator before starting a preview.")])
             }
             #else
             // Ask on the phone before delivering a start request to the companion.
@@ -106,7 +106,7 @@ final class PhoneTrainingController {
                 try? await Task.sleep(for: .seconds(120))
                 guard !Task.isCancelled, self?.isStarting == true else { return }
                 self?.isStarting = false
-                self?.errorMessage = "Start wasn't confirmed. Open Workoutes on your watch and check Health permissions."
+                self?.errorMessage = String(localized: "Start wasn't confirmed. Open Workoutes on your watch and check Health permissions.")
             }
         } catch { isStarting = false; pendingStartID = nil; errorMessage = error.localizedDescription }
     }
@@ -197,7 +197,7 @@ final class PhoneTrainingController {
                 isStarting = false; pendingStartID = nil; startTimeout?.cancel()
             }
             if archive.current?.id == incoming.id { synchronizeActiveExercise() }
-        } catch { errorMessage = "Couldn't save training: \(error.localizedDescription)" }
+        } catch { errorMessage = String(localized: "Couldn't save training: \(error.localizedDescription)") }
     }
 
     private func reconcile(_ incoming: TrainingRun, previous: TrainingRun?) throws {

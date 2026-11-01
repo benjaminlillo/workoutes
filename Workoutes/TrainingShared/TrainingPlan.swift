@@ -12,6 +12,7 @@ struct TrainingBlock: Codable, Equatable, Identifiable, Sendable {
 
 struct TrainingPlan: Codable, Equatable, Sendable {
     var name = "Daily Training"
+    var localizedName: String { name == "Daily Training" ? String(localized: "Daily Training") : name }
     var blocks: [TrainingBlock]
     var asksForEffortRating = true
 
@@ -67,13 +68,13 @@ enum TrainingFailure: LocalizedError {
     case invalidPlan, invalidExercise, wrongPhase, noAvailableExerciseBlock, staleCommand, notConnected, noSession
     var errorDescription: String? {
         switch self {
-        case .invalidPlan: "Add at least one exercise block and valid rest durations."
-        case .invalidExercise: "This exercise needs a name, 1–20 sets, 1–100 repetitions and a valid weight."
-        case .wrongPhase: "This action isn't available in the current training stage. Resume training if it is paused."
-        case .noAvailableExerciseBlock: "There are no upcoming empty exercise blocks in this training."
-        case .staleCommand: "The workout has advanced. Check the current stage and try again."
-        case .notConnected: "The live connection to Apple Watch is unavailable. Keep both devices nearby and tap Refresh to reconnect. Any workout already running continues on the watch."
-        case .noSession: "There is no active training session."
+        case .invalidPlan: String(localized: "Add at least one exercise block and valid rest durations.")
+        case .invalidExercise: String(localized: "This exercise needs a name, 1–20 sets, 1–100 repetitions and a valid weight.")
+        case .wrongPhase: String(localized: "This action isn't available in the current training stage. Resume training if it is paused.")
+        case .noAvailableExerciseBlock: String(localized: "There are no upcoming empty exercise blocks in this training.")
+        case .staleCommand: String(localized: "The workout has advanced. Check the current stage and try again.")
+        case .notConnected: String(localized: "The live connection to Apple Watch is unavailable. Keep both devices nearby and tap Refresh to reconnect. Any workout already running continues on the watch.")
+        case .noSession: String(localized: "There is no active training session.")
         }
     }
 }

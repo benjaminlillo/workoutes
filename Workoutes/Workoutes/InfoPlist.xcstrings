@@ -1,0 +1,60 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes uses the camera to take a photo for your workout or Exercises background."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes usa la cámara para tomar una foto para el fondo de tu rutina o de Ejercicios."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "NSHealthShareUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes displays your strength workout metrics from Apple Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes muestra las métricas de tus entrenamientos de fuerza del Apple Watch."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "NSHealthUpdateUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes starts strength workouts on your Apple Watch to save to Apple Health."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes inicia entrenamientos de fuerza en el Apple Watch para guardarlos en Salud de Apple."
+          }
+        }
+      },
+      "generatesSymbol": false
+    }
+  },
+  "version": "1.0"
+}

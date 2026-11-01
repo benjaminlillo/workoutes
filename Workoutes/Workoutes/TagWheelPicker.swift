@@ -119,8 +119,8 @@ struct TagWheelPicker: View {
     }
 
     private var accessibilityValue: String {
-        guard let selectedTag, let selectedIndex else { return "No Tag Selected" }
-        return "\(selectedTag.name), \(selectedIndex + 1) of \(count)"
+        guard let selectedTag, let selectedIndex else { return String(localized: "No Tag Selected") }
+        return String(localized: "\(selectedTag.name), \(selectedIndex + 1) of \(count)")
     }
 
     private var plate: some View {

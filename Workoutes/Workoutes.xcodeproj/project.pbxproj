@@ -121,6 +121,11 @@
 			path = TrainingShared;
 			sourceTree = "<group>";
 		};
+		D10000000000000000000001 /* Localization */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Localization;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +163,7 @@
 		00290BA43003F83F004D59FD = {
 			isa = PBXGroup;
 			children = (
+				D10000000000000000000001 /* Localization */,
 				00290BAF3003F83F004D59FD /* Workoutes */,
 				C10000000000000000000008 /* TrainingShared */,
 				A10000000000000000000008 /* Shared */,
@@ -199,6 +205,7 @@
 				C1000000000000000000000D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				D10000000000000000000001 /* Localization */,
 				00290BAF3003F83F004D59FD /* Workoutes */,
 				A10000000000000000000008 /* Shared */,
 				C10000000000000000000008 /* TrainingShared */,
@@ -223,6 +230,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				D10000000000000000000001 /* Localization */,
 				A10000000000000000000007 /* WorkoutesLiveActivity */,
 				A10000000000000000000008 /* Shared */,
 			);
@@ -267,6 +275,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				D10000000000000000000001 /* Localization */,
 				C10000000000000000000007 /* WorkoutesWatch */,
 				C10000000000000000000008 /* TrainingShared */,
 			);
@@ -307,6 +316,7 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				es,
 				en,
 				Base,
 			);

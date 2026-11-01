@@ -10,7 +10,7 @@ struct ImportDataView: View {
     @State private var showingSuccessAlert = false
     @State private var importError: String?
     
-    let aiPrompt = """
+    let aiPrompt = String(localized: """
     Please convert the provided workout exercises into a JSON format strictly following this structure:
     
     {
@@ -34,7 +34,7 @@ struct ImportDataView: View {
     }
     
     Ensure all objects are linked by matching 'id's. Use valid UUIDs for all 'id' fields. Output ONLY valid JSON without markdown wrapping if possible.
-    """
+    """)
     
     var body: some View {
         Form {

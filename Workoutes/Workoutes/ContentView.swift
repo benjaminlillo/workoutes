@@ -46,7 +46,7 @@ struct ContentView: View {
                 EmptyView()
             } label: {
                 Image(systemName: "figure.strengthtraining.traditional")
-                    .accessibilityLabel(activeExercise?.title ?? "No Active Exercise")
+                    .accessibilityLabel(activeExercise?.title ?? String(localized: "No Active Exercise"))
             }
             .disabled(activeExercise == nil)
         }

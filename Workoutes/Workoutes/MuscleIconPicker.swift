@@ -26,7 +26,7 @@ struct MuscleIconPicker: View {
 
                 ForEach(MuscleIcon.Group.allCases) { group in
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(group.rawValue).font(.headline)
+                        Text(LocalizedStringKey(group.rawValue)).font(.headline)
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 94), spacing: 10)], spacing: 10) {
                             ForEach(MuscleIcon.allCases.filter { $0.group == group }) { icon in
                                 iconButton(icon)

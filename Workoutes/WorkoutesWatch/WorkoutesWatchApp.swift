@@ -61,7 +61,7 @@ struct WatchTrainingView: View {
                                     Label("Saved to Health", systemImage: "checkmark.circle").font(.caption)
                                 }
                             }
-                            Text(controller.archive.plan.name).font(.headline)
+                            Text(controller.archive.plan.localizedName).font(.headline)
                             #if targetEnvironment(simulator)
                             Text("Simulator Preview\nNo Health recording").font(.caption).foregroundStyle(.orange)
                             #endif

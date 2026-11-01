@@ -168,7 +168,7 @@ final class ExerciseActivityController {
         } catch {
             context.rollback()
             restoreSession()
-            errorMessage = "Couldn't save the exercise session: \(error.localizedDescription)"
+            errorMessage = String(localized: "Couldn't save the exercise session: \(error.localizedDescription)")
             return
         }
         // Activity.request is synchronous and must happen before the user can
@@ -302,7 +302,7 @@ final class ExerciseActivityController {
             for extra in sessions where extra.id != session?.id { context.delete(extra) }
             if context.hasChanges { try context.save() }
             updateActiveSession()
-        } catch { errorMessage = "Couldn't restore the exercise session: \(error.localizedDescription)" }
+        } catch { errorMessage = String(localized: "Couldn't restore the exercise session: \(error.localizedDescription)") }
     }
 
     private func cancelSession() throws {
@@ -369,7 +369,7 @@ final class ExerciseActivityController {
             // iOS can deny a new activity from a background snapshot. Foreground
             // restoration retries it; repeated snapshots shouldn't produce alerts.
             awaitingForeground = true
-        } catch { errorMessage = "Exercise is running, but the Live Activity couldn't start: \(error.localizedDescription)" }
+        } catch { errorMessage = String(localized: "Exercise is running, but the Live Activity couldn't start: \(error.localizedDescription)") }
     }
 
     private func enqueue(_ operation: @escaping @MainActor () async -> Void) {

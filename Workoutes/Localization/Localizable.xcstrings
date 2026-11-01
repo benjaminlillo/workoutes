@@ -1,0 +1,6780 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@ · %lld reps · %lld series": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld reps · %lld series"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld rep. · %lld series"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@ · %lld reps · %lld/%lld series": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld reps · %lld/%lld series"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld rep. · %lld/%lld series"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@ · automatic advance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · automatic advance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · avance automático"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@, %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld de %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld / 10": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 10"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 10"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld BPM": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld BPM"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld lpm"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld active kcal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld active kcal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kcal activas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld bpm": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bpm"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld lpm"
+          }
+        }
+      }
+    },
+    "%lld completed exercises": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld completed exercise"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld completed exercises"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ejercicio completado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ejercicios completados"
+                }
+              }
+            }
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld completed exercises, %lld categories": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld completed exercises, %lld categories"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ejercicios completados, %lld categorías"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld exercise blocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld exercise block"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld exercise blocks"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld bloque de ejercicio"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld bloques de ejercicio"
+                }
+              }
+            }
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld exercise blocks · choose exercises as you train": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercise blocks · choose exercises as you train"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bloques de ejercicio · elige los ejercicios mientras entrenas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld kcal": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kcal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kcal"
+          }
+        }
+      }
+    },
+    "%lld reps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rep"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld reps"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rep."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld rep."
+                }
+              }
+            }
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld sets": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld set"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld sets"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld serie"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld series"
+                }
+              }
+            }
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld tag appearances, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld tag appearances, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld apariciones de etiquetas, %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "%lld x %lld • %@%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld x %lld • %@%@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld x %lld • %@%@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "AI Assistant Prompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Assistant Prompt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instrucciones para el asistente de IA"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Abdominals": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abdominals"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abdominales"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Abductors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abductors"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abductores"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Active Calories": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Calories"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calorías activas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Active Days": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Days"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Días activos"
+          }
+        }
+      }
+    },
+    "Active exercise sessions are never exported.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active exercise sessions are never exported."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las sesiones de ejercicio activas nunca se exportan."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Color": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Color"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir color"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Exercise Block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Exercise Block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir bloque de ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Existing Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Existing Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir ejercicio existente"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Rest Block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Rest Block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir bloque de descanso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Tag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir etiqueta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add Workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir rutina"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Add at least one exercise block and valid rest durations.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add at least one exercise block and valid rest durations."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade al menos un bloque de ejercicio y duraciones de descanso válidas."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Adductors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adductors"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aductores"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Advance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avanzar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "All Blocks Complete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Blocks Complete"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los bloques completados"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "All Exercises": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los ejercicios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "All exercises containing these tags will be automatically added to your workout.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All exercises containing these tags will be automatically added to your workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los ejercicios con estas etiquetas se añadirán automáticamente a tu rutina."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "An exercise runs for as long as you need. Double-tap the watch display to finish each series.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An exercise runs for as long as you need. Double-tap the watch display to finish each series."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El ejercicio dura el tiempo que necesites. Toca dos veces la pantalla del reloj para terminar cada serie."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Appearance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apariencia"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Apple Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Watch"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Are you sure you want to delete this exercise permanently? This will remove it from all workouts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to delete this exercise permanently? This will remove it from all workouts."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Quieres eliminar este ejercicio de forma permanente? Se quitará de todas las rutinas."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Arms": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arms"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brazos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Ask for Effort Rating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask for Effort Rating"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solicitar valoración del esfuerzo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Auto-Populate with Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-Populate with Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completar con etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Automatic": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automático"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Automatically moves to the next block when the timer ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically moves to the next block when the timer ends."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avanza al siguiente bloque cuando termina el temporizador."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Average Heart Rate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average Heart Rate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frecuencia cardíaca media"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "BPM": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BPM"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lpm"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espalda"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fondo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Background Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background Type"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tipo de fondo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Basic Info": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basic Info"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Información básica"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Biceps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biceps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bíceps"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Block %lld / %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block %lld / %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloque %lld / %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Blocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloques"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Build strength. Build confidence.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build strength. Build confidence."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gana fuerza. Gana confianza."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Bump": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bump"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subir carga"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Bump enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bump enabled"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subida de carga activada"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Calves": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calves"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantorrillas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Camera access is unavailable. You can choose a photo from your library or allow camera access in Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera access is unavailable. You can choose a photo from your library or allow camera access in Settings."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay acceso a la cámara. Puedes elegir una foto de tu biblioteca o permitir el acceso en Ajustes."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Catalog Only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catalog Only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo catálogo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Cherry Ice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cherry Ice"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cereza helada"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Chest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pecho"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Choose a Photo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a Photo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir una foto"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Choose an Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir un ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Choose between one and three colors.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose between one and three colors."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige entre uno y tres colores."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Choose exercises as you go": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose exercises as you go"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige los ejercicios mientras entrenas"
+          }
+        }
+      }
+    },
+    "Choose from Photos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose from Photos"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir de Fotos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Choose the exercise during training. Its series, repetitions and weight come from your catalog.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the exercise during training. Its series, repetitions and weight come from your catalog."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el ejercicio durante el entrenamiento. Sus series, repeticiones y peso se obtienen de tu catálogo."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Choose up to three colors. A soft white overlay keeps the background subtle.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose up to three colors. A soft white overlay keeps the background subtle."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige hasta tres colores. Una capa blanca suave mantiene el fondo tenue."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Cobalt Heat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cobalt Heat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calor cobalto"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Color": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Color %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Complete Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completar ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Completed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completado"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Completed Exercises": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed Exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicios completados"
+          }
+        }
+      }
+    },
+    "Completed exercises will appear here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed exercises will appear here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí aparecerán los ejercicios completados."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Completed sessions will appear here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed sessions will appear here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí aparecerán las sesiones completadas."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Configure your structure and choose exercises on iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure your structure and choose exercises on iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configura la estructura y elige los ejercicios en el iPhone."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Consistency is your superpower.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consistency is your superpower."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La constancia es tu superpoder."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Controls": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controls"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controles"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Copy AI Prompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy AI Prompt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar instrucciones para IA"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Copy this prompt and send it to ChatGPT, Claude, or Gemini along with your text-based routines. The AI will format your routines into the exact JSON format required by Workoutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy this prompt and send it to ChatGPT, Claude, or Gemini along with your text-based routines. The AI will format your routines into the exact JSON format required by Workoutes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia estas instrucciones y envíalas a ChatGPT, Claude o Gemini junto con tus rutinas en texto. La IA las convertirá al formato JSON que necesita Workoutes."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Core": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona media"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Couldn't activate the Apple Watch connection. Try starting training again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't activate the Apple Watch connection. Try starting training again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo activar la conexión con el Apple Watch. Intenta iniciar el entrenamiento de nuevo."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Couldn't recover the workout: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't recover the workout: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo recuperar el entrenamiento: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Couldn't restore the exercise session: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't restore the exercise session: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo restaurar la sesión de ejercicio: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Couldn't restore training: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't restore training: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo restaurar el entrenamiento: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Couldn't save the exercise session: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save the exercise session: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar la sesión de ejercicio: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Couldn't save training: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save training: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar el entrenamiento: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Create New Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create New Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crear ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Create and Add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create and Add"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crear y añadir"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Current Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento actual"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Customize Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Customize Background"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizar fondo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Daily Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento diario"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Delete \"%@\"? Your exercises will be kept.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete \"%@\"? Your exercises will be kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar «%@»? Se conservarán tus ejercicios."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Delete Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo eliminar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Delete Permanently": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Permanently"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar permanentemente"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Delete Tag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar etiqueta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Delete Tag?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Tag?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar etiqueta?"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Deselect All Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deselect All Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deseleccionar todas las etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Details (Optional)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details (Optional)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles (opcional)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Disables bump": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disables bump"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactiva la subida de carga"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Duration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duration"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duración"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Each item must have a nonempty, unique ID.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each item must have a nonempty, unique ID."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada elemento debe tener un ID único y no vacío."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Edit Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Edit Tag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar etiqueta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Edit Training Structure": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Training Structure"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar plan de entrenamiento"
+          }
+        }
+      }
+    },
+    "Effort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effort"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esfuerzo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Effort: %lld/10": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effort: %lld/10"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esfuerzo: %lld/10"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Electric Rush": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Electric Rush"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impulso eléctrico"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Enables bump": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enables bump"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa la subida de carga"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "End of Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End of Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fin del entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Every effort counts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every effort counts."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada esfuerzo cuenta."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise %lld / %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise %lld / %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio %lld / %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise %lld of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio %lld de %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise Block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise Block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloque de ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historial de ejercicios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise ID"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID del ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise Session": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise Session"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesión de ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise completed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise completed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio completado"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise deleted"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio eliminado"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise details weren't saved for this entry.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise details weren't saved for this entry."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se guardaron los detalles del ejercicio para este registro."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise is running, but the Live Activity couldn't start: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise is running, but the Live Activity couldn't start: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El ejercicio está activo, pero no se pudo iniciar la actividad en directo: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise not started": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise not started"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio sin iniciar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise queued": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise queued"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio en espera"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercise status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise status"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado del ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Exercises": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Export Data (JSON)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Data (JSON)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar datos (JSON)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Export Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo exportar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Filter and Manage Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter and Manage Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar y gestionar etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Filter by Tag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar por etiqueta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizar"
+          }
+        }
+      }
+    },
+    "Finish Preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Preview"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizar vista previa"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish Series": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Series"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminar serie"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizar entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish Without an Effort Rating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Without an Effort Rating"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizar sin valorar el esfuerzo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish and Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish and Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizar y guardar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish and Save to Health": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish and Save to Health"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizar y guardar en Salud"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish saving the previous workout before starting another one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish saving the previous workout before starting another one."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termina de guardar el entrenamiento anterior antes de iniciar otro."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Finish this series or skip the current rest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish this series or skip the current rest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminar esta serie u omitir el descanso actual"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Forearms": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forearms"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antebrazos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Full Body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Body"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuerpo completo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "General": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Glutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glutes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glúteos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Gradient": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradient"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Degradado"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Hamstrings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hamstrings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isquiotibiales"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Health Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en Salud"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Health is unavailable on this device.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health is unavailable on this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salud no está disponible en este dispositivo."
+          }
+        }
+      }
+    },
+    "Health permission hasn't been completed. Open Workoutes on your iPhone, start training, and allow it to save Workouts in the Health permission screen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health permission hasn't been completed. Open Workoutes on your iPhone, start training, and allow it to save Workouts in the Health permission screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falta completar el permiso de Salud. Abre Workoutes en el iPhone, inicia el entrenamiento y permite guardar entrenamientos en la pantalla de permisos de Salud."
+          }
+        }
+      }
+    },
+    "Health save needs attention: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health save needs attention: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El guardado en Salud requiere atención: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Health save pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health save pending"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en Salud pendiente"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Heart Rate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart Rate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frecuencia cardíaca"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Heart Rate Recovery (1 min)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart Rate Recovery (1 min)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recuperación cardíaca (1 min)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Heart Rate Zones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart Rate Zones"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zonas de frecuencia cardíaca"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "History refers to an unknown exercise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History refers to an unknown exercise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El historial hace referencia a un ejercicio desconocido."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "How Hard Was Your Training?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How Hard Was Your Training?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué esfuerzo supuso tu entrenamiento?"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "How hard was it?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How hard was it?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Cuánto esfuerzo supuso?"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Icon Update Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icon Update Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo actualizar el icono"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "If Health cannot be saved, you can keep this record in Workoutes and start another session.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If Health cannot be saved, you can keep this record in Workoutes and start another session."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si no puedes guardar en Salud, puedes conservar el registro en Workoutes e iniciar otra sesión."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Imperial (lb)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imperial (lb)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imperial (lb)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Import Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar datos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Import Data (JSON)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Data (JSON)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar datos (JSON)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Import Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo importar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Import Successful": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Successful"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importación completada"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Include History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluir historial"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Include exercise history?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include exercise history?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Incluir el historial de ejercicios?"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Incomplete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incomplete"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incompleto"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Invalid exercise values or workout/tag references.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid exercise values or workout/tag references."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valores de ejercicio o referencias a rutinas o etiquetas no válidos."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Invalid historical exercise details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid historical exercise details."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles históricos del ejercicio no válidos."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "JSON Format Requirements": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JSON Format Requirements"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requisitos del formato JSON"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Keep Local Record and Continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Local Record and Continue"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conservar registro local y continuar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Kept in Workoutes only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kept in Workoutes only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado solo en Workoutes"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Last Sync": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Sync"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última sincronización"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Legs": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piernas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Lower Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower Back"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona lumbar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Lower Body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower Body"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tren inferior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Maximum Heart Rate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximum Heart Rate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frecuencia cardíaca máxima"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Metric (kg)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metric (kg)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Métrico (kg)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Midnight Gold": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Midnight Gold"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oro de medianoche"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Move Wheel to Bottom Edge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Wheel to Bottom Edge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover rueda al borde inferior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Move Wheel to Left Edge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Wheel to Left Edge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover rueda al borde izquierdo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Move Wheel to Right Edge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Wheel to Right Edge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover rueda al borde derecho"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Move Wheel to Top Edge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Wheel to Top Edge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover rueda al borde superior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Muscle Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muscle Icon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icono muscular"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Neck": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neck"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuello"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "New Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuevo ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "New Tag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nueva etiqueta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "New Workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nueva rutina"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Next Week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Week"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semana siguiente"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Next · %lld / %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next · %lld / %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiente · %lld / %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Active Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Active Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin ejercicio activo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Exercise History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Exercise History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin historial de ejercicios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Exercises": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin ejercicios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Historical Snapshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Historical Snapshot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin detalles guardados"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Icon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin icono"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Tag Selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Tag Selected"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin etiqueta seleccionada"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No completed exercises": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No completed exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin ejercicios completados"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No exercises with this tag.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No exercises with this tag."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ejercicios con esta etiqueta."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No paired Apple Watch is available for this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No paired Apple Watch is available for this iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ningún Apple Watch enlazado disponible para este iPhone."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "No saved Health workout or recoverable builder was found. Exercise records are preserved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No saved Health workout or recoverable builder was found. Exercise records are preserved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontró un entrenamiento guardado en Salud ni una sesión recuperable. Se conservan los registros de ejercicios."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "None": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguno"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Not started": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not started"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin iniciar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "OK": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Obliques": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obliques"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oblicuos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "One rep at a time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One rep at a time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una repetición a la vez."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Open Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Open Workoutes on your paired Apple Watch simulator before starting a preview.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Workoutes on your paired Apple Watch simulator before starting a preview."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Workoutes en el simulador de Apple Watch enlazado antes de iniciar una vista previa."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Open duration · %@ between series": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open duration · %@ between series"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duración libre · %@ entre series"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Opens the repetitions selector": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the repetitions selector"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre el selector de repeticiones"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Opens the sets selector": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the sets selector"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre el selector de series"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Opens the weight selector": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the weight selector"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre el selector de peso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Pause": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Pause Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausar entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Paused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En pausa"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Please convert the provided workout exercises into a JSON format strictly following this structure:\n\n{\n  \"workouts\": [{ \"id\": \"uuid\", \"name\": \"string\" }],\n  \"tags\": [{ \"id\": \"uuid\", \"name\": \"string\", \"colorHex\": \"string\" }],\n  \"exercises\": [\n    {\n      \"id\": \"uuid\",\n      \"title\": \"string\",\n      \"subtitle\": \"string\",\n      \"details\": \"string\",\n      \"numberOfSets\": 0,\n      \"reps\": 0,\n      \"increaseLoadNextTime\": false,\n      \"isDone\": false,\n      \"weight\": 0.0,\n      \"workouts\": [{ \"id\": \"uuid\" }],\n      \"tags\": [{ \"id\": \"uuid\" }]\n    }\n  ]\n}\n\nEnsure all objects are linked by matching 'id's. Use valid UUIDs for all 'id' fields. Output ONLY valid JSON without markdown wrapping if possible.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please convert the provided workout exercises into a JSON format strictly following this structure:\n\n{\n  \"workouts\": [{ \"id\": \"uuid\", \"name\": \"string\" }],\n  \"tags\": [{ \"id\": \"uuid\", \"name\": \"string\", \"colorHex\": \"string\" }],\n  \"exercises\": [\n    {\n      \"id\": \"uuid\",\n      \"title\": \"string\",\n      \"subtitle\": \"string\",\n      \"details\": \"string\",\n      \"numberOfSets\": 0,\n      \"reps\": 0,\n      \"increaseLoadNextTime\": false,\n      \"isDone\": false,\n      \"weight\": 0.0,\n      \"workouts\": [{ \"id\": \"uuid\" }],\n      \"tags\": [{ \"id\": \"uuid\" }]\n    }\n  ]\n}\n\nEnsure all objects are linked by matching 'id's. Use valid UUIDs for all 'id' fields. Output ONLY valid JSON without markdown wrapping if possible."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convierte los ejercicios proporcionados a JSON siguiendo estrictamente esta estructura:\n\n{\n  \"workouts\": [{ \"id\": \"uuid\", \"name\": \"string\" }],\n  \"tags\": [{ \"id\": \"uuid\", \"name\": \"string\", \"colorHex\": \"string\" }],\n  \"exercises\": [\n    {\n      \"id\": \"uuid\",\n      \"title\": \"string\",\n      \"subtitle\": \"string\",\n      \"details\": \"string\",\n      \"numberOfSets\": 0,\n      \"reps\": 0,\n      \"increaseLoadNextTime\": false,\n      \"isDone\": false,\n      \"weight\": 0.0,\n      \"workouts\": [{ \"id\": \"uuid\" }],\n      \"tags\": [{ \"id\": \"uuid\" }]\n    }\n  ]\n}\n\nRelaciona todos los objetos mediante sus 'id'. Usa UUID válidos en todos los campos 'id'. Devuelve SOLO JSON válido, sin bloques de Markdown si es posible."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Please wait while the workout is being saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please wait while the workout is being saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espera mientras se guarda el entrenamiento."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Preview results stay in Workoutes. Nothing is saved to Apple Health.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview results stay in Workoutes. Nothing is saved to Apple Health."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los resultados de la vista previa quedan en Workoutes. No se guarda nada en Salud de Apple."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Previous Block": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous Block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloque anterior"
+          }
+        }
+      }
+    },
+    "Previous Week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous Week"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semana anterior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Progress starts with movement.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progress starts with movement."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El progreso empieza al moverte."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Prompt Copied!": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prompt Copied!"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¡Instrucciones copiadas!"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Quadriceps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quadriceps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuádriceps"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Queue this exercise for the next available exercise block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queue this exercise for the next available exercise block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poner este ejercicio en espera para el siguiente bloque disponible"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Queued for next exercise block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queued for next exercise block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En espera para el siguiente bloque"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Queued · %lld series": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queued · %lld series"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En espera · %lld series"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Queued · Exercise %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queued · Exercise %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En espera · Ejercicio %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Recovery: %lld bpm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recovery: %lld bpm"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recuperación: %lld lpm"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Reimporting a file updates catalog items by ID without creating duplicates. Exercise history is imported automatically when included.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reimporting a file updates catalog items by ID without creating duplicates. Exercise history is imported automatically when included."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al volver a importar un archivo, se actualizan los elementos por su ID sin duplicarlos. El historial se importa automáticamente si está incluido."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Remove Queued Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Queued Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar ejercicio en espera"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Remove color %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove color %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar color %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Remove from Workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de la rutina"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Remove this exercise from the queue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove this exercise from the queue"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar este ejercicio de la cola"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Repetitions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repetitions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeticiones"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Reps: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reps: %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeticiones: %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Reset Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Background"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restablecer fondo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Rest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descanso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Rest Block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest Block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloque de descanso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Rest between series": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest between series"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descanso entre series"
+          }
+        }
+      }
+    },
+    "Rest · Next Series %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest · Next Series %lld of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descanso · Siguiente serie %lld de %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Resume": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Resume Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Retry Health Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry Health Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar guardado en Salud"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Retry on Apple Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry on Apple Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar en el Apple Watch"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Rotate to select a tag. Drag the center to move the wheel. Manage tags in the toolbar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotate to select a tag. Drag the center to move the wheel. Manage tags in the toolbar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gira para seleccionar una etiqueta. Arrastra el centro para mover la rueda. Gestiona las etiquetas en la barra de herramientas."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Save Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Saved to Apple Health": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved to Apple Health"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en Salud de Apple"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Saved to Health": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved to Health"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en Salud"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Saving background…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving background…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardando fondo…"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Saving to Health…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving to Health…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardando en Salud…"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Select JSON File": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select JSON File"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionar archivo JSON"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Select on iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select on iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionar en el iPhone"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Select the active exercise from your exercise list.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select the active exercise from your exercise list."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecciona el ejercicio activo en tu lista de ejercicios."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionado"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Series %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series %lld of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serie %lld de %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Session ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session ID"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID de la sesión"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Sets": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Sets: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets: %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series: %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Shoulders": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shoulders"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hombros"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Show up for yourself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show up for yourself."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hazlo por ti."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Shows the saved exercise details": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows the saved exercise details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra los detalles guardados del ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Simulator Preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulator Preview"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa del simulador"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Simulator Preview\nNo Health recording": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulator Preview\nNo Health recording"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa del simulador\nSin registro en Salud"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Simulator Preview · No Health recording": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulator Preview · No Health recording"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa del simulador · Sin registro en Salud"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Skip Rating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip Rating"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir valoración"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Skip Rest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip Rest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir descanso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Small steps. Stronger you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small steps. Stronger you."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pequeños pasos. Más fuerza."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Soft Gradient": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft Gradient"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Degradado suave"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Start Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Start Training on Apple Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Training on Apple Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar entrenamiento en el Apple Watch"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Start this exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start this exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar este ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Start wasn't confirmed. Open Workoutes on your watch and check Health permissions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start wasn't confirmed. Open Workoutes on your watch and check Health permissions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se confirmó el inicio. Abre Workoutes en el reloj y revisa los permisos de Salud."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Starting Load": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting Load"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carga inicial"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Starting on Apple Watch…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting on Apple Watch…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando en el Apple Watch…"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Stop active exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop active exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detener ejercicio activo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Stop: completes after more than 10 seconds, otherwise cancels": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop: completes after more than 10 seconds, otherwise cancels"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detener: se completa después de más de 10 segundos; antes, se cancela"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Structure": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Structure"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estructura"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Subtitle (Optional)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitle (Optional)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtítulo (opcional)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summary"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumen"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Sunset Pop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunset Pop"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atardecer vibrante"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tag": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta"
+          }
+        }
+      }
+    },
+    "Tag Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag Details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles de la etiqueta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tag Distribution": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag Distribution"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distribución de etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tag appearances": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag appearances"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apariciones de etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tag: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Take Photo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take Photo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomar foto"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Targets": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Targets"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objetivos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The default gradient follows your theme. Editing these colors customizes only this screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The default gradient follows your theme. Editing these colors customizes only this screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El degradado predeterminado sigue tu tema. Al editar estos colores solo se personaliza esta pantalla."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The gradient follows the colors of the selected tags. Without tags, it uses the default gradient.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The gradient follows the colors of the selected tags. Without tags, it uses the default gradient."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El degradado sigue los colores de las etiquetas seleccionadas. Sin etiquetas, se usa el degradado predeterminado."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The live connection to Apple Watch is unavailable. Keep both devices nearby and tap Refresh to reconnect. Any workout already running continues on the watch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The live connection to Apple Watch is unavailable. Keep both devices nearby and tap Refresh to reconnect. Any workout already running continues on the watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La conexión en directo con el Apple Watch no está disponible. Mantén ambos dispositivos cerca y toca Actualizar para reconectar. El entrenamiento en curso continúa en el reloj."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The photo applies only to this screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The photo applies only to this screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La foto solo se aplica a esta pantalla."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The photo is saved on this device. Camera capture is unavailable on this device or simulator.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The photo is saved on this device. Camera capture is unavailable on this device or simulator."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La foto se guarda en este dispositivo. La cámara no está disponible en este dispositivo o simulador."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The workout has advanced. Check the current stage and try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The workout has advanced. Check the current stage and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El entrenamiento ha avanzado. Revisa la etapa actual e inténtalo de nuevo."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The workout was interrupted and its HealthKit session could not be recovered. Your exercise records are preserved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The workout was interrupted and its HealthKit session could not be recovered. Your exercise records are preserved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El entrenamiento se interrumpió y no se pudo recuperar su sesión de HealthKit. Se conservan tus registros de ejercicios."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Theme": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "There are no upcoming empty exercise blocks in this training.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no upcoming empty exercise blocks in this training."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No quedan bloques de ejercicio vacíos en este entrenamiento."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "There is no active training session.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no active training session."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna sesión de entrenamiento activa."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This Week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Week"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta semana"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This action isn't available in the current training stage. Resume training if it is paused.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This action isn't available in the current training stage. Resume training if it is paused."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta acción no está disponible en la etapa actual. Reanuda el entrenamiento si está en pausa."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This exercise needs a name, 1–20 sets, 1–100 repetitions and a valid weight.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exercise needs a name, 1–20 sets, 1–100 repetitions and a valid weight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este ejercicio necesita un nombre, entre 1 y 20 series, entre 1 y 100 repeticiones y un peso válido."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This image couldn't be loaded. Please choose another photo.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This image couldn't be loaded. Please choose another photo."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar esta imagen. Elige otra foto."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This rating contributes to Apple's training load.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This rating contributes to Apple's training load."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta valoración contribuye a la carga de entrenamiento de Apple."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tibialis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tibialis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tibiales"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Title"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Título"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para importar rutinas, el archivo JSON debe relacionar rutinas, etiquetas y ejercicios mediante identificadores únicos."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Total": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Total Calories": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total Calories"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calorías totales"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Train with Apple Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Train with Apple Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenar con Apple Watch"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Training": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Training Complete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training Complete"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento completado"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Training History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historial de entrenamientos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Training Structure": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training Structure"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan de entrenamiento"
+          }
+        }
+      }
+    },
+    "Training Structure and History": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training Structure and History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan e historial"
+          }
+        }
+      }
+    },
+    "Training Summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training Summary"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumen del entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Training in Progress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Training in Progress"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento en curso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Trapezius": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trapezius"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trapecios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Triceps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triceps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tríceps"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Ultravolt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ultravolt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ultravolt"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No disponible"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Uncheck All Exercises": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uncheck All Exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desmarcar todos los ejercicios"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Undo Last Transition": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo Last Transition"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deshacer último cambio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Units": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Units"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unidades"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Unmark this exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unmark this exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desmarcar este ejercicio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Up Next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up Next"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A continuación"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Up Next · Exercise %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up Next · Exercise %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A continuación · Ejercicio %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Update Active Exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Active Exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar ejercicio activo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Upper Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper Back"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espalda alta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Upper Body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper Body"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tren superior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Use this exercise in the current training block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this exercise in the current training block"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar este ejercicio en el bloque actual"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Violet Aura": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Violet Aura"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aura violeta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Wallpaper": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wallpaper"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagen de fondo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Watch Controls Unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch Controls Unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controles del reloj no disponibles"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Week Summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Week Summary"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumen semanal"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Weekly tag distribution": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly tag distribution"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distribución semanal de etiquetas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Weight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Weight Unit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight Unit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unidad de peso"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "When disabled, finishing training skips the effort question and saves no effort rating in Workoutes or Apple Health. Applies to new sessions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When disabled, finishing training skips the effort question and saves no effort rating in Workoutes or Apple Health. Applies to new sessions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si se desactiva, al finalizar no se solicita ni guarda una valoración del esfuerzo en Workoutes o Salud de Apple. Se aplica a las sesiones nuevas."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Workout Background": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout Background"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fondo de la rutina"
+          }
+        }
+      }
+    },
+    "Workout Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout Details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles de la rutina"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Workout Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout Name"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre de la rutina"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Workout saved. Allow effort ratings in Health to save your training effort.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout saved. Allow effort ratings in Health to save your training effort."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento guardado. Permite las valoraciones de esfuerzo en Salud para guardar tu esfuerzo."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Workoutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Workoutes can't save workouts to Health. On your iPhone, open Health → your profile → Apps → Workoutes and enable Workouts under Allow Workoutes to Write. Then try starting again.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes can't save workouts to Health. On your iPhone, open Health → your profile → Apps → Workoutes and enable Workouts under Allow Workoutes to Write. Then try starting again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes no puede guardar entrenamientos en Salud. En el iPhone, abre Salud → tu perfil → Apps → Workoutes y permite escribir entrenamientos. Después, intenta iniciar de nuevo."
+          }
+        }
+      }
+    },
+    "Workoutes isn't installed on the Apple Watch currently paired with this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes isn't installed on the Apple Watch currently paired with this iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes no está instalado en el Apple Watch enlazado actualmente con este iPhone."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Workouts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workouts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rutinas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your data has been successfully imported.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your data has been successfully imported."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus datos se han importado correctamente."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your pace. Your progress.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your pace. Your progress."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu ritmo. Tu progreso."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your theme was applied, but its app icon couldn't be changed. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your theme was applied, but its app icon couldn't be changed. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se aplicó el tema, pero no se pudo cambiar el icono de la app. %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Zone %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona %lld"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "kilograms": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kilograms"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kilogramos"
+          }
+        }
+      }
+    },
+    "pounds": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pounds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "libras"
+          }
+        }
+      }
+    },
+    "·": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "·"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "·"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "—": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "—"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "—"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "— %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    }
+  },
+  "version": "1.0"
+}

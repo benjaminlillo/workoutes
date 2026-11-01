@@ -10,9 +10,9 @@ enum TrainingStartReadiness {
 
         var errorDescription: String? {
             switch self {
-            case .activationTimedOut: "Couldn't activate the Apple Watch connection. Try starting training again."
-            case .unpaired: "No paired Apple Watch is available for this iPhone."
-            case .appNotInstalled: "Workoutes isn't installed on the Apple Watch currently paired with this iPhone."
+            case .activationTimedOut: String(localized: "Couldn't activate the Apple Watch connection. Try starting training again.")
+            case .unpaired: String(localized: "No paired Apple Watch is available for this iPhone.")
+            case .appNotInstalled: String(localized: "Workoutes isn't installed on the Apple Watch currently paired with this iPhone.")
             }
         }
     }

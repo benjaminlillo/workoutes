@@ -8,8 +8,8 @@ enum ExerciseCountMetric: String, Identifiable, CaseIterable {
 
     var title: String {
         switch self {
-        case .sets: "Sets"
-        case .repetitions: "Repetitions"
+        case .sets: String(localized: "Sets")
+        case .repetitions: String(localized: "Repetitions")
         }
     }
 
@@ -29,8 +29,8 @@ enum ExerciseCountMetric: String, Identifiable, CaseIterable {
 
     func label(for value: Int) -> String {
         switch self {
-        case .sets: "\(value) sets"
-        case .repetitions: "\(value) reps"
+        case .sets: String(localized: "\(value) sets")
+        case .repetitions: String(localized: "\(value) reps")
         }
     }
 }
@@ -66,7 +66,7 @@ struct ExerciseCountSheet: View {
                 }
                 .pickerStyle(.wheel)
                 .frame(height: 216)
-                .accessibilityIdentifier("exercise\(metric.title)Picker")
+                .accessibilityIdentifier(metric == .sets ? "exerciseSetsPicker" : "exerciseRepetitionsPicker")
                 .onChange(of: selectedValue) { _, value in
                     exercise[keyPath: metric.keyPath] = value
                 }

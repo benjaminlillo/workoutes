@@ -6,8 +6,8 @@ enum WeightUnit: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var symbol: String { self == .metric ? "kg" : "lb" }
-    var name: String { self == .metric ? "Metric (kg)" : "Imperial (lb)" }
-    var accessibilityName: String { self == .metric ? "kilograms" : "pounds" }
+    var name: String { self == .metric ? String(localized: "Metric (kg)") : String(localized: "Imperial (lb)") }
+    var accessibilityName: String { self == .metric ? String(localized: "kilograms") : String(localized: "pounds") }
     var pickerStep: Double { self == .metric ? 0.5 : 1 }
 
     // Stored exercise weights remain in kilograms when the display unit changes.

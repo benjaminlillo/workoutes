@@ -118,12 +118,12 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
     var seriesNumber: Int { min((currentResult?.sets.count ?? 0) + 1, currentResult?.exercise.sets ?? 1) }
     var phaseTitle: String {
         switch progress.stage {
-        case .choosingExercise: "Choose an Exercise"
-        case .series: "Series \(seriesNumber) of \(currentResult?.exercise.sets ?? 0)"
-        case .seriesRest: "Rest · Next Series \(seriesNumber) of \(currentResult?.exercise.sets ?? 0)"
-        case .blockRest: "Rest"
-        case .readyToFinish: "All Blocks Complete"
-        case .finished: "Training Complete"
+        case .choosingExercise: String(localized: "Choose an Exercise")
+        case .series: String(localized: "Series \(seriesNumber) of \(currentResult?.exercise.sets ?? 0)")
+        case .seriesRest: String(localized: "Rest · Next Series \(seriesNumber) of \(currentResult?.exercise.sets ?? 0)")
+        case .blockRest: String(localized: "Rest")
+        case .readyToFinish: String(localized: "All Blocks Complete")
+        case .finished: String(localized: "Training Complete")
         }
     }
     func elapsed(at date: Date) -> TimeInterval {

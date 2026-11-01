@@ -47,7 +47,7 @@ struct BackgroundCustomizationSheet: View {
                 Section {
                     Picker("Background Type", selection: $mode) {
                         ForEach(BackgroundMode.allCases, id: \.self) { option in
-                            Text(option.rawValue).tag(option)
+                            Text(LocalizedStringKey(option.rawValue)).tag(option)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -271,7 +271,7 @@ struct BackgroundCustomizationSheet: View {
             showingCamera = true
         } else {
             showCameraSettings = AVCaptureDevice.authorizationStatus(for: .video) == .denied
-            errorMessage = "Camera access is unavailable. You can choose a photo from your library or allow camera access in Settings."
+            errorMessage = String(localized: "Camera access is unavailable. You can choose a photo from your library or allow camera access in Settings.")
         }
     }
 }

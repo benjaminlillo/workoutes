@@ -72,13 +72,13 @@ enum ThemeColor: String, CaseIterable, Identifiable {
     
     var name: String {
         switch self {
-        case .indigo: "Violet Aura"
-        case .electricRush: "Electric Rush"
-        case .sunsetPop: "Sunset Pop"
-        case .ultravolt: "Ultravolt"
-        case .cobaltHeat: "Cobalt Heat"
-        case .cherryIce: "Cherry Ice"
-        case .midnightGold: "Midnight Gold"
+        case .indigo: String(localized: "Violet Aura")
+        case .electricRush: String(localized: "Electric Rush")
+        case .sunsetPop: String(localized: "Sunset Pop")
+        case .ultravolt: String(localized: "Ultravolt")
+        case .cobaltHeat: String(localized: "Cobalt Heat")
+        case .cherryIce: String(localized: "Cherry Ice")
+        case .midnightGold: String(localized: "Midnight Gold")
         }
     }
 

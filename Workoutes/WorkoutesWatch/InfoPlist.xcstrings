@@ -1,0 +1,42 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSHealthShareUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes shows your heart rate, calories, heart rate zones and recovery during and after strength training."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes muestra tu frecuencia cardíaca, calorías, zonas de frecuencia cardíaca y recuperación durante y después del entrenamiento de fuerza."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "NSHealthUpdateUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes saves your strength workouts, calorie data and effort ratings to Apple Health."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workoutes guarda tus entrenamientos de fuerza, calorías y valoraciones de esfuerzo en Salud de Apple."
+          }
+        }
+      },
+      "generatesSymbol": false
+    }
+  },
+  "version": "1.0"
+}

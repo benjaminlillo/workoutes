@@ -70,7 +70,7 @@ struct ExerciseCardHeader<StatusControl: View>: View {
                             .frame(width: 7, height: 7)
                     }
                 }
-                .accessibilityLabel(tagNames.indices.contains(index) ? "Tag: \(tagNames[index])" : icon?.name ?? "Tag")
+                .accessibilityLabel(tagNames.indices.contains(index) ? String(localized: "Tag: \(tagNames[index])") : icon?.name ?? String(localized: "Tag"))
             }
         }
         .fixedSize()

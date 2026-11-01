@@ -121,7 +121,7 @@ enum DataBackup {
     private static func validate(_ payload: ExportDataDTO, workoutIDs: Set<String>, tagIDs: Set<String>, exerciseIDs: Set<String>) throws {
         for ids in [payload.workouts.map(\.id), payload.tags.map(\.id), payload.exercises.map(\.id), (payload.history ?? []).map(\.id)] {
             guard ids.allSatisfy({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }), Set(ids).count == ids.count else {
-                throw ImportError.invalid("Each item must have a nonempty, unique ID.")
+                throw ImportError.invalid(String(localized: "Each item must have a nonempty, unique ID."))
             }
         }
         let allWorkouts = workoutIDs.union(payload.workouts.map(\.id))
@@ -132,15 +132,15 @@ enum DataBackup {
                   dto.workouts.allSatisfy({ allWorkouts.contains($0.id) }), dto.tags.allSatisfy({ allTags.contains($0.id) }),
                   Set(dto.workouts.map(\.id)).count == dto.workouts.count,
                   Set(dto.tags.map(\.id)).count == dto.tags.count else {
-                throw ImportError.invalid("Invalid exercise values or workout/tag references.")
+                throw ImportError.invalid(String(localized: "Invalid exercise values or workout/tag references."))
             }
         }
         for dto in payload.history ?? [] {
             guard dto.exerciseID.map({ allExercises.contains($0) }) ?? true else {
-                throw ImportError.invalid("History refers to an unknown exercise.")
+                throw ImportError.invalid(String(localized: "History refers to an unknown exercise."))
             }
             guard dto.snapshot?.isValid ?? true else {
-                throw ImportError.invalid("Invalid historical exercise details.")
+                throw ImportError.invalid(String(localized: "Invalid historical exercise details."))
             }
         }
     }

@@ -11,30 +11,30 @@ nonisolated enum MuscleIcon: String, CaseIterable, Identifiable {
 
     var name: String {
         switch self {
-        case .fullBody: "Full Body"
-        case .upperBody: "Upper Body"
-        case .lowerBody: "Legs"
-        case .arms: "Arms"
-        case .core: "Core"
-        case .chest: "Chest"
-        case .back: "Back"
-        case .shoulders: "Shoulders"
-        case .biceps: "Biceps"
-        case .triceps: "Triceps"
-        case .forearms: "Forearms"
-        case .trapezius: "Trapezius"
-        case .upperBack: "Upper Back"
-        case .lowerBack: "Lower Back"
-        case .abdominals: "Abdominals"
-        case .obliques: "Obliques"
-        case .neck: "Neck"
-        case .glutes: "Glutes"
-        case .quadriceps: "Quadriceps"
-        case .hamstrings: "Hamstrings"
-        case .calves: "Calves"
-        case .adductors: "Adductors"
-        case .abductors: "Abductors"
-        case .tibialis: "Tibialis"
+        case .fullBody: String(localized: "Full Body")
+        case .upperBody: String(localized: "Upper Body")
+        case .lowerBody: String(localized: "Legs")
+        case .arms: String(localized: "Arms")
+        case .core: String(localized: "Core")
+        case .chest: String(localized: "Chest")
+        case .back: String(localized: "Back")
+        case .shoulders: String(localized: "Shoulders")
+        case .biceps: String(localized: "Biceps")
+        case .triceps: String(localized: "Triceps")
+        case .forearms: String(localized: "Forearms")
+        case .trapezius: String(localized: "Trapezius")
+        case .upperBack: String(localized: "Upper Back")
+        case .lowerBack: String(localized: "Lower Back")
+        case .abdominals: String(localized: "Abdominals")
+        case .obliques: String(localized: "Obliques")
+        case .neck: String(localized: "Neck")
+        case .glutes: String(localized: "Glutes")
+        case .quadriceps: String(localized: "Quadriceps")
+        case .hamstrings: String(localized: "Hamstrings")
+        case .calves: String(localized: "Calves")
+        case .adductors: String(localized: "Adductors")
+        case .abductors: String(localized: "Abductors")
+        case .tibialis: String(localized: "Tibialis")
         }
     }
 

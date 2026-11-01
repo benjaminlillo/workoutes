@@ -35,7 +35,7 @@ struct TagWheelMenu: UIViewRepresentable {
                 button.configuration?.baseForegroundColor = tint
             }
         }
-        button.accessibilityValue = tags.first { $0.persistentModelID == selection }?.name ?? "No Tag Selected"
+        button.accessibilityValue = tags.first { $0.persistentModelID == selection }?.name ?? String(localized: "No Tag Selected")
 
         updateMenu(button, coordinator: context.coordinator, theme: theme,
                    scheme: colorScheme, scale: displayScale)
@@ -103,19 +103,19 @@ struct TagWheelMenu: UIViewRepresentable {
                     if let tag = $0.tag(id) { $0.onChoose?(tag) }
                 }
             }
-            children.append(UIMenu(title: "Filter by Tag", options: .displayInline, children: options))
-            let deselect = action("Deselect All Tags", image: menuImage("xmark.circle"),
+            children.append(UIMenu(title: String(localized: "Filter by Tag"), options: .displayInline, children: options))
+            let deselect = action(String(localized: "Deselect All Tags"), image: menuImage("xmark.circle"),
                                   attributes: selection == nil ? .disabled : []) { $0.onDeselect?() }
             children.append(UIMenu(options: .displayInline, children: [deselect]))
         }
 
-        var management: [UIMenuElement] = [action("Add Tag", image: menuImage("plus"), afterMenuDismissal: true) { $0.onAdd?() }]
+        var management: [UIMenuElement] = [action(String(localized: "Add Tag"), image: menuImage("plus"), afterMenuDismissal: true) { $0.onAdd?() }]
         if !tags.isEmpty {
-            management.append(UIMenu(title: "Edit Tag", image: menuImage("pencil"), children: tags.map { tag in
+            management.append(UIMenu(title: String(localized: "Edit Tag"), image: menuImage("pencil"), children: tags.map { tag in
                 let id = tag.persistentModelID
                 return action(tag.name, afterMenuDismissal: true) { if let tag = $0.tag(id) { $0.onEdit?(tag) } }
             }))
-            management.append(UIMenu(title: "Delete Tag", image: menuImage("trash"), children: tags.map { tag in
+            management.append(UIMenu(title: String(localized: "Delete Tag"), image: menuImage("trash"), children: tags.map { tag in
                 let id = tag.persistentModelID
                 return action(tag.name, attributes: .destructive, afterMenuDismissal: true) { if let tag = $0.tag(id) { $0.onDelete?(tag) } }
             }))
@@ -188,7 +188,7 @@ final class TagWheelMenuButton: UIButton {
         tintColor = .label
         showsMenuAsPrimaryAction = true
         preferredMenuElementOrder = .fixed
-        accessibilityLabel = "Filter and Manage Tags"
+        accessibilityLabel = String(localized: "Filter and Manage Tags")
         accessibilityIdentifier = "tag-management-menu"
     }
 

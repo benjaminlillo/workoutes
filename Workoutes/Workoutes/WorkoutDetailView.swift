@@ -74,7 +74,7 @@ struct WorkoutDetailView: View {
         }
         .sheet(isPresented: $showingBackgroundSheet) {
             if let background {
-                BackgroundCustomizationSheet(background: background, title: "Workout Background", tagColors: backgroundTagColors)
+                BackgroundCustomizationSheet(background: background, title: String(localized: "Workout Background"), tagColors: backgroundTagColors)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }

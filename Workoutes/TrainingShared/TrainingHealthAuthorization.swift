@@ -18,11 +18,11 @@ enum TrainingHealthAuthorization {
         var errorDescription: String? {
             switch self {
             case .unavailable:
-                "Health is unavailable on this device."
+                String(localized: "Health is unavailable on this device.")
             case .notDetermined:
-                "Health permission hasn't been completed. Open Workoutes on your iPhone, start training, and allow it to save Workouts in the Health permission screen."
+                String(localized: "Health permission hasn't been completed. Open Workoutes on your iPhone, start training, and allow it to save Workouts in the Health permission screen.")
             case .denied:
-                "Workoutes can't save workouts to Health. On your iPhone, open Health → your profile → Apps → Workoutes and enable Workouts under Allow Workoutes to Write. Then try starting again."
+                String(localized: "Workoutes can't save workouts to Health. On your iPhone, open Health → your profile → Apps → Workoutes and enable Workouts under Allow Workoutes to Write. Then try starting again.")
             }
         }
     }

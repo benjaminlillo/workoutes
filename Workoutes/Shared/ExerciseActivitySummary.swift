@@ -24,7 +24,7 @@ struct ExerciseActivitySummary: View {
                 ExerciseMetricView(
                     systemImage: "dumbbell.fill",
                     value: "\((state.displayedWeight ?? state.weight).formatted(.number.precision(.fractionLength(0...2)))) \(state.weightUnitSymbol ?? "kg")",
-                    label: "Weight"
+                    label: String(localized: "Weight")
                 )
                 .frame(maxWidth: .infinity, minHeight: 44)
 
@@ -32,8 +32,8 @@ struct ExerciseActivitySummary: View {
 
                 ExerciseMetricView(
                     systemImage: "square.stack.3d.up.fill",
-                    value: "\(state.numberOfSets) sets",
-                    label: "Sets"
+                    value: String(localized: "\(state.numberOfSets) sets"),
+                    label: String(localized: "Sets")
                 )
                 .frame(maxWidth: .infinity, minHeight: 44)
 
@@ -41,8 +41,8 @@ struct ExerciseActivitySummary: View {
 
                 ExerciseMetricView(
                     systemImage: "repeat",
-                    value: "\(state.reps) reps",
-                    label: "Repetitions"
+                    value: String(localized: "\(state.reps) reps"),
+                    label: String(localized: "Repetitions")
                 )
                 .frame(maxWidth: .infinity, minHeight: 44)
             }
@@ -70,7 +70,7 @@ struct ExerciseActivitySummary: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Stop active exercise")
-            .accessibilityValue(status.rawValue)
+            .accessibilityValue("Active")
         } else {
             ExerciseStatusSymbol(status: status, accentColor: accentColor)
                 .accessibilityElement(children: .ignore)

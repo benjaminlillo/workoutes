@@ -20,7 +20,7 @@ struct TrainingEntryView: View {
                 Image(systemName: "applewatch").font(.title2)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(controller.hasActiveSession ? "Training in Progress" : "Train with Apple Watch").font(.headline)
-                    Text(controller.hasActiveSession ? controller.run?.phaseTitle ?? "" : "Choose exercises as you go")
+                    Text(controller.hasActiveSession ? controller.run?.phaseTitle ?? "" : String(localized: "Choose exercises as you go"))
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -85,7 +85,7 @@ struct TrainingView: View {
                 }
             } else {
                 Section {
-                    Text(controller.plan.name).font(.headline)
+                    Text(controller.plan.localizedName).font(.headline)
                         .subtleFormRowShadow(.first)
                     #if targetEnvironment(simulator)
                     Label("Simulator Preview · No Health recording", systemImage: "testtube.2")
@@ -269,7 +269,7 @@ struct TrainingPlanEditor: View {
         NavigationStack {
             List {
                 Section {
-                    TextField("Name", text: $plan.name)
+                    TextField("Name", text: Binding(get: { plan.localizedName }, set: { plan.name = $0 }))
                         .subtleFormRowShadow()
                 }
                 Section {
@@ -287,7 +287,7 @@ struct TrainingPlanEditor: View {
                             Label(block.kind == .exercise ? "Exercise Block" : "Rest Block",
                                   systemImage: block.kind == .exercise ? "dumbbell" : "timer")
                             Stepper(value: $block.seconds, in: (block.kind == .exercise ? 0 : 15)...3_600, step: 15) {
-                                Text("\(block.kind == .exercise ? "Rest between series" : "Duration"): \(TrainingClock.label(TimeInterval(block.seconds)))")
+                                Text("\(block.kind == .exercise ? String(localized: "Rest between series") : String(localized: "Duration")): \(TrainingClock.label(TimeInterval(block.seconds)))")
                             }
                             Text(block.kind == .exercise ? "Choose the exercise during training. Its series, repetitions and weight come from your catalog."
                                  : "Automatically moves to the next block when the timer ends.")

@@ -100,8 +100,8 @@ final class ExerciseBackgroundStore {
         case invalidColors
         var errorDescription: String? {
             switch self {
-            case .invalidImage: "This image couldn't be loaded. Please choose another photo."
-            case .invalidColors: "Choose between one and three colors."
+            case .invalidImage: String(localized: "This image couldn't be loaded. Please choose another photo.")
+            case .invalidColors: String(localized: "Choose between one and three colors.")
             }
         }
     }

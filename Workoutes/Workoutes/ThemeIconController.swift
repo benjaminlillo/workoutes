@@ -40,7 +40,7 @@ final class ThemeIconController {
                 errorMessage = nil
             } catch {
                 if pendingTheme == nil {
-                    errorMessage = "Your theme was applied, but its app icon couldn't be changed. \(error.localizedDescription)"
+                    errorMessage = String(localized: "Your theme was applied, but its app icon couldn't be changed. \(error.localizedDescription)")
                 }
             }
         }
