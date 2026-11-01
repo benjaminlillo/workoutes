@@ -503,7 +503,7 @@ final class SummaryTests: XCTestCase {
         }
     }
 
-    func testFullTabIntegrationPreservesActiveExerciseTabAndRendersSummary() async throws {
+    func testFullTabIntegrationKeepsFourTabsDuringExerciseAndRendersSummary() async throws {
         let store = try container()
         let context = store.mainContext
         let item = exercise()
@@ -526,12 +526,12 @@ final class SummaryTests: XCTestCase {
             return root.children.compactMap { findTabs($0) }.first
         }
         for _ in 0..<100 {
-            if findTabs(root)?.tabs.count == 5 { break }
+            if findTabs(root)?.tabs.count == 4 { break }
             try await Task.sleep(for: .milliseconds(20))
         }
         let tabs = try XCTUnwrap(findTabs(root))
-        XCTAssertEqual(tabs.tabs.count, 5)
-        XCTAssertFalse(try XCTUnwrap(tabs.tabBar.items?.last).isEnabled)
+        XCTAssertEqual(tabs.tabs.count, 4)
+        XCTAssertTrue(tabs.tabs.allSatisfy { $0.isEnabled })
 
         func snapshot(_ name: String) throws {
             window.layoutIfNeeded()
@@ -557,7 +557,7 @@ final class SummaryTests: XCTestCase {
         tabs.selectedTab = tabs.tabs[0]
         try await Task.sleep(for: .milliseconds(500))
         XCTAssertTrue(tabs.selectedTab === tabs.tabs[0])
-        XCTAssertFalse(try XCTUnwrap(tabs.tabBar.items?.last).isEnabled)
+        XCTAssertTrue(tabs.tabs.allSatisfy { $0.isEnabled })
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<ExerciseCompletion>()), 1)
         XCTAssertTrue(item.isDone)
         try snapshot("summary-completed")

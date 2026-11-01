@@ -11,7 +11,7 @@ struct ResetCompletedExercisesButton: View {
                 }
             }
         } label: {
-            ExerciseToolbarLabel(title: "Uncheck All Exercises", systemImage: "arrow.counterclockwise")
+            ExerciseToolbarLabel(title: "Uncheck All Exercises", systemImage: "checkmark.arrow.trianglehead.counterclockwise")
         }
         .disabled(!exercises.contains(where: \.isDone))
         .accessibilityIdentifier("resetCompletedExercises")

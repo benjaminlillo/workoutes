@@ -3,9 +3,11 @@ import SwiftData
 
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Query(sort: \WorkoutExercise.title) private var allExercises: [WorkoutExercise]
     @Query(sort: \Tag.name) private var allTags: [Tag]
     
+    @Namespace private var toolbarGlass
     @State private var showingAddExerciseSheet = false
     @State private var showingAddTagSheet = false
     @State private var editingTag: Tag?
@@ -29,7 +31,50 @@ struct ExerciseListView: View {
         allTags.first { $0.persistentModelID == tagSelection.wrappedValue }?.name
             ?? String(localized: "All Exercises")
     }
+
+    private var activeExercise: WorkoutExercise? {
+        allExercises.first { !$0.isDeleted && exerciseActivity.isActive($0) }
+    }
     
+    /// Reserve the host's maximum width so UIKit doesn't jump its bar-item frame.
+    /// Only the inner capsule resizes; SwiftUI interpolates its native glass surface.
+    private var exerciseToolbarActions: some View {
+        GlassEffectContainer {
+            HStack(spacing: 0) {
+                if let activeExercise {
+                    Button {
+                        navigation.reveal(activeExercise)
+                    } label: {
+                        ExerciseToolbarLabel(title: "Show Active Exercise",
+                                             systemImage: "figure.strengthtraining.traditional")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityValue(activeExercise.title)
+                    .accessibilityIdentifier("showActiveExercise")
+                    .transition(.opacity.combined(with: .scale(scale: 0.85)))
+                }
+                ResetCompletedExercisesButton(exercises: allExercises)
+                    .buttonStyle(.plain)
+                    .tint(.primary)
+                TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue,
+                             onChoose: { tag in
+                                 let id = tag.persistentModelID
+                                 tagSelection.wrappedValue = tagSelection.wrappedValue == id ? nil : id
+                             }, onDeselect: { navigation.selectedTagIDs.removeAll() },
+                             onAdd: { showingAddTagSheet = true },
+                             onEdit: { editingTag = $0 },
+                             onDelete: { tagPendingDeletion = $0 })
+                    .frame(width: ExerciseToolbarStyle.targetSize, height: ExerciseToolbarStyle.targetSize)
+            }
+            .frame(width: ExerciseToolbarStyle.targetSize * (activeExercise == nil ? 2 : 3),
+                   height: ExerciseToolbarStyle.targetSize, alignment: .trailing)
+            .glassEffect(.regular, in: Capsule())
+            .glassEffectID("exercise-actions", in: toolbarGlass)
+            .animation(reduceMotion ? nil : .smooth(duration: 0.4), value: activeExercise != nil)
+            .frame(width: ExerciseToolbarStyle.targetSize * 3, alignment: .trailing)
+        }
+    }
+
     var filteredExercises: [WorkoutExercise] {
         let tagIDs = displayedTagIDs ?? navigation.selectedTagIDs
         if tagIDs.isEmpty {
@@ -124,23 +169,14 @@ struct ExerciseListView: View {
                     displayedTagIDs = nil
                 }
                 .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        ResetCompletedExercisesButton(exercises: allExercises)
-                            .tint(.primary)
-                        TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue,
-                                     onChoose: { tag in
-                                         let id = tag.persistentModelID
-                                         tagSelection.wrappedValue = tagSelection.wrappedValue == id ? nil : id
-                                     }, onDeselect: { navigation.selectedTagIDs.removeAll() },
-                                     onAdd: { showingAddTagSheet = true },
-                                     onEdit: { editingTag = $0 },
-                                     onDelete: { tagPendingDeletion = $0 })
-                            .frame(width: ExerciseToolbarStyle.targetSize, height: ExerciseToolbarStyle.targetSize)
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        exerciseToolbarActions
                     }
+                    .sharedBackgroundVisibility(.hidden)
                     ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: { showingAddExerciseSheet = true }) {
-                            ExerciseToolbarLabel(title: "Add Exercise", systemImage: "plus")
+                            Label("Add Exercise", systemImage: "plus")
                         }
                         .tint(.primary)
                     }

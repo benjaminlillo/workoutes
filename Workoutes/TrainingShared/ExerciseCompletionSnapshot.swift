@@ -6,6 +6,7 @@ nonisolated struct ExerciseCompletionSnapshot: Codable, Equatable, Sendable {
         var name: String
         var colorHex: String
         var iconName: String?
+        var paletteColorID: String? = nil
     }
 
     var title: String

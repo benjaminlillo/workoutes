@@ -182,8 +182,7 @@ final class TagWheelMenuButton: UIButton {
         var configuration = UIButton.Configuration.plain()
         configuration.contentInsets = .zero
         configuration.baseForegroundColor = .label
-        configuration.image = UIImage(systemName: "tag")
-        configuration.preferredSymbolConfigurationForImage = ExerciseToolbarStyle.symbolConfiguration
+        configuration.image = ExerciseToolbarStyle.symbol("tag")
         self.configuration = configuration
         tintColor = .label
         showsMenuAsPrimaryAction = true
@@ -198,7 +197,7 @@ final class TagWheelMenuButton: UIButton {
         guard symbolColor != color else { return }
         symbolColor = color
         // Preserve the selected-filter indicator when the navigation bar applies its own tint.
-        configuration?.image = UIImage(systemName: "tag", withConfiguration: ExerciseToolbarStyle.symbolConfiguration)?
+        configuration?.image = ExerciseToolbarStyle.symbol("tag")?
             .withTintColor(color, renderingMode: .alwaysOriginal)
     }
 

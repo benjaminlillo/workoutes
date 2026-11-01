@@ -64,7 +64,6 @@ struct SummaryCardSkeleton: View {
                         switch kind {
                         case .muscle:
                             VStack(spacing: 6) {
-                                MuscleBodyLabels()
                                 GeometryReader { diagram in
                                     ZStack {
                                         ForEach(MuscleBodySide.allCases, id: \.self) { side in
@@ -86,7 +85,6 @@ struct SummaryCardSkeleton: View {
                                 ForEach(0..<7) { index in
                                     let day = Calendar.current.date(byAdding: .day, value: index, to: week)!
                                     VStack(spacing: 8) {
-                                        bar(width: 16, height: captionHeight)
                                         VStack {
                                             Spacer(minLength: 0)
                                             RoundedRectangle(cornerRadius: 5)
@@ -145,8 +143,8 @@ struct SummaryCardSkeleton: View {
 
     private var idealHeight: CGFloat {
         switch kind {
-        case .muscle: 40 + titleHeight + 16 + captionHeight + 6 + 280
-        case .week: 40 + titleHeight + 20 + captionHeight * 2 + 16 + chartHeight
+        case .muscle: 40 + titleHeight + 16 + 280
+        case .week: 40 + titleHeight + 20 + captionHeight + 8 + chartHeight
         case .tags, .totals: dynamicTypeSize.isAccessibilitySize ? 380 : 180
         }
     }

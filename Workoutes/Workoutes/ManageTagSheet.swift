@@ -8,13 +8,19 @@ struct ManageTagSheet: View {
     var editingTag: Tag?
     
     @State private var name: String = ""
-    @State private var color: Color = .blue
+    @AppStorage("appAccentColor") private var themeRawValue = ThemeColor.indigo.rawValue
+    @State private var colorSelection: TagColorSelection = .suggested(.blue)
+    private var theme: ThemeColor { ThemeColor.resolve(themeRawValue) }
+    private var color: Color { Color(hex: colorSelection.hex(for: theme)) }
+    @State private var isColorExpanded = false
     @State private var selectedIcon: MuscleIcon?
 
     init(editingTag: Tag? = nil) {
         self.editingTag = editingTag
         _name = State(initialValue: editingTag?.name ?? "")
-        _color = State(initialValue: editingTag.map { Color(hex: $0.colorHex) } ?? .blue)
+        _colorSelection = State(initialValue: editingTag.map {
+            TagColorSelection(paletteID: $0.paletteColorID, customHex: $0.colorHex)
+        } ?? .suggested(.blue))
         _selectedIcon = State(initialValue: editingTag?.muscleIcon)
     }
     
@@ -24,7 +30,7 @@ struct ManageTagSheet: View {
                 Section(header: Text("Tag Details")) {
                     TextField("Name", text: $name)
                         .subtleFormRowShadow(.first)
-                    ColorPicker("Color", selection: $color)
+                    TagColorPicker(selection: $colorSelection, isExpanded: $isColorExpanded)
                         .subtleFormRowShadow(.middle)
                     NavigationLink {
                         MuscleIconPicker(selection: $selectedIcon, color: color)
@@ -75,10 +81,12 @@ struct ManageTagSheet: View {
     private func save() {
         if let tag = editingTag {
             tag.name = name
-            tag.colorHex = color.toHex()
+            tag.colorHex = colorSelection.hex(for: theme)
+            tag.paletteColorID = colorSelection.paletteID
             tag.iconName = selectedIcon?.rawValue
         } else {
-            let newTag = Tag(name: name, colorHex: color.toHex(), iconName: selectedIcon?.rawValue)
+            let newTag = Tag(name: name, colorHex: colorSelection.hex(for: theme), iconName: selectedIcon?.rawValue,
+                             paletteColorID: colorSelection.paletteID)
             modelContext.insert(newTag)
         }
         dismiss()

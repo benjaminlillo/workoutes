@@ -47,7 +47,8 @@ struct ExerciseCompletionCard: View {
             ExerciseCardHeader(
                 title: snapshot.title, subtitle: snapshot.subtitle, details: snapshot.details,
                 increaseLoadNextTime: snapshot.increaseLoadNextTime, accentColor: accentColor,
-                tagColors: snapshot.tags.map(\.colorHex), tagIconNames: snapshot.tags.map(\.iconName),
+                tagColors: snapshot.tags.map { $0.resolvedColorHex(for: ThemeColor.resolve(accentColorRawValue)) },
+                tagIconNames: snapshot.tags.map(\.iconName),
                 tagNames: snapshot.tags.map(\.name)
             ) {
                 ExerciseStatusSymbol(status: .done, accentColor: accentColor)

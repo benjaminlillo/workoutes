@@ -5,27 +5,27 @@ import XCTest
 
 @MainActor
 final class ActiveExerciseTabTests: XCTestCase {
-    func testNativeShortcutKeepsItsPlaceAndOnlyEnablesDuringAnExercise() async throws {
+    func testNativeBarKeepsFourIconOnlyTabsWithAndWithoutAnActiveExercise() async throws {
         let fixture = try await host()
         defer { fixture.window.isHidden = true }
         let tabs = fixture.tabs
-        XCTAssertEqual(tabs.tabBar.items?.count, 5)
-        let shortcut = try XCTUnwrap(tabs.tabs.last)
-        XCTAssertFalse(shortcut.isEnabled)
-        XCTAssertTrue(tabs.tabBar.items?.prefix(4).allSatisfy { $0.title?.isEmpty ?? true } ?? false)
-        XCTAssertNil(tabs.bottomAccessory)
+        func checkBar() {
+            XCTAssertEqual(tabs.tabBar.items?.count, 4)
+            XCTAssertTrue(tabs.tabBar.items?.allSatisfy { $0.title?.isEmpty ?? true } ?? false)
+            XCTAssertTrue(tabs.tabs.allSatisfy { $0.isEnabled })
+            XCTAssertNil(tabs.bottomAccessory)
+            if #available(iOS 27.0, *) { XCTAssertNil(tabs.prominentTabIdentifier) }
+            XCTAssertEqual(fixture.navigation.selectedTab, .settings)
+            XCTAssertEqual(tabs.selectedIndex, 3)
+        }
+        checkBar()
         snapshot(fixture.window, name: "idle")
 
         fixture.controller.toggle(fixture.exercise, context: fixture.store.mainContext)
         await fixture.controller.waitForPendingUpdates()
         XCTAssertTrue(fixture.controller.isActive(fixture.exercise), fixture.controller.errorMessage ?? "")
-        try await waitUntil { shortcut.isEnabled }
-        XCTAssertEqual(tabs.tabBar.items?.count, 5)
-        XCTAssertEqual(fixture.navigation.selectedTab, .settings)
-        XCTAssertEqual(tabs.selectedIndex, 3)
-        XCTAssertNil(tabs.bottomAccessory)
-        if #available(iOS 27.0, *) { XCTAssertNotNil(tabs.prominentTabIdentifier) }
-        try await Task.sleep(for: .milliseconds(600))
+        try await Task.sleep(for: .milliseconds(400))
+        checkBar()
         snapshot(fixture.window, name: "active")
         fixture.window.overrideUserInterfaceStyle = .dark
         try await Task.sleep(for: .milliseconds(400))
@@ -34,38 +34,35 @@ final class ActiveExerciseTabTests: XCTestCase {
         fixture.controller.toggle(fixture.exercise, context: fixture.store.mainContext)
         await fixture.controller.waitForPendingUpdates()
         XCTAssertFalse(fixture.controller.isActive(fixture.exercise), fixture.controller.errorMessage ?? "")
-        try await waitUntil { !shortcut.isEnabled }
-        XCTAssertEqual(tabs.tabBar.items?.count, 5)
-        XCTAssertEqual(fixture.navigation.selectedTab, .settings)
-        XCTAssertNil(tabs.bottomAccessory)
+        checkBar()
     }
 
-    func testNativeShortcutRevealsExerciseAndCanBeTappedAgain() async throws {
+    func testActiveExerciseToolbarAppearance() async throws {
         let fixture = try await host()
         defer { fixture.window.isHidden = true }
+        fixture.navigation.selectedTab = .workouts
+        try await Task.sleep(for: .milliseconds(600))
+        snapshot(fixture.window, name: "toolbar-workouts-reference")
+        fixture.navigation.selectedTab = .exercises
+        try await Task.sleep(for: .milliseconds(600))
+        snapshot(fixture.window, name: "toolbar-before")
         fixture.controller.toggle(fixture.exercise, context: fixture.store.mainContext)
+        try await Task.sleep(for: .milliseconds(60))
+        snapshot(fixture.window, name: "toolbar-enter-early")
+        try await Task.sleep(for: .milliseconds(100))
+        snapshot(fixture.window, name: "toolbar-enter-middle")
         await fixture.controller.waitForPendingUpdates()
-        XCTAssertTrue(fixture.controller.isActive(fixture.exercise), fixture.controller.errorMessage ?? "")
-        try await waitUntil { fixture.tabs.tabs.last?.isEnabled == true }
-        let tabs = fixture.tabs
-        for _ in 0..<2 {
-            // A native tap writes the shortcut's selection before routing to Exercises.
-            fixture.navigation.selectedTab = .activeExercise
-            try await waitUntil {
-                fixture.navigation.selectedTab == .exercises && tabs.selectedIndex == 2
-                    && fixture.navigation.revealRequest == nil
-            }
-            XCTAssertTrue(fixture.controller.isActive(fixture.exercise))
-            XCTAssertNil(tabs.bottomAccessory)
-        }
-    }
-
-    func testStaleShortcutWithNoActiveExerciseKeepsCurrentTab() {
-        let navigation = ExerciseNavigation()
-        navigation.selectedTab = .activeExercise
-        navigation.resolveActiveExerciseShortcut(nil, previousTab: .settings)
-        XCTAssertEqual(navigation.selectedTab, .settings)
-        XCTAssertNil(navigation.revealRequest)
+        try await Task.sleep(for: .milliseconds(500))
+        snapshot(fixture.window, name: "toolbar-enter-end")
+        XCTAssertTrue(fixture.controller.isActive(fixture.exercise))
+        XCTAssertEqual(fixture.tabs.tabBar.items?.count, 4)
+        fixture.controller.toggle(fixture.exercise, context: fixture.store.mainContext)
+        try await Task.sleep(for: .milliseconds(100))
+        snapshot(fixture.window, name: "toolbar-exit-middle")
+        await fixture.controller.waitForPendingUpdates()
+        try await Task.sleep(for: .milliseconds(500))
+        snapshot(fixture.window, name: "toolbar-exit-end")
+        XCTAssertFalse(fixture.controller.isActive(fixture.exercise))
     }
 
     private struct Fixture {
@@ -96,7 +93,7 @@ final class ActiveExerciseTabTests: XCTestCase {
         window.overrideUserInterfaceStyle = .light
         window.makeKeyAndVisible()
         window.layoutIfNeeded()
-        try await waitUntil { self.findTabs(root)?.tabBar.items?.count == 5 }
+        try await waitUntil { self.findTabs(root)?.tabBar.items?.count == 4 }
         await controller.waitForPendingUpdates()
         try await Task.sleep(for: .milliseconds(400))
         let tabs = try XCTUnwrap(findTabs(root))

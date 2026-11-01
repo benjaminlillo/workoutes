@@ -6,19 +6,12 @@ struct ContentView: View {
     @Environment(\.trainingController) private var training
     @Environment(\.scenePhase) private var scenePhase
     @Query private var exercises: [WorkoutExercise]
+    @Query private var tags: [Tag]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .metric
     @State private var motivationalPull = MotivationalPullState()
     @State var navigation = ExerciseNavigation()
     
-    private var activeExercise: WorkoutExercise? {
-        exercises.first { !$0.isDeleted && !$0.isDone && exerciseActivity.isActive($0) }
-    }
-
-    private var activeExerciseRole: TabRole {
-        if #available(iOS 27.0, *) { .prominent } else { .search }
-    }
-
     var body: some View {
         TabView(selection: $navigation.selectedTab) {
             Tab(value: AppTab.summary) {
@@ -41,21 +34,13 @@ struct ContentView: View {
             } label: {
                 Image(systemName: "gearshape").accessibilityLabel("Settings")
             }
-            Tab(value: AppTab.activeExercise, role: activeExerciseRole) {
-                // Selection is redirected after the native tab controller records the tap.
-                EmptyView()
-            } label: {
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .accessibilityLabel(activeExercise?.title ?? String(localized: "No Active Exercise"))
-            }
-            .disabled(activeExercise == nil)
         }
         .tabBarMinimizeBehavior(.never)
-        .onChange(of: navigation.selectedTab) { previousTab, _ in
-            navigation.resolveActiveExerciseShortcut(activeExercise, previousTab: previousTab)
-        }
         .overlay {
             MotivationalPullOverlay(pull: motivationalPull)
+        }
+        .onChange(of: tags.map { TagPaletteSnapshot(id: $0.persistentModelID, paletteID: $0.paletteColorID, hex: $0.colorHex) }, initial: true) {
+            TagColorSynchronization.apply(ThemeColor.resolve(accentColorRawValue), to: tags)
         }
         .onChange(of: exercises.map { ExerciseSnapshot(content: $0.activityContent, isDone: $0.isDone) }, initial: true) {
             exerciseActivity.synchronize(exercises: exercises)
@@ -66,7 +51,12 @@ struct ContentView: View {
                 exerciseActivity.restore()
             }
         }
-        .onChange(of: accentColorRawValue) { exerciseActivity.synchronize(exercises: exercises) }
+        .onChange(of: accentColorRawValue) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                TagColorSynchronization.apply(ThemeColor.resolve(accentColorRawValue), to: tags)
+            }
+            exerciseActivity.synchronize(exercises: exercises)
+        }
         .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
         .alert(training?.errorMessage != nil ? "Training" : "Exercise Session", isPresented: Binding(
             get: { exerciseActivity.errorMessage != nil || training?.errorMessage != nil },
@@ -77,6 +67,12 @@ struct ContentView: View {
             Text(training?.errorMessage ?? exerciseActivity.errorMessage ?? "")
         }
     }
+}
+
+private struct TagPaletteSnapshot: Equatable {
+    let id: PersistentIdentifier
+    let paletteID: String?
+    let hex: String
 }
 
 private struct ExerciseSnapshot: Equatable {

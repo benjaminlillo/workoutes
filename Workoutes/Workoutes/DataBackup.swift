@@ -9,7 +9,7 @@ struct ExportDataDTO: Codable {
 }
 
 struct WorkoutDTO: Codable { var id: String; var name: String }
-struct TagDTO: Codable { var id: String; var name: String; var colorHex: String; var iconName: String? = nil }
+struct TagDTO: Codable { var id: String; var name: String; var colorHex: String; var iconName: String? = nil; var paletteColorID: String? = nil }
 struct EntityRefDTO: Codable { var id: String }
 struct WorkoutExerciseDTO: Codable {
     var id: String
@@ -54,7 +54,7 @@ enum DataBackup {
                       workouts: $0.workouts.map { .init(id: $0.stableID!) },
                       tags: $0.tags.map { .init(id: $0.stableID!) })
             },
-            tags: tags.map { .init(id: $0.stableID!, name: $0.name, colorHex: $0.colorHex, iconName: $0.iconName) },
+            tags: tags.map { .init(id: $0.stableID!, name: $0.name, colorHex: $0.colorHex, iconName: $0.iconName, paletteColorID: $0.paletteColorID) },
             history: includeHistory ? try context.fetch(FetchDescriptor<ExerciseCompletion>()).map {
                 .init(id: $0.id, completedAt: $0.completedAt, exerciseID: $0.exercise?.stableID, snapshot: $0.snapshot)
             } : nil
@@ -90,6 +90,7 @@ enum DataBackup {
                 tag.name = dto.name
                 tag.colorHex = dto.colorHex
                 tag.iconName = dto.iconName
+                tag.paletteColorID = dto.paletteColorID
                 tags[dto.id] = tag
             }
             for dto in payload.exercises {

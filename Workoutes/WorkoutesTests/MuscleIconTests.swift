@@ -170,5 +170,30 @@ final class MuscleIconTests: XCTestCase {
             }
             try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-muscle-\(name).png"))
         }
+
+        // Review the expanded native control, including its compact fallback and custom picker.
+        for (name, scheme, width) in [("light", ColorScheme.light, CGFloat(430)),
+                                      ("dark", .dark, 430), ("compact", .light, 320)] {
+            window.rootViewController = UIHostingController(rootView: NavigationStack {
+                Form {
+                    Section("Tag Details") {
+                        TextField("Name", text: .constant("Pecho"))
+                        TagColorPicker(selection: .constant(.suggested(.blue)), isExpanded: .constant(true))
+                    }
+                }
+                .transparentNavigationChrome()
+                .navigationTitle("New Tag")
+                .navigationBarTitleDisplayMode(.inline)
+            }
+            .frame(width: width)
+            .environment(\.dynamicTypeSize, .large))
+            window.overrideUserInterfaceStyle = scheme == .dark ? .dark : .light
+            try await Task.sleep(for: .milliseconds(200))
+            window.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-tag-colors-\(name).png"))
+        }
     }
 }

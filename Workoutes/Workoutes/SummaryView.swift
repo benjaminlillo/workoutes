@@ -267,8 +267,6 @@ struct WeeklyExerciseChart: View {
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(summary.days) { day in
                     VStack(spacing: 8) {
-                        Text("\(day.completions.count)")
-                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                         VStack(spacing: 0) {
                             Spacer(minLength: 0)
                             VStack(spacing: blockSpacing) {

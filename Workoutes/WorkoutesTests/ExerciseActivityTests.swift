@@ -346,8 +346,8 @@ final class ExerciseActivityTests: XCTestCase {
 
         XCTAssertEqual(ExerciseCountMetric.sets.maximum, 20)
         XCTAssertEqual(ExerciseCountMetric.repetitions.maximum, 100)
-        XCTAssertEqual(ExerciseCountMetric.sets.label(for: 4), "4 sets")
-        XCTAssertEqual(ExerciseCountMetric.repetitions.label(for: 12), "12 reps")
+        XCTAssertEqual(ExerciseCountMetric.sets.label(for: 4), String(localized: "\(4) sets"))
+        XCTAssertEqual(ExerciseCountMetric.repetitions.label(for: 12), String(localized: "\(12) reps"))
 
         item[keyPath: ExerciseCountMetric.sets.keyPath] = 4
         item[keyPath: ExerciseCountMetric.repetitions.keyPath] = 12

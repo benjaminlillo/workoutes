@@ -47,7 +47,6 @@ private struct WeeklyMuscleDiagram: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            MuscleBodyLabels()
             GeometryReader { geometry in
                 let style = MuscleDiagramStyle(colorScheme: colorScheme, contrast: contrast,
                     dynamicTypeSize: dynamicTypeSize, locale: locale, scale: displayScale)

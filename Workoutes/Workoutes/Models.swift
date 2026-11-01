@@ -22,6 +22,8 @@ final class Tag {
     @Attribute(.unique) var stableID: String?
     var name: String
     var colorHex: String
+    // Nil preserves existing/custom colors. The HEX remains a cache/fallback for consumers.
+    var paletteColorID: String? = nil
     // Optional so existing stores and tags retain their color-only appearance.
     var iconName: String?
 
@@ -30,10 +32,11 @@ final class Tag {
     @Relationship(inverse: \WorkoutExercise.tags)
     var exercises: [WorkoutExercise] = []
     
-    init(name: String, colorHex: String, iconName: String? = nil) {
+    init(name: String, colorHex: String, iconName: String? = nil, paletteColorID: String? = nil) {
         self.stableID = UUID().uuidString
         self.name = name
         self.colorHex = colorHex
+        self.paletteColorID = paletteColorID
         self.iconName = iconName
     }
 }

@@ -30,30 +30,6 @@ enum MuscleBodyLayout {
     }
 }
 
-struct MuscleBodyLabels: View {
-    var body: some View {
-        MuscleBodyLabelsLayout {
-            Text("Front")
-            Text("Back")
-        }
-        .font(.caption).foregroundStyle(.secondary)
-    }
-}
-
-private struct MuscleBodyLabelsLayout: Layout {
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        CGSize(width: proposal.width ?? 330,
-               height: subviews.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        for (side, subview) in zip(MuscleBodySide.allCases, subviews) {
-            subview.place(at: CGPoint(x: bounds.minX + bounds.width * side.columnCenter, y: bounds.midY),
-                          anchor: .center, proposal: .unspecified)
-        }
-    }
-}
-
 struct MuscleBodyAnchor {
     let side: MuscleBodySide
     /// Original body coordinates, normalized to the common 724 × 1448 canvas.
