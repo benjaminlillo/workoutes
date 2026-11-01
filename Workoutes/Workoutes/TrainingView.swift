@@ -23,12 +23,7 @@ struct TrainingEntryView: View {
                     Text(controller.hasActiveSession ? controller.run?.phaseTitle ?? "" : String(localized: "Choose exercises as you go"))
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(.secondary)
             }
-            .padding(20)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24))
-            .subtleCardShadow()
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("watchTrainingEntry")

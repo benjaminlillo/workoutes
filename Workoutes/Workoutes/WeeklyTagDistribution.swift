@@ -13,6 +13,7 @@ struct WeeklyTagDistribution {
         let id: Category
         let name: String
         let colorHex: String?
+        let icon: MuscleIcon?
         var count: Int
     }
 
@@ -22,12 +23,12 @@ struct WeeklyTagDistribution {
     init(summary: WeeklySummary) {
         var entries: [Entry] = []
         var positions: [Category: Int] = [:]
-        func count(_ id: Category, name: String, colorHex: String?) {
+        func count(_ id: Category, name: String, colorHex: String?, icon: MuscleIcon? = nil) {
             if let position = positions[id] {
                 entries[position].count += 1
             } else {
                 positions[id] = entries.count
-                entries.append(Entry(id: id, name: name, colorHex: colorHex, count: 1))
+                entries.append(Entry(id: id, name: name, colorHex: colorHex, icon: icon, count: 1))
             }
         }
 
@@ -38,7 +39,7 @@ struct WeeklyTagDistribution {
             } else {
                 var seen: Set<PersistentIdentifier> = []
                 for tag in tags where seen.insert(tag.persistentModelID).inserted {
-                    count(.tag(tag.persistentModelID), name: tag.name, colorHex: tag.colorHex)
+                    count(.tag(tag.persistentModelID), name: tag.name, colorHex: tag.colorHex, icon: tag.muscleIcon)
                 }
             }
         }

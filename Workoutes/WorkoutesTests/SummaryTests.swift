@@ -121,7 +121,7 @@ final class SummaryTests: XCTestCase {
         context.delete(item)
         try context.save()
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<ExerciseCompletion>()), 2)
-        XCTAssertTrue(records.allSatisfy { $0.exercise == nil && $0.exerciseTitle == "Exercise deleted" })
+        XCTAssertTrue(records.allSatisfy { $0.exercise == nil && $0.exerciseTitle == String(localized: "Exercise deleted") })
     }
 
     func testDeletingActiveExerciseCancelsWithoutHistory() async throws {
@@ -307,7 +307,7 @@ final class SummaryTests: XCTestCase {
         }
     }
 
-    func testWeeklyPagerFillsHomeWidthAndSeparatesCardsDuringScrolling() async throws {
+    func testWholeWeekPagerMovesAllCardsAndVerticalScrollReachesScreenTop() async throws {
         let store = try container()
         let root = UIHostingController(rootView: SummaryView().modelContainer(store))
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
@@ -327,6 +327,8 @@ final class SummaryTests: XCTestCase {
         window.layoutIfNeeded()
         let pager = try XCTUnwrap(findPager(root.view))
         let viewport = pager.convert(pager.bounds, to: window)
+        XCTAssertGreaterThan(viewport.minY, 0)
+        XCTAssertGreaterThan(viewport.height, window.bounds.height * 0.5)
         XCTAssertEqual(viewport.minX, 0, accuracy: 0.5)
         XCTAssertEqual(viewport.width, window.bounds.width, accuracy: 0.5)
         let format = UIGraphicsImageRendererFormat()
@@ -338,8 +340,8 @@ final class SummaryTests: XCTestCase {
             try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-weekly-pager-\(name).png"))
             return try XCTUnwrap(image.cgImage)
         }
-        func brightness(_ image: CGImage, x: CGFloat) throws -> Double {
-            let patch = try XCTUnwrap(image.cropping(to: CGRect(x: x - 1, y: viewport.midY - 1, width: 3, height: 3)))
+        func brightness(_ image: CGImage, x: CGFloat, y: CGFloat? = nil) throws -> Double {
+            let patch = try XCTUnwrap(image.cropping(to: CGRect(x: x - 1, y: y ?? (viewport.minY + 110), width: 3, height: 3)))
             var bytes = [UInt8](repeating: 0, count: 36)
             try bytes.withUnsafeMutableBytes { buffer in
                 let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 3, height: 3,
@@ -354,7 +356,7 @@ final class SummaryTests: XCTestCase {
             return Double(total) / 27
         }
         let initial = try snapshot("aligned")
-        // The resting card aligns with Home's 16-point margins on both sides.
+        // The first statistic aligns with Home's 16-point margins on both sides.
         XCTAssertGreaterThan(try brightness(initial, x: 24), try brightness(initial, x: 3) + 2)
         XCTAssertGreaterThan(try brightness(initial, x: window.bounds.width - 24),
                              try brightness(initial, x: window.bounds.width - 3) + 2)
@@ -373,7 +375,56 @@ final class SummaryTests: XCTestCase {
         XCTAssertGreaterThan(try brightness(halfway, x: viewport.width - 3), 250)
         pager.setContentOffset(CGPoint(x: original.x - stride, y: original.y), animated: false)
         try await Task.sleep(for: .milliseconds(350))
-        _ = try snapshot("previous-week")
+        let previous = try snapshot("previous-week")
+        let headerBounds = CGRect(x: 0, y: 0, width: viewport.width, height: viewport.minY)
+        XCTAssertNotEqual(try XCTUnwrap(initial.cropping(to: headerBounds)).dataProvider?.data as Data?,
+                          try XCTUnwrap(previous.cropping(to: headerBounds)).dataProvider?.data as Data?)
+        XCTAssertEqual(pager.convert(pager.bounds, to: window).minY, viewport.minY, accuracy: 0.5)
+        XCTAssertEqual(pager.contentOffset.x, original.x - stride, accuracy: 0.5)
+        var ancestor = pager.superview
+        var verticalScroll: UIScrollView?
+        while let view = ancestor {
+            if let scroll = view as? UIScrollView, scroll.contentSize.height > scroll.bounds.height {
+                verticalScroll = scroll
+                break
+            }
+            ancestor = view.superview
+        }
+        let vertical = try XCTUnwrap(verticalScroll)
+        vertical.setContentOffset(CGPoint(x: 0, y: viewport.minY + 60), animated: false)
+        try await Task.sleep(for: .milliseconds(100))
+        let scrolled = try snapshot("scrolled-to-top")
+        XCTAssertLessThan(pager.convert(pager.bounds, to: window).minY, 0)
+        // The native top-edge effect blends the card with the background, rather than clipping it.
+        XCTAssertGreaterThan(try brightness(scrolled, x: viewport.midX, y: 10),
+                             try brightness(initial, x: viewport.midX, y: 10) + 3)
+
+    }
+
+    func testHomeAndSettingsShowTheNewHeaderAndWatchEntryInBothAppearances() async throws {
+        let store = try container()
+        let training = PhoneTrainingController(store: TrainingStore(url: FileManager.default.temporaryDirectory
+            .appending(path: "SummarySettingsTests/\(UUID().uuidString).json")), activate: false)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+        let window = UIWindow(windowScene: scene)
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        for (name, view, scheme, size) in [
+            ("home", AnyView(SummaryView()), ColorScheme.light, DynamicTypeSize.large),
+            ("home-dark", AnyView(SummaryView()), .dark, .large),
+            ("home-accessible", AnyView(SummaryView()), .light, .accessibility3),
+            ("settings", AnyView(SettingsView()), .light, .large)
+        ] {
+            window.rootViewController = UIHostingController(rootView: view.modelContainer(store)
+                .environment(\.trainingController, training).environment(\.dynamicTypeSize, size))
+            window.overrideUserInterfaceStyle = scheme == .dark ? .dark : .light
+            try await Task.sleep(for: .milliseconds(250))
+            window.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-week-layout-\(name).png"))
+        }
     }
 
     func testFullTabIntegrationPreservesActiveExerciseTabAndRendersSummary() async throws {

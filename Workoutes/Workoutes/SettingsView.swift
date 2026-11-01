@@ -37,7 +37,7 @@ struct SettingsView: View {
             List {
                 if let training {
                     Section("Apple Watch") {
-                        NavigationLink("Training Structure and History") { TrainingView(controller: training) }
+                        TrainingEntryView(controller: training)
                             .subtleFormRowShadow()
                     }
                 }

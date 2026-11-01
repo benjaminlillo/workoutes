@@ -56,10 +56,21 @@ struct SummaryView: View {
         NavigationStack {
             // Refreshes after midnight/time-zone changes, including when this tab stays open.
             TimelineView(.periodic(from: .now, by: 60)) { timeline in
-                SummaryWeekView(today: timeline.date, selectedWeek: $selectedWeek, pull: pull ?? $localPull)
+                MotivationalScrollView(pull: pull ?? $localPull) {
+                    VStack(spacing: 4) {
+                        SummaryWeekHeader(week: selectedWeek ?? timeline.date, today: timeline.date)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 12)
+                            .padding(.bottom, 16)
+                        WeeklySummaryPager(today: timeline.date, selectedWeek: $selectedWeek)
+                    }
+                    .padding(.bottom, 16)
+                }
+                .scrollClipDisabled()
+                .scrollEdgeEffectStyle(.soft, for: .top)
+                .defaultScreenBackground()
             }
-            .transparentNavigationChrome()
-            .navigationTitle("Summary")
+            .toolbar(.hidden, for: .navigationBar)
         }
         .overlay {
             if pull == nil {
@@ -69,50 +80,26 @@ struct SummaryView: View {
     }
 }
 
-private struct SummaryWeekView: View {
-    @Environment(\.trainingController) private var training
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    let date: Date
+struct SummaryWeekHeader: View {
+    let week: Date
     let today: Date
-    @Binding var selectedWeek: Date?
-    @Binding var pull: MotivationalPullState
-    @Query private var completions: [ExerciseCompletion]
-
-    init(today: Date, selectedWeek: Binding<Date?>, pull: Binding<MotivationalPullState>) {
-        self.today = today
-        self.date = selectedWeek.wrappedValue ?? today
-        _selectedWeek = selectedWeek
-        _pull = pull
-        let interval = WeeklySummary.interval(containing: selectedWeek.wrappedValue ?? today)
-        let start = interval.start
-        let end = interval.end
-        _completions = Query(filter: #Predicate<ExerciseCompletion> { $0.completedAt >= start && $0.completedAt < end },
-                             sort: \ExerciseCompletion.completedAt)
-    }
 
     var body: some View {
-        let summary = WeeklySummary(completions: completions, date: date)
-        MotivationalScrollView(pull: $pull) {
-            VStack(spacing: 16) {
-                if let training {
-                    TrainingEntryView(controller: training)
-                        .padding(.horizontal, 16)
-                }
-                WeeklySummaryPager(today: today, selectedWeek: $selectedWeek)
-                ZStack(alignment: .top) {
-                    VStack(spacing: 16) {
-                        WeeklyTagDistributionChart(summary: summary)
-                        SummaryStatistics(summary: summary)
-                    }
-                    .id(summary.interval.start)
-                    .transition(.opacity)
-                }
-                .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: summary.interval.start)
-                .padding(.horizontal, 16)
-            }
-            .padding(.vertical, 16)
+        let summary = WeeklySummary(completions: [], date: week)
+        let isCurrentWeek = summary.interval.start == WeeklySummary.interval(containing: today).start
+        VStack(alignment: .leading, spacing: 6) {
+            Text(isCurrentWeek ? "This Week" : "Week Summary")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(summary.dateRange(relativeTo: today))
+                .font(.system(.title, design: .rounded, weight: .bold))
+                .contentTransition(.numericText())
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .defaultScreenBackground()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityIdentifier("summaryWeekHeader")
     }
 }
 
@@ -120,6 +107,7 @@ private struct SummaryWeekView: View {
 struct WeeklySummaryPager: View {
     let today: Date
     @Binding var selectedWeek: Date?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var centeredWeek: Date?
     @State private var oldestWeek: Date
 
@@ -144,10 +132,6 @@ struct WeeklySummaryPager: View {
             LazyHStack(alignment: .top, spacing: 0) {
                 ForEach(weeks, id: \.self) { week in
                     WeeklySummaryPage(week: week, today: today)
-                        // The page spans the screen; its card retains Home's side margins.
-                        // Adjacent pages therefore leave 32 points between their cards.
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 5)
                         .containerRelativeFrame(.horizontal)
                         .id(week)
                 }
@@ -158,8 +142,16 @@ struct WeeklySummaryPager: View {
         .scrollPosition(id: $centeredWeek)
         .defaultScrollAnchor(.trailing, for: .initialOffset)
         .scrollIndicators(.hidden)
+        .scrollClipDisabled()
         .fixedSize(horizontal: false, vertical: true)
-        .padding(.vertical, -5)
+        .onScrollGeometryChange(for: Int.self) { scroll in
+            guard scroll.containerSize.width > 0 else { return weeks.count - 1 }
+            return Int(((scroll.contentOffset.x + scroll.contentInsets.leading) / scroll.containerSize.width).rounded())
+        } action: { _, index in
+            guard weeks.indices.contains(index) else { return }
+            let week = weeks[index]
+            selectedWeek = week == currentWeek ? nil : week
+        }
         .accessibilityIdentifier("weeklySummaryPager")
         .accessibilityAction(named: "Previous Week") { moveWeek(by: -1) }
         .accessibilityAction(named: "Next Week") { moveWeek(by: 1) }
@@ -179,7 +171,9 @@ struct WeeklySummaryPager: View {
     private func moveWeek(by offset: Int) {
         guard let target = Calendar.current.date(byAdding: .day, value: offset * 7, to: centeredWeek ?? currentWeek),
               target <= currentWeek else { return }
-        centeredWeek = target
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.32)) {
+            centeredWeek = target
+        }
     }
 }
 
@@ -199,7 +193,16 @@ private struct WeeklySummaryPage: View {
     }
 
     var body: some View {
-        WeeklyExerciseChart(summary: WeeklySummary(completions: completions, date: week), today: today)
+        let summary = WeeklySummary(completions: completions, date: week)
+        VStack(spacing: 16) {
+            WeeklyMuscleActivityCard(summary: summary)
+            WeeklyExerciseChart(summary: summary, today: today)
+            WeeklyTagDistributionChart(summary: summary)
+            SummaryStatistics(summary: summary)
+        }
+        .padding(16)
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityIdentifier("summaryWeekPage")
     }
 }
 
@@ -210,17 +213,11 @@ struct WeeklyExerciseChart: View {
 
     private var maximum: Int { max(1, summary.days.map { $0.completions.count }.max() ?? 0) }
     private var blockSpacing: CGFloat { min(2, chartHeight / CGFloat(maximum) * 0.12) }
-    private var isCurrentWeek: Bool { summary.interval.start == WeeklySummary.interval(containing: today).start }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(isCurrentWeek ? "This Week" : "Week Summary").font(.title3.bold())
-                Text(summary.dateRange(relativeTo: today))
-                    .font(.subheadline).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text("Week Summary").font(.title3.bold())
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(summary.days) { day in

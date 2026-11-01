@@ -2833,6 +2833,24 @@
       },
       "generatesSymbol": false
     },
+    "Front": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Front"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frente"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Full Body": {
       "extractionState": "manual",
       "localizations": {
@@ -3584,6 +3602,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mover rueda al borde superior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Muscle Activity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muscle Activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actividad muscular"
           }
         }
       },
