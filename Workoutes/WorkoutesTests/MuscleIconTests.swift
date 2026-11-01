@@ -5,6 +5,67 @@ import XCTest
 
 @MainActor
 final class MuscleIconTests: XCTestCase {
+    func testBodySilhouettesAndSoftShadingMatchTheApprovedReference() throws {
+        let size = CGSize(width: 310, height: 620)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = false
+        func pixels(_ image: UIImage) throws -> [UInt8] {
+            let rendered = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+                image.draw(in: CGRect(origin: .zero, size: size))
+            }
+            var bytes = [UInt8](repeating: 0, count: 310 * 620 * 4)
+            try bytes.withUnsafeMutableBytes { buffer in
+                let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 310, height: 620,
+                    bitsPerComponent: 8, bytesPerRow: 310 * 4, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+                context.draw(try XCTUnwrap(rendered.cgImage), in: CGRect(origin: .zero, size: size))
+            }
+            return bytes
+        }
+        for side in MuscleBodySide.allCases {
+            let referenceURL = try XCTUnwrap(Bundle(for: Self.self)
+                .url(forResource: "approved-body-\(side.rawValue)", withExtension: "png"))
+            let reference = try pixels(XCTUnwrap(UIImage(contentsOfFile: referenceURL.path)))
+            let actual = try pixels(XCTUnwrap(UIImage(named: side.asset("base")))
+                .withTintColor(.black, renderingMode: .alwaysOriginal))
+            var expectedMask = [Bool](repeating: false, count: 310 * 620)
+            var actualMask = expectedMask
+            var shadeSamples = 0
+            var shadeError = 0.0
+            for pixel in 0..<(310 * 620) {
+                let i = pixel * 4
+                let r = Int(reference[i]), g = Int(reference[i+1]), b = Int(reference[i+2])
+                expectedMask[pixel] = min(r, g, b) < 239
+                actualMask[pixel] = actual[i+3] > 24
+                if max(r, g, b) - min(r, g, b) < 8, min(r, g, b) < 235 {
+                    let neutral = 255 - Double(actual[i+3]) / 255 * (255 - 0.78 * 255)
+                    shadeError += abs(neutral - Double(r + g + b) / 3)
+                    shadeSamples += 1
+                }
+            }
+            // One source pixel accounts for antialiasing and the selected 1x/2x/3x raster scale.
+            // Both directions are checked: extra anatomy and missing anatomy must fail equally.
+            func agreement(_ source: [Bool], _ target: [Bool]) -> Double {
+                var count = 0, matched = 0
+                for index in source.indices where source[index] {
+                    count += 1
+                    let x = index % 310, y = index / 310
+                    if ((max(0, y-1))...min(619, y+1)).contains(where: { row in
+                        ((max(0, x-1))...min(309, x+1)).contains { target[row * 310 + $0] }
+                    }) { matched += 1 }
+                }
+                return Double(matched) / Double(count)
+            }
+            XCTAssertGreaterThan(agreement(expectedMask, actualMask), 0.99,
+                                 "The \(side.rawValue) body must not lose reference details")
+            XCTAssertGreaterThan(agreement(actualMask, expectedMask), 0.99,
+                                 "The \(side.rawValue) body must not introduce different shapes")
+            XCTAssertLessThan(shadeError / Double(shadeSamples), 8,
+                              "The original soft shading must survive tinting")
+        }
+    }
+
     private func container() throws -> ModelContainer {
         try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
                            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
@@ -17,6 +78,7 @@ final class MuscleIconTests: XCTestCase {
                          Tag(name: "Legs", colorHex: "B15D78", iconName: "lowerBody"),
                          Tag(name: "Strength", colorHex: "8064B5"),
                          Tag(name: "Future", colorHex: "228844", iconName: "future-muscle")]
+            + MuscleIcon.allCases.map { Tag(name: "Existing-\($0.rawValue)", colorHex: "4488CC", iconName: $0.rawValue) }
         for tag in originals { context.insert(tag) }
         try context.save()
         let reloaded = ModelContext(source)
@@ -36,6 +98,7 @@ final class MuscleIconTests: XCTestCase {
             let tag = try XCTUnwrap(imported.first { $0.stableID == original.stableID })
             XCTAssertEqual(tag.colorHex, original.colorHex)
             XCTAssertEqual(tag.iconName, original.iconName)
+            XCTAssertEqual(tag.muscleIcon, original.muscleIcon)
         }
     }
 

@@ -6,45 +6,25 @@ struct WeeklyMuscleActivityCard: View {
     init(summary: WeeklySummary, distribution: WeeklyTagDistribution? = nil) {
         activity = WeeklyMuscleActivity(distribution: distribution ?? WeeklyTagDistribution(summary: summary))
     }
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Muscle Activity").font(.title3.bold())
             WeeklyMuscleDiagram(activity: activity)
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            if activity.entries.isEmpty {
-                Text("No completed exercises")
-                    .font(.subheadline).foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
-            } else {
-                Divider()
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .topLeading),
-                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2),
-                          alignment: .leading, spacing: 12) {
-                    ForEach(activity.entries) { entry in
-                        HStack(alignment: .firstTextBaseline, spacing: 6) {
-                            Circle().fill(color(for: entry)).frame(width: 7, height: 7)
-                                .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] }
-                                .accessibilityHidden(true)
-                            Text(entry.name).font(.caption)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Text(entry.count, format: .number)
-                                .font(.caption.bold().monospacedDigit())
-                                .foregroundStyle(color(for: entry))
-                                .fixedSize()
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(entry.name)
-                        .accessibilityValue("\(entry.count) completed exercises")
-                    }
-                }
-            }
         }
         .padding(20)
         .statisticCardBackground()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Muscle Activity")
+        .accessibilityValue(accessibilitySummary)
         .accessibilityIdentifier("weeklyMuscleActivity")
+    }
+
+    private var accessibilitySummary: String {
+        guard !activity.entries.isEmpty else { return String(localized: "No completed exercises") }
+        return activity.entries.map { entry in
+            entry.name + ": " + String(localized: "\(entry.count) completed exercises")
+        }.joined(separator: ", ")
     }
 }
 
@@ -67,11 +47,7 @@ private struct WeeklyMuscleDiagram: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            HStack {
-                Text("Front").frame(maxWidth: .infinity)
-                Text("Back").frame(maxWidth: .infinity)
-            }
-            .font(.caption).foregroundStyle(.secondary)
+            MuscleBodyLabels()
             GeometryReader { geometry in
                 let style = MuscleDiagramStyle(colorScheme: colorScheme, contrast: contrast,
                     dynamicTypeSize: dynamicTypeSize, locale: locale, scale: displayScale)
@@ -86,7 +62,7 @@ private struct WeeklyMuscleDiagram: View {
             }
             .frame(height: max(280, CGFloat(calloutCount) * (badgeHeight + 8)))
         }
-        // The legend exposes every tag once, with its full name and count.
+        // The card exposes each tag and count to VoiceOver without a visible legend.
         .accessibilityHidden(true)
     }
 }
@@ -101,10 +77,9 @@ struct MuscleDiagramDrawing: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let bodyHeight = min(320, geometry.size.width * 0.86, geometry.size.height)
             ZStack(alignment: .topLeading) {
                 ForEach(MuscleBodySide.allCases, id: \.self) { side in
-                    let frame = bodyFrame(side, size: geometry.size, bodyHeight: bodyHeight)
+                    let frame = MuscleBodyLayout.frame(for: side, in: geometry.size)
                     Image(uiImage: MuscleBodyImageCache.shared.image(side: side, activity: activity,
                         size: frame.size, scale: displayScale, isDark: colorScheme == .dark))
                         .resizable()
@@ -114,12 +89,6 @@ struct MuscleDiagramDrawing: View {
                 }
             }
         }
-    }
-
-    private func bodyFrame(_ side: MuscleBodySide, size: CGSize, bodyHeight: CGFloat) -> CGRect {
-        let center = size.width * (side == .front ? 0.27 : 0.73)
-        return CGRect(x: center - bodyHeight / 4, y: (size.height - bodyHeight) / 2,
-                      width: bodyHeight / 2, height: bodyHeight)
     }
 
     private func callouts(_ side: MuscleBodySide, frame: CGRect, size: CGSize, spacing: CGFloat) -> some View {

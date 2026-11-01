@@ -27,17 +27,40 @@ final class MuscleBodyImageCache {
         let key = "\(side.rawValue)|\(size.width)x\(size.height)@\(scale)|\(isDark)|\(palette)" as NSString
         if let image = images.object(forKey: key) { return image }
 
+        var groups: [(regions: [String], colors: [String])] = []
+        for (region, colors) in layers {
+            if let index = groups.firstIndex(where: { $0.colors == colors }) {
+                groups[index].regions.append(region)
+            } else {
+                groups.append(([region], colors))
+            }
+        }
+
         let format = UIGraphicsImageRendererFormat()
         format.scale = scale
         format.preferredRange = .standard
         let bounds = CGRect(origin: .zero, size: size)
         let image = UIGraphicsImageRenderer(size: size, format: format).image { renderer in
             UIImage(named: side.asset("base"))?
-                .withTintColor(UIColor(white: isDark ? 0.30 : 0.84, alpha: 1), renderingMode: .alwaysOriginal)
+                .withTintColor(UIColor(white: isDark ? 0.30 : 0.78, alpha: 1), renderingMode: .alwaysOriginal)
                 .draw(in: bounds)
-            for (region, hexColors) in layers {
-                guard let mask = UIImage(named: side.asset(region)) else { continue }
-                let colors = hexColors.map { UIColor(Color(hex: $0)) }
+            for group in groups {
+                let mask: UIImage
+                if group.regions.count == 1 {
+                    guard let single = UIImage(named: side.asset(group.regions[0])) else { continue }
+                    mask = single
+                } else {
+                    // Add complementary alpha masks before tinting. Source-over would leave
+                    // a faint seam where two parts of the original artwork share one color.
+                    mask = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+                        for region in group.regions {
+                            UIImage(named: side.asset(region))?
+                                .withTintColor(.white, renderingMode: .alwaysOriginal)
+                                .draw(in: bounds, blendMode: .plusLighter, alpha: 1)
+                        }
+                    }
+                }
+                let colors = group.colors.map { UIColor(Color(hex: $0)) }
                 if colors.count == 1 {
                     mask.withTintColor(colors[0], renderingMode: .alwaysOriginal).draw(in: bounds)
                 } else {

@@ -76,7 +76,7 @@ final class WeeklyMuscleActivityTests: XCTestCase {
         }
     }
 
-    func testCardRendersBothAppearancesEmptyWeeksAndAccessibleLegends() throws {
+    func testCardRendersBothAppearancesEmptyWeeksAndAccessibleCounts() throws {
         let store = try store()
         let tags = [Tag(name: "Pecho", colorHex: "F08B4F", iconName: "chest"),
                     Tag(name: "Hombros", colorHex: "A280D9", iconName: "shoulders"),

@@ -64,34 +64,23 @@ struct SummaryCardSkeleton: View {
                         switch kind {
                         case .muscle:
                             VStack(spacing: 6) {
-                                HStack {
-                                    Text("Front").frame(maxWidth: .infinity)
-                                    Text("Back").frame(maxWidth: .infinity)
-                                }
-                                .font(.caption).foregroundStyle(.secondary)
+                                MuscleBodyLabels()
                                 GeometryReader { diagram in
-                                    let height = min(320, diagram.size.width * 0.86, diagram.size.height)
                                     ZStack {
                                         ForEach(MuscleBodySide.allCases, id: \.self) { side in
-                                            // Already assembled offline from the same tag-icon paths.
+                                            let frame = MuscleBodyLayout.frame(for: side, in: diagram.size)
+                                            // Original silhouettes already assembled in the asset catalog.
                                             Image(side.asset("base"))
                                                 .resizable()
                                                 .foregroundStyle(placeholder)
-                                                .frame(width: height / 2, height: height)
-                                                .position(x: diagram.size.width * (side == .front ? 0.27 : 0.73),
-                                                          y: diagram.size.height / 2)
+                                                .frame(width: frame.width, height: frame.height)
+                                                .position(x: frame.midX, y: frame.midY)
                                         }
                                     }
                                 }
                                 .frame(height: 280)
                             }
                             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                            HStack {
-                                bar(width: geometry.size.width * 0.3, height: captionHeight)
-                                Spacer()
-                                bar(width: geometry.size.width * 0.25, height: captionHeight)
-                            }
-                            .frame(maxHeight: .infinity, alignment: .top)
                         case .week:
                             HStack(alignment: .bottom, spacing: 8) {
                                 ForEach(0..<7) { index in
@@ -156,7 +145,7 @@ struct SummaryCardSkeleton: View {
 
     private var idealHeight: CGFloat {
         switch kind {
-        case .muscle: 40 + titleHeight + 16 + captionHeight + 6 + 280 + 16 + 20
+        case .muscle: 40 + titleHeight + 16 + captionHeight + 6 + 280
         case .week: 40 + titleHeight + 20 + captionHeight * 2 + 16 + chartHeight
         case .tags, .totals: dynamicTypeSize.isAccessibilitySize ? 380 : 180
         }

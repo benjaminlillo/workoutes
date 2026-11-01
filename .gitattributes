@@ -1,0 +1,3 @@
+# Native vector artwork is stored as PDF resources, not line-oriented source.
+Workoutes/Shared/MuscleIcons.xcassets/**/icon.pdf binary
+Workoutes/Workoutes/BodyMap.xcassets/**/body.pdf binary

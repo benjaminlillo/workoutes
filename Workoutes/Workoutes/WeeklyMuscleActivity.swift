@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Anatomical names match tools/muscle-icons/body-paths.json and the existing tag icons.
+/// Anatomical names match tools/muscle-icons/reference_artwork.py and the shared tag icons.
 enum MuscleBodySide: String, CaseIterable {
     case front, back
 
@@ -10,12 +10,48 @@ enum MuscleBodySide: String, CaseIterable {
             ["chest", "obliques", "abs", "biceps", "triceps", "neck", "trapezius", "deltoids",
              "adductors", "quadriceps", "tibialis", "calves", "forearm"]
         case .back:
-            ["neck", "trapezius", "deltoids", "upper-back", "triceps", "lower-back", "forearm",
+            ["neck", "trapezius", "deltoids", "upper-back", "lats", "triceps", "lower-back", "forearm",
              "gluteal-lateral", "gluteal-medial", "adductors", "hamstring", "calves"]
         }
     }
 
     func asset(_ region: String) -> String { "body-\(rawValue)-\(region)" }
+
+    var columnCenter: CGFloat { self == .front ? 0.285 : 0.715 }
+}
+
+/// Keep the original artwork proportions, with room for the count badges outside the hands.
+enum MuscleBodyLayout {
+    static func frame(for side: MuscleBodySide, in size: CGSize) -> CGRect {
+        let height = min(320, size.width * 0.74, size.height)
+        let center = size.width * side.columnCenter
+        return CGRect(x: center - height / 4, y: (size.height - height) / 2,
+                      width: height / 2, height: height)
+    }
+}
+
+struct MuscleBodyLabels: View {
+    var body: some View {
+        MuscleBodyLabelsLayout {
+            Text("Front")
+            Text("Back")
+        }
+        .font(.caption).foregroundStyle(.secondary)
+    }
+}
+
+private struct MuscleBodyLabelsLayout: Layout {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        CGSize(width: proposal.width ?? 330,
+               height: subviews.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        for (side, subview) in zip(MuscleBodySide.allCases, subviews) {
+            subview.place(at: CGPoint(x: bounds.minX + bounds.width * side.columnCenter, y: bounds.midY),
+                          anchor: .center, proposal: .unspecified)
+        }
+    }
 }
 
 struct MuscleBodyAnchor {
@@ -35,19 +71,19 @@ enum MuscleBodyAnatomy {
         switch icon {
         case .fullBody: names = side.regions
         case .upperBody:
-            names = ["chest", "obliques", "abs", "biceps", "triceps", "neck", "trapezius", "deltoids", "upper-back", "lower-back", "forearm"]
+            names = ["chest", "obliques", "abs", "biceps", "triceps", "neck", "trapezius", "deltoids", "upper-back", "lats", "lower-back", "forearm"]
         case .lowerBody:
             names = ["quadriceps", "adductors", "calves", "tibialis", "hamstring", "gluteal-lateral", "gluteal-medial"]
         case .arms: names = ["biceps", "triceps", "forearm"]
         case .core: names = ["abs", "obliques"]
         case .chest: names = ["chest"]
-        case .back: names = side == .back ? ["upper-back", "lower-back", "trapezius"] : []
+        case .back: names = side == .back ? ["upper-back", "lats", "lower-back", "trapezius"] : []
         case .shoulders: names = ["deltoids"]
         case .biceps: names = ["biceps"]
         case .triceps: names = ["triceps"]
         case .forearms: names = ["forearm"]
         case .trapezius: names = ["trapezius"]
-        case .upperBack: names = ["upper-back"]
+        case .upperBack: names = ["upper-back", "trapezius"]
         case .lowerBack: names = ["lower-back"]
         case .abdominals: names = ["abs"]
         case .obliques: names = ["obliques"]
@@ -65,25 +101,25 @@ enum MuscleBodyAnatomy {
 
     static func anchor(for icon: MuscleIcon) -> MuscleBodyAnchor {
         switch icon {
-        case .fullBody: MuscleBodyAnchor(350, 570)
-        case .upperBody, .chest: MuscleBodyAnchor(310, 380)
-        case .lowerBody, .quadriceps: MuscleBodyAnchor(300, 850)
-        case .arms, .biceps: MuscleBodyAnchor(235, 450)
-        case .core, .abdominals: MuscleBodyAnchor(350, 520)
-        case .back, .upperBack: MuscleBodyAnchor(350, 430, side: .back)
-        case .shoulders: MuscleBodyAnchor(220, 320)
-        case .triceps: MuscleBodyAnchor(520, 450, side: .back)
-        case .forearms: MuscleBodyAnchor(165, 600)
-        case .trapezius: MuscleBodyAnchor(365, 310, side: .back)
-        case .lowerBack: MuscleBodyAnchor(365, 550, side: .back)
-        case .obliques: MuscleBodyAnchor(285, 515)
-        case .neck: MuscleBodyAnchor(335, 275)
-        case .glutes: MuscleBodyAnchor(405, 690, side: .back)
-        case .hamstrings: MuscleBodyAnchor(425, 850, side: .back)
-        case .calves: MuscleBodyAnchor(425, 1110, side: .back)
-        case .adductors: MuscleBodyAnchor(330, 760)
-        case .abductors: MuscleBodyAnchor(460, 655, side: .back)
-        case .tibialis: MuscleBodyAnchor(295, 1110)
+        case .fullBody, .core, .abdominals: MuscleBodyAnchor(335, 627)
+        case .upperBody, .chest: MuscleBodyAnchor(305, 337)
+        case .lowerBody, .quadriceps: MuscleBodyAnchor(302, 842)
+        case .arms, .biceps: MuscleBodyAnchor(190, 431)
+        case .back: MuscleBodyAnchor(429, 464, side: .back)
+        case .upperBack: MuscleBodyAnchor(436, 321, side: .back)
+        case .shoulders: MuscleBodyAnchor(216, 305)
+        case .triceps: MuscleBodyAnchor(543, 431, side: .back)
+        case .forearms: MuscleBodyAnchor(153, 597)
+        case .trapezius: MuscleBodyAnchor(382, 354, side: .back)
+        case .lowerBack: MuscleBodyAnchor(454, 571, side: .back)
+        case .obliques: MuscleBodyAnchor(277, 538)
+        case .neck: MuscleBodyAnchor(370, 237)
+        case .glutes: MuscleBodyAnchor(415, 706, side: .back)
+        case .hamstrings: MuscleBodyAnchor(438, 879, side: .back)
+        case .calves: MuscleBodyAnchor(471, 1115, side: .back)
+        case .adductors: MuscleBodyAnchor(328, 758)
+        case .abductors: MuscleBodyAnchor(471, 709, side: .back)
+        case .tibialis: MuscleBodyAnchor(258, 1129)
         }
     }
 }
