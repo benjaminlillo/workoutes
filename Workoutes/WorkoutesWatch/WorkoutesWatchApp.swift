@@ -30,6 +30,7 @@ final class TrainingWatchDelegate: NSObject, WKApplicationDelegate {
 struct WatchTrainingView: View {
     @Bindable var controller: WatchTrainingController
     @State private var finishing = false
+    @State private var recoveringHealthSave = false
     @State private var effort = 5
     var body: some View {
         Group {
@@ -41,38 +42,23 @@ struct WatchTrainingView: View {
                 })
                     .id(run.id)
             } else {
-                NavigationStack {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            Image(systemName: "dumbbell.fill").font(.largeTitle)
-                            if let run = controller.run {
-                                Text("Training Complete").font(.headline)
-                                Text(TrainingClock.label(run.elapsed(at: run.endedAt ?? .now)))
-                                if let calories = run.metrics.activeCalories { Text("\(Int(calories)) active kcal") }
-                                if let recovery = run.metrics.recoveryOneMinute { Text("Recovery: \(Int(recovery)) bpm").font(.caption) }
-                                if controller.isBusy { ProgressView("Saving to Health…") }
-                                if let error = run.healthSaveError {
-                                    Text(error).font(.caption)
-                                    Button("Retry Health Save") { controller.local(.retrySave) }.disabled(controller.isBusy)
-                                    if run.healthSaveSkipped != true {
-                                        Button("Keep Local Record and Continue") { controller.local(.keepLocalRecord) }.disabled(controller.isBusy)
-                                    }
-                                } else if run.healthWorkoutID != nil {
-                                    Label("Saved to Health", systemImage: "checkmark.circle").font(.caption)
-                                }
-                            }
-                            Text(controller.archive.plan.localizedName).font(.headline)
-                            #if targetEnvironment(simulator)
-                            Text("Simulator Preview\nNo Health recording").font(.caption).foregroundStyle(.orange)
-                            #endif
-                            Text("\(controller.archive.plan.exerciseCount) exercise blocks").font(.caption)
-                            Button("Start Training") { controller.startFromWatch() }
-                                .disabled(!controller.canStart)
-                            Text("Configure your structure and choose exercises on iPhone.").font(.caption).foregroundStyle(.secondary)
-                        }.multilineTextAlignment(.center)
-                    }
-                    .navigationTitle("Workoutes")
+                startScreen
+            }
+        }
+        .sheet(isPresented: $recoveringHealthSave) {
+            ScrollView {
+                if let error = controller.run?.healthSaveError {
+                    Text(error).font(.caption)
                 }
+                Button("Retry Health Save") {
+                    recoveringHealthSave = false
+                    controller.local(.retrySave)
+                }
+                Button("Keep Local Record and Continue") {
+                    recoveringHealthSave = false
+                    controller.local(.keepLocalRecord)
+                }
+                Button("Cancel", role: .cancel) { recoveringHealthSave = false }
             }
         }
         .sheet(isPresented: $finishing) {
@@ -91,5 +77,40 @@ struct WatchTrainingView: View {
         .alert("Training", isPresented: Binding(get: { controller.errorMessage != nil }, set: { if !$0 { controller.errorMessage = nil } })) {
             Button("OK", role: .cancel) { controller.errorMessage = nil }
         } message: { Text(controller.errorMessage ?? "") }
+    }
+
+    private var startScreen: some View {
+        VStack(spacing: 24) {
+            Text("Workoutes")
+                .font(.system(.title2, design: .rounded, weight: .semibold))
+                .accessibilityAddTraits(.isHeader)
+            Button {
+                if controller.run?.healthSaveError != nil, controller.run?.healthSaveSkipped != true {
+                    recoveringHealthSave = true
+                } else {
+                    controller.startFromWatch()
+                }
+            } label: {
+                Image(systemName: "play.fill")
+                    .font(.system(size: 36, weight: .semibold))
+                    .foregroundStyle(Color(red: 0.03, green: 0.22, blue: 0.09))
+                    .offset(x: 2)
+                    .frame(width: 96, height: 96)
+                    .background {
+                        Circle().fill(LinearGradient(
+                            colors: [Color(red: 0.62, green: 0.96, blue: 0.23),
+                                     Color(red: 0.17, green: 0.77, blue: 0.31)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing))
+                    }
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(controller.isBusy)
+            .opacity(controller.isBusy ? 0.45 : 1)
+            .accessibilityLabel("Start Training")
+            .accessibilityIdentifier("watchStartTraining")
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 8)
     }
 }
