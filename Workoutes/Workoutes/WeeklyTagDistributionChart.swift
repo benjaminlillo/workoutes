@@ -3,10 +3,15 @@ import SwiftUI
 
 struct WeeklyTagDistributionChart: View {
     let summary: WeeklySummary
+    private let distribution: WeeklyTagDistribution
+
+    init(summary: WeeklySummary, distribution: WeeklyTagDistribution? = nil) {
+        self.summary = summary
+        self.distribution = distribution ?? WeeklyTagDistribution(summary: summary)
+    }
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        let distribution = WeeklyTagDistribution(summary: summary)
         WeeklyTagCardLayout(minimumHeight: dynamicTypeSize.isAccessibilitySize ? 300 : 0) {
             GeometryReader { geometry in
                 let diameter = min(geometry.size.width * (dynamicTypeSize.isAccessibilitySize ? 0.25 : 0.42), geometry.size.height - 32)
@@ -42,8 +47,7 @@ struct WeeklyTagDistributionChart: View {
                 .padding(16)
             }
         }
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .subtleCardShadow()
+        .statisticCardBackground()
         .accessibilityIdentifier("weeklyTagDistribution")
     }
 

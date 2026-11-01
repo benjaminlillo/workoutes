@@ -323,9 +323,17 @@ final class SummaryTests: XCTestCase {
             }
             return view.subviews.compactMap { findPager($0) }.first
         }
-        try await Task.sleep(for: .milliseconds(400))
+        try await Task.sleep(for: .milliseconds(750))
         window.layoutIfNeeded()
         let pager = try XCTUnwrap(findPager(root.view))
+        func findNavigationBar(_ view: UIView) -> UINavigationBar? {
+            if let bar = view as? UINavigationBar { return bar }
+            return view.subviews.compactMap { findNavigationBar($0) }.first
+        }
+        let navigationBar = try XCTUnwrap(findNavigationBar(root.view))
+        let expandedBarHeight = navigationBar.bounds.height
+        let currentTitle = WeeklySummary(completions: [], date: .now).dateRange(relativeTo: .now)
+        XCTAssertEqual(navigationBar.topItem?.title, currentTitle)
         let viewport = pager.convert(pager.bounds, to: window)
         XCTAssertGreaterThan(viewport.minY, 0)
         XCTAssertGreaterThan(viewport.height, window.bounds.height * 0.5)
@@ -366,21 +374,21 @@ final class SummaryTests: XCTestCase {
         pager.setContentOffset(CGPoint(x: original.x - stride / 2, y: original.y), animated: false)
         try await Task.sleep(for: .milliseconds(60))
         let halfway = try snapshot("halfway")
-        // Halfway through, the gap is at screen center and cards reach both screen edges.
-        XCTAssertGreaterThan(try brightness(halfway, x: viewport.midX - 20),
-                             try brightness(halfway, x: viewport.midX) + 2)
-        XCTAssertGreaterThan(try brightness(halfway, x: viewport.midX + 20),
-                             try brightness(halfway, x: viewport.midX) + 2)
+        // Only the outgoing week has real statistics during the swipe.
+        // The incoming week already has lightweight skeleton cards until scrolling settles.
         XCTAssertGreaterThan(try brightness(halfway, x: 3), 250)
         XCTAssertGreaterThan(try brightness(halfway, x: viewport.width - 3), 250)
         pager.setContentOffset(CGPoint(x: original.x - stride, y: original.y), animated: false)
-        try await Task.sleep(for: .milliseconds(350))
+        try await Task.sleep(for: .milliseconds(750))
         let previous = try snapshot("previous-week")
         let headerBounds = CGRect(x: 0, y: 0, width: viewport.width, height: viewport.minY)
         XCTAssertNotEqual(try XCTUnwrap(initial.cropping(to: headerBounds)).dataProvider?.data as Data?,
                           try XCTUnwrap(previous.cropping(to: headerBounds)).dataProvider?.data as Data?)
         XCTAssertEqual(pager.convert(pager.bounds, to: window).minY, viewport.minY, accuracy: 0.5)
         XCTAssertEqual(pager.contentOffset.x, original.x - stride, accuracy: 0.5)
+        let previousDate = Calendar.current.date(byAdding: .day, value: -7, to: .now)!
+        let previousTitle = WeeklySummary(completions: [], date: previousDate).dateRange(relativeTo: .now)
+        XCTAssertEqual(navigationBar.topItem?.title, previousTitle)
         var ancestor = pager.superview
         var verticalScroll: UIScrollView?
         while let view = ancestor {
@@ -393,12 +401,80 @@ final class SummaryTests: XCTestCase {
         let vertical = try XCTUnwrap(verticalScroll)
         vertical.setContentOffset(CGPoint(x: 0, y: viewport.minY + 60), animated: false)
         try await Task.sleep(for: .milliseconds(100))
-        let scrolled = try snapshot("scrolled-to-top")
+        _ = try snapshot("scrolled-to-top")
         XCTAssertLessThan(pager.convert(pager.bounds, to: window).minY, 0)
-        // The native top-edge effect blends the card with the background, rather than clipping it.
-        XCTAssertGreaterThan(try brightness(scrolled, x: viewport.midX, y: 10),
-                             try brightness(initial, x: viewport.midX, y: 10) + 3)
+        XCTAssertFalse(navigationBar.isHidden)
+        XCTAssertLessThan(navigationBar.bounds.height, expandedBarHeight - 10,
+                          "The native large title must collapse into the top navigation bar")
+        XCTAssertEqual(navigationBar.topItem?.title, previousTitle)
 
+    }
+
+    func testWeekStatisticsDissolveOverSkeletonWithoutHidingCardBackgrounds() async throws {
+        let store = try container()
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = UIHostingController(rootView: SummaryView().modelContainer(store)
+            .environment(\.dynamicTypeSize, .large))
+        window.overrideUserInterfaceStyle = .light
+        window.makeKeyAndVisible()
+        window.layoutIfNeeded()
+        defer { window.isHidden = true }
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let renderer = UIGraphicsImageRenderer(bounds: window.bounds, format: format)
+        func snapshot() -> UIImage {
+            renderer.image { _ in window.drawHierarchy(in: window.bounds, afterScreenUpdates: true) }
+        }
+        func brightness(_ image: UIImage, rect: CGRect) throws -> Double {
+            let width = Int(rect.width), height = Int(rect.height)
+            let patch = try XCTUnwrap(image.cgImage?.cropping(to: rect))
+            var pixels = [UInt8](repeating: 0, count: width * height * 4)
+            try pixels.withUnsafeMutableBytes { buffer in
+                let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: width, height: height,
+                    bitsPerComponent: 8, bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+                context.draw(patch, in: CGRect(x: 0, y: 0, width: width, height: height))
+            }
+            var total = 0
+            for pixel in 0..<(width * height) {
+                for channel in 0..<3 { total += Int(pixels[pixel * 4 + channel]) }
+            }
+            return Double(total) / Double(width * height * 3)
+        }
+        let initial = snapshot()
+        func findPager(_ view: UIView) -> UIScrollView? {
+            if let scroll = view as? UIScrollView, scroll.contentSize.width > scroll.bounds.width * 2 { return scroll }
+            return view.subviews.compactMap { findPager($0) }.first
+        }
+        let pager = try XCTUnwrap(findPager(window))
+        let cardTop = pager.convert(pager.bounds, to: window).minY + 16
+        let title = CGRect(x: 40, y: cardTop + 25, width: 170, height: 18)
+        let data = CGRect(x: 80, y: cardTop + 132, width: 50, height: 160)
+        let backing = CGRect(x: 23, y: cardTop + 52, width: 3, height: 3)
+        let start = try brightness(initial, rect: data)
+        let titleBrightness = try brightness(initial, rect: title)
+        var levels: [Double] = [start]
+        var frames: [UIImage] = []
+        var final = initial
+        XCTAssertGreaterThan(try brightness(initial, rect: backing), 250, "Skeleton cards must be visible immediately")
+        for _ in 0..<16 {
+            try await Task.sleep(for: .milliseconds(40))
+            final = snapshot()
+            frames.append(final)
+            levels.append(try brightness(final, rect: data))
+            XCTAssertGreaterThan(try brightness(final, rect: backing), 250, "The card backing must never fade away")
+            XCTAssertEqual(try brightness(final, rect: title), titleBrightness, accuracy: 1.5,
+                           "Static titles must remain visible throughout loading")
+        }
+        let finish = try brightness(final, rect: data)
+        XCTAssertGreaterThan(abs(finish - start), 3)
+        let low = min(start, finish), high = max(start, finish)
+        let middle = levels.indices.dropFirst().first { levels[$0] > low + 1 && levels[$0] < high - 1 }
+        XCTAssertNotNil(middle, "The skeleton must dissolve gradually into real content")
+        for (name, image) in [("loading", initial), ("fading", middle.map { frames[$0 - 1] } ?? final), ("ready", final)] {
+            try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-week-skeleton-\(name).png"))
+        }
     }
 
     func testHomeAndSettingsShowTheNewHeaderAndWatchEntryInBothAppearances() async throws {
@@ -418,7 +494,7 @@ final class SummaryTests: XCTestCase {
             window.rootViewController = UIHostingController(rootView: view.modelContainer(store)
                 .environment(\.trainingController, training).environment(\.dynamicTypeSize, size))
             window.overrideUserInterfaceStyle = scheme == .dark ? .dark : .light
-            try await Task.sleep(for: .milliseconds(250))
+            try await Task.sleep(for: .milliseconds(750))
             window.layoutIfNeeded()
             let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
                 window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)

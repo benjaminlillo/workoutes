@@ -1,11 +1,14 @@
 import SwiftUI
 
 struct WeeklyMuscleActivityCard: View {
-    let summary: WeeklySummary
+    private let activity: WeeklyMuscleActivity
+
+    init(summary: WeeklySummary, distribution: WeeklyTagDistribution? = nil) {
+        activity = WeeklyMuscleActivity(distribution: distribution ?? WeeklyTagDistribution(summary: summary))
+    }
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        let activity = WeeklyMuscleActivity(summary: summary)
         VStack(alignment: .leading, spacing: 16) {
             Text("Muscle Activity").font(.title3.bold())
             WeeklyMuscleDiagram(activity: activity)
@@ -40,8 +43,7 @@ struct WeeklyMuscleActivityCard: View {
             }
         }
         .padding(20)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .subtleCardShadow()
+        .statisticCardBackground()
         .accessibilityIdentifier("weeklyMuscleActivity")
     }
 }
@@ -53,6 +55,10 @@ private func color(for entry: WeeklyMuscleActivity.Entry) -> Color {
 private struct WeeklyMuscleDiagram: View {
     let activity: WeeklyMuscleActivity
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.displayScale) private var displayScale
+    @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.locale) private var locale
     @ScaledMetric(relativeTo: .caption) private var badgeHeight: CGFloat = 26
 
     private var calloutCount: Int {
@@ -67,17 +73,15 @@ private struct WeeklyMuscleDiagram: View {
             }
             .font(.caption).foregroundStyle(.secondary)
             GeometryReader { geometry in
-                let bodyHeight = min(320, geometry.size.width * 0.86, geometry.size.height)
-                let spacing = badgeHeight + 8
-                let height = geometry.size.height
-                ZStack(alignment: .topLeading) {
-                    ForEach(MuscleBodySide.allCases, id: \.self) { side in
-                        let frame = bodyFrame(side, size: CGSize(width: geometry.size.width, height: height), bodyHeight: bodyHeight)
-                        bodyImage(side)
-                            .frame(width: frame.width, height: frame.height)
-                            .position(x: frame.midX, y: frame.midY)
-                        callouts(side, frame: frame, size: CGSize(width: geometry.size.width, height: height), spacing: spacing)
-                    }
+                let style = MuscleDiagramStyle(colorScheme: colorScheme, contrast: contrast,
+                    dynamicTypeSize: dynamicTypeSize, locale: locale, scale: displayScale)
+                if let image = MuscleDiagramImageCache.shared.image(activity: activity, size: geometry.size,
+                    badgeHeight: badgeHeight, style: style, content: {
+                        MuscleDiagramDrawing(activity: activity, badgeHeight: badgeHeight, background: style.background)
+                    }) {
+                    Image(uiImage: image).resizable()
+                } else {
+                    MuscleDiagramDrawing(activity: activity, badgeHeight: badgeHeight, background: style.background)
                 }
             }
             .frame(height: max(280, CGFloat(calloutCount) * (badgeHeight + 8)))
@@ -85,37 +89,37 @@ private struct WeeklyMuscleDiagram: View {
         // The legend exposes every tag once, with its full name and count.
         .accessibilityHidden(true)
     }
+}
 
-    private func bodyFrame(_ side: MuscleBodySide, size: CGSize, bodyHeight: CGFloat) -> CGRect {
-        let center = size.width * (side == .front ? 0.27 : 0.73)
-        return CGRect(x: center - bodyHeight / 4, y: (size.height - bodyHeight) / 2,
-                      width: bodyHeight / 2, height: bodyHeight)
-    }
+/// Also used as the fallback if a snapshot cannot be created.
+struct MuscleDiagramDrawing: View {
+    let activity: WeeklyMuscleActivity
+    let badgeHeight: CGFloat
+    var background: Color = Color(uiColor: .secondarySystemGroupedBackground)
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.displayScale) private var displayScale
 
-    private func bodyImage(_ side: MuscleBodySide) -> some View {
-        ZStack {
-            Image(side.asset("base"))
-                .resizable().scaledToFit()
-                .foregroundStyle(Color(white: colorScheme == .dark ? 0.30 : 0.84))
-            ForEach(side.regions, id: \.self) { region in
-                let entries = activity.entries(for: region, on: side)
-                if !entries.isEmpty {
-                    Image(side.asset(region))
-                        .resizable().scaledToFit()
-                        .foregroundStyle(regionGradient(entries))
+    var body: some View {
+        GeometryReader { geometry in
+            let bodyHeight = min(320, geometry.size.width * 0.86, geometry.size.height)
+            ZStack(alignment: .topLeading) {
+                ForEach(MuscleBodySide.allCases, id: \.self) { side in
+                    let frame = bodyFrame(side, size: geometry.size, bodyHeight: bodyHeight)
+                    Image(uiImage: MuscleBodyImageCache.shared.image(side: side, activity: activity,
+                        size: frame.size, scale: displayScale, isDark: colorScheme == .dark))
+                        .resizable()
+                        .frame(width: frame.width, height: frame.height)
+                        .position(x: frame.midX, y: frame.midY)
+                    callouts(side, frame: frame, size: geometry.size, spacing: badgeHeight + 8)
                 }
             }
         }
     }
 
-    /// Distinct bands preserve each tag's color when specific and broad tags overlap.
-    private func regionGradient(_ entries: [WeeklyMuscleActivity.Entry]) -> LinearGradient {
-        let colors = entries.map { color(for: $0) }
-        let stops = colors.enumerated().flatMap { index, color in
-            [Gradient.Stop(color: color, location: Double(index) / Double(colors.count)),
-             Gradient.Stop(color: color, location: Double(index + 1) / Double(colors.count))]
-        }
-        return LinearGradient(stops: stops, startPoint: .leading, endPoint: .trailing)
+    private func bodyFrame(_ side: MuscleBodySide, size: CGSize, bodyHeight: CGFloat) -> CGRect {
+        let center = size.width * (side == .front ? 0.27 : 0.73)
+        return CGRect(x: center - bodyHeight / 4, y: (size.height - bodyHeight) / 2,
+                      width: bodyHeight / 2, height: bodyHeight)
     }
 
     private func callouts(_ side: MuscleBodySide, frame: CGRect, size: CGSize, spacing: CGFloat) -> some View {
@@ -142,7 +146,7 @@ private struct WeeklyMuscleDiagram: View {
                 .font(.caption.bold().monospacedDigit())
                 .foregroundStyle(color(for: entry))
                 .frame(width: badgeWidth, height: badgeHeight)
-                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 9))
+                .background(background, in: RoundedRectangle(cornerRadius: 9))
                 .overlay { RoundedRectangle(cornerRadius: 9).strokeBorder(color(for: entry).opacity(0.4), lineWidth: 1) }
                 .position(x: badgeX, y: labelY)
         }

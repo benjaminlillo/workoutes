@@ -91,26 +91,52 @@ enum MuscleBodyAnatomy {
 struct WeeklyMuscleActivity {
     typealias Entry = WeeklyTagDistribution.Entry
     let entries: [Entry]
+    let diagramSignature: String
+    private let regionEntries: [MuscleBodySide: [String: [Entry]]]
+    private let sideCallouts: [MuscleBodySide: [Entry]]
 
     init(summary: WeeklySummary) {
-        entries = WeeklyTagDistribution(summary: summary).entries
+        self.init(distribution: WeeklyTagDistribution(summary: summary))
+    }
+
+    init(distribution: WeeklyTagDistribution) {
+        entries = distribution.entries
+        var regions: [MuscleBodySide: [String: [Entry]]] = [:]
+        var callouts: [MuscleBodySide: [(index: Int, entry: Entry, anchor: MuscleBodyAnchor)]] = [:]
+        for (index, entry) in entries.enumerated() {
+            guard let icon = entry.icon else { continue }
+            for side in MuscleBodySide.allCases {
+                for region in MuscleBodyAnatomy.regions(for: icon, on: side) {
+                    regions[side, default: [:]][region, default: []].append(entry)
+                }
+            }
+            let anchor = MuscleBodyAnatomy.anchor(for: icon)
+            callouts[anchor.side, default: []].append((index, entry, anchor))
+        }
+        regionEntries = regions
+        let sortedCallouts = callouts.mapValues { values in
+            values.sorted {
+                $0.anchor.point.y == $1.anchor.point.y ? $0.index < $1.index : $0.anchor.point.y < $1.anchor.point.y
+            }.map(\.entry)
+        }
+        sideCallouts = sortedCallouts
+        diagramSignature = MuscleBodySide.allCases.map { side in
+            let paints = side.regions.map { region in
+                region + ":" + (regions[side]?[region] ?? []).map { $0.colorHex ?? "808080" }.joined(separator: ",")
+            }.joined(separator: ";")
+            let labels = (sortedCallouts[side] ?? []).map { entry in
+                "\(entry.icon?.rawValue ?? ""):\(entry.colorHex ?? "808080"):\(entry.count)"
+            }.joined(separator: ";")
+            return side.rawValue + "|" + paints + "|" + labels
+        }.joined(separator: "/")
     }
 
     func entries(for region: String, on side: MuscleBodySide) -> [Entry] {
-        entries.filter { entry in
-            guard let icon = entry.icon else { return false }
-            return MuscleBodyAnatomy.regions(for: icon, on: side).contains(region)
-        }
+        regionEntries[side]?[region] ?? []
     }
 
     func callouts(on side: MuscleBodySide) -> [Entry] {
-        entries.enumerated().filter { _, entry in
-            entry.icon.map { MuscleBodyAnatomy.anchor(for: $0).side == side } ?? false
-        }.sorted {
-            let lhs = MuscleBodyAnatomy.anchor(for: $0.element.icon!).point.y
-            let rhs = MuscleBodyAnatomy.anchor(for: $1.element.icon!).point.y
-            return lhs == rhs ? $0.offset < $1.offset : lhs < rhs
-        }.map(\.element)
+        sideCallouts[side] ?? []
     }
 }
 

@@ -3445,6 +3445,24 @@
       },
       "generatesSymbol": false
     },
+    "Loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargando"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Lower Back": {
       "extractionState": "manual",
       "localizations": {

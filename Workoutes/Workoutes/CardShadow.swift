@@ -24,6 +24,15 @@ enum CardRowPosition {
 }
 
 extension View {
+    /// Keep a statistic's shadow on its opaque backing, not on every chart mark or body layer.
+    func statisticCardBackground(cornerRadius: CGFloat = 24) -> some View {
+        background {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                .subtleCardShadow()
+        }
+    }
+
     func subtleCardShadow() -> some View {
         shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 1)
     }
