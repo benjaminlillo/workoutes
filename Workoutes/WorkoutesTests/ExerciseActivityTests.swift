@@ -134,6 +134,58 @@ final class ExerciseActivityTests: XCTestCase {
         await controller.waitForPendingUpdates()
     }
 
+    func testDeniedLiveActivitiesCanRecoverWithoutRestartingTheExercise() async throws {
+        let container = try makeContainer()
+        let item = exercise("Exercise With Live Activities Disabled")
+        container.mainContext.insert(item)
+        var authorized = false
+        let controller = ExerciseActivityController(context: container.mainContext, areActivitiesAuthorized: { authorized })
+
+        controller.toggle(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+        XCTAssertEqual(controller.liveActivityStatus, .disabled)
+        XCTAssertTrue(controller.showingLiveActivityPermissionAlert)
+        XCTAssertTrue(controller.isActive(item))
+        XCTAssertFalse(Activity<ExerciseActivityAttributes>.activities.contains { $0.content.state.exerciseID == item.activityID })
+        let sessionID = try XCTUnwrap(controller.activeSessionID)
+
+        authorized = true
+        controller.restore()
+        await controller.waitForPendingUpdates()
+        XCTAssertEqual(controller.liveActivityStatus, .active)
+        XCTAssertFalse(controller.showingLiveActivityPermissionAlert)
+        XCTAssertEqual(controller.activeSessionID, sessionID)
+        XCTAssertTrue(Activity<ExerciseActivityAttributes>.activities.contains { $0.content.state.sessionID == sessionID })
+        controller.toggle(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+    }
+
+    func testActivityEndedWhileExerciseIsStillActiveIsRecreated() async throws {
+        let container = try makeContainer()
+        let item = exercise("Unexpected Live Activity End")
+        container.mainContext.insert(item)
+        let controller = ExerciseActivityController(context: container.mainContext)
+        controller.toggle(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+        let sessionID = try XCTUnwrap(controller.activeSessionID)
+        let original = try XCTUnwrap(Activity<ExerciseActivityAttributes>.activities.first { $0.content.state.sessionID == sessionID })
+
+        await original.end(nil, dismissalPolicy: .after(.now.addingTimeInterval(2)))
+
+        for _ in 0..<100 {
+            if Activity<ExerciseActivityAttributes>.activities.contains(where: {
+                $0.id != original.id && $0.activityState == .active && $0.content.state.sessionID == sessionID
+            }) { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        XCTAssertTrue(Activity<ExerciseActivityAttributes>.activities.contains {
+            $0.id != original.id && $0.activityState == .active && $0.content.state.sessionID == sessionID
+        })
+        XCTAssertEqual(controller.activeSessionID, sessionID)
+        controller.toggle(item, context: container.mainContext)
+        await controller.waitForPendingUpdates()
+    }
+
     func testOutdatedQueryCannotCancelPersistedActiveExercise() async throws {
         let container = try makeContainer()
         let item = exercise("Recently Inserted Exercise")

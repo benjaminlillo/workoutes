@@ -15,9 +15,11 @@ struct ShareSheet: UIViewControllerRepresentable {
 }
 
 struct SettingsView: View {
+    var exerciseActivity: ExerciseActivityController? = nil
     @Environment(\.trainingController) private var training
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
     @State private var shareURL: IdentifiableURL?
     @State private var showingExportOptions = false
     @State private var exportError: String?
@@ -39,6 +41,27 @@ struct SettingsView: View {
                     Section("Apple Watch") {
                         TrainingEntryView(controller: training)
                             .subtleFormRowShadow()
+                    }
+                }
+                if let exerciseActivity, exerciseActivity.activeExerciseID != nil {
+                    Section {
+                        LabeledContent("Live Activity") {
+                            switch exerciseActivity.liveActivityStatus {
+                            case .active: Text("Active")
+                            case .disabled: Text("Disabled")
+                            case .unavailable: Text("Unavailable")
+                            }
+                        }
+                        .subtleFormRowShadow(exerciseActivity.liveActivityStatus == .active ? .single : .first)
+                        if exerciseActivity.liveActivityStatus == .disabled {
+                            Button("Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                            }
+                            .subtleFormRowShadow(.last)
+                        } else if exerciseActivity.liveActivityStatus == .unavailable {
+                            Button("Retry") { exerciseActivity.restore() }
+                                .subtleFormRowShadow(.last)
+                        }
                     }
                 }
                 Section("Appearance") {

@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Environment(\.trainingController) private var training
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @Query private var exercises: [WorkoutExercise]
     @Query private var tags: [Tag]
     @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
@@ -13,6 +14,7 @@ struct ContentView: View {
     @State var navigation = ExerciseNavigation()
     
     var body: some View {
+        @Bindable var exerciseActivity = exerciseActivity
         TabView(selection: $navigation.selectedTab) {
             Tab(value: AppTab.summary) {
                 SummaryView(pull: $motivationalPull)
@@ -30,7 +32,7 @@ struct ContentView: View {
                 Image(systemName: "dumbbell").accessibilityLabel("Exercises")
             }
             Tab(value: AppTab.settings) {
-                SettingsView()
+                SettingsView(exerciseActivity: exerciseActivity)
             } label: {
                 Image(systemName: "gearshape").accessibilityLabel("Settings")
             }
@@ -58,6 +60,15 @@ struct ContentView: View {
             exerciseActivity.synchronize(exercises: exercises)
         }
         .onChange(of: weightUnit) { exerciseActivity.synchronize(exercises: exercises) }
+        .task { await exerciseActivity.observeLiveActivityAuthorization() }
+        .alert("Live Activity", isPresented: $exerciseActivity.showingLiveActivityPermissionAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            }
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Live Activities are disabled for Workoutes.")
+        }
         .alert(training?.errorMessage != nil ? "Training" : "Exercise Session", isPresented: Binding(
             get: { exerciseActivity.errorMessage != nil || training?.errorMessage != nil },
             set: { if !$0 { exerciseActivity.errorMessage = nil; training?.errorMessage = nil } }

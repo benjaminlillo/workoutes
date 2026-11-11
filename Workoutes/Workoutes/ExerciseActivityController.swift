@@ -1,6 +1,7 @@
 import ActivityKit
 import Foundation
 import Observation
+import OSLog
 import SwiftData
 import SwiftUI
 import UIKit
@@ -37,6 +38,10 @@ extension WorkoutExercise {
 @MainActor
 @Observable
 final class ExerciseActivityController {
+    enum LiveActivityStatus {
+        case unavailable, active, disabled
+    }
+
     var training: PhoneTrainingController?
     private var localExerciseID: String?
     private var localStartedAt: Date?
@@ -53,12 +58,15 @@ final class ExerciseActivityController {
         return "\(result.id):\(run.progress.stage.rawValue):\(result.sets.count):\(phaseStart.timeIntervalSinceReferenceDate)"
     }
     private(set) var isUpdating = false
+    private(set) var liveActivityStatus: LiveActivityStatus = .unavailable
+    var showingLiveActivityPermissionAlert = false
     var errorMessage: String?
 
+    private static let logger = Logger(subsystem: "benjaminlillo.Workoutes", category: "LiveActivity")
     @ObservationIgnored private var activity: Activity<ExerciseActivityAttributes>?
     @ObservationIgnored private var pendingOperation: Task<Void, Never>?
     @ObservationIgnored private var stateObservation: Task<Void, Never>?
-    @ObservationIgnored private var awaitingForeground = false
+    @ObservationIgnored private var activityRecovery: Task<Void, Never>?
     @ObservationIgnored private var queuedOperationCount = 0
     @ObservationIgnored private var context: ModelContext?
     // ModelContext doesn't keep its container alive. Queued work may outlive
@@ -67,12 +75,15 @@ final class ExerciseActivityController {
     @ObservationIgnored private var session: ExerciseSession?
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let liveActivitiesEnabled: Bool
+    @ObservationIgnored private let areActivitiesAuthorized: () -> Bool
 
-    init(context: ModelContext? = nil, now: @escaping () -> Date = { .now }, liveActivitiesEnabled: Bool = true) {
+    init(context: ModelContext? = nil, now: @escaping () -> Date = { .now }, liveActivitiesEnabled: Bool = true,
+         areActivitiesAuthorized: @escaping () -> Bool = { ActivityAuthorizationInfo().areActivitiesEnabled }) {
         self.context = context
         self.modelContainer = context?.container
         self.now = now
         self.liveActivitiesEnabled = liveActivitiesEnabled
+        self.areActivitiesAuthorized = areActivitiesAuthorized
         restoreSession()
         restoreCurrentActivity()
     }
@@ -173,7 +184,7 @@ final class ExerciseActivityController {
         }
         // Activity.request is synchronous and must happen before the user can
         // background the app. Only updates/end operations need the async queue.
-        requestActivityIfNeeded(for: exercise)
+        requestActivityIfNeeded(for: exercise, userInitiated: true)
         enqueue { await self.publish(exercise) }
     }
 
@@ -211,13 +222,24 @@ final class ExerciseActivityController {
 
     func restore() {
         enqueue {
-            self.awaitingForeground = false
             self.restoreSession()
             self.restoreCurrentActivity()
             guard let context = self.context else { return }
             do {
                 await self.synchronizeCurrentExercise(exercises: try context.fetch(FetchDescriptor<WorkoutExercise>()))
             } catch { self.errorMessage = error.localizedDescription }
+        }
+    }
+
+    func observeLiveActivityAuthorization() async {
+        guard liveActivitiesEnabled else { return }
+        for await enabled in ActivityAuthorizationInfo().activityEnablementUpdates {
+            if enabled, liveActivityStatus == .disabled {
+                showingLiveActivityPermissionAlert = false
+                restore()
+            } else if !enabled {
+                liveActivityStatus = .disabled
+            }
         }
     }
 
@@ -253,11 +275,17 @@ final class ExerciseActivityController {
     private func restoreCurrentActivity() {
         guard liveActivitiesEnabled else { return }
         let activities = Activity<ExerciseActivityAttributes>.activities.filter(isRunning)
-        activity = activities.first
-        observeActivity()
+        let restored = activities.first { $0.content.state.exerciseID == liveActivityExerciseID }
+            ?? activities.first { $0.id == activity?.id } ?? activities.first
+        if activity?.id != restored?.id {
+            activity = restored
+            observeActivity()
+        }
         // Recover a single activity even if an earlier process left duplicates behind.
-        for extra in activities.dropFirst() {
-            enqueue { await extra.end(nil, dismissalPolicy: .immediate) }
+        for extra in activities where extra.id != restored?.id {
+            enqueue {
+                if self.activity?.id != extra.id { await extra.end(nil, dismissalPolicy: .immediate) }
+            }
         }
     }
 
@@ -270,11 +298,13 @@ final class ExerciseActivityController {
         guard let observed = activity else { return }
         stateObservation = Task { [weak self] in
             for await state in observed.activityStateUpdates {
-                guard !Task.isCancelled else { return }
-                if state == .ended || state == .dismissed,
-                   self?.activity?.id == observed.id {
-                    self?.activity = nil
-                }
+                guard !Task.isCancelled, let self, self.activity?.id == observed.id else { return }
+                guard state == .ended || state == .dismissed else { continue }
+                Self.logger.notice("Activity became \(String(describing: state), privacy: .public)")
+                self.activity = nil
+                self.liveActivityStatus = .unavailable
+                if state == .ended { self.retryActivityInForeground() }
+                return
             }
         }
     }
@@ -282,6 +312,7 @@ final class ExerciseActivityController {
     private func finish(finalState: ExerciseActivityAttributes.ContentState? = nil) async {
         let previous = activity
         activity = nil
+        if liveActivityStatus != .disabled { liveActivityStatus = .unavailable }
         stateObservation?.cancel()
         let finalContent = finalState.map { ActivityContent(state: $0, staleDate: nil) }
         await previous?.end(finalContent, dismissalPolicy: finalState?.status == .done
@@ -343,33 +374,68 @@ final class ExerciseActivityController {
     }
 
     private func publish(_ exercise: WorkoutExercise) async {
-        guard liveActivityExerciseID == exercise.activityID, !exercise.isDeleted, liveActivitiesEnabled,
-              ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard liveActivityExerciseID == exercise.activityID, !exercise.isDeleted else { return }
         let state = content(for: exercise)
-        let content = ActivityContent(state: state, staleDate: nil)
         requestActivityIfNeeded(for: exercise)
-        if let activity, isRunning(activity), state != activity.content.state {
-            await activity.update(content)
+        if liveActivityStatus == .active, let activity, isRunning(activity), state != activity.content.state {
+            await activity.update(ActivityContent(state: state, staleDate: nil))
         }
     }
 
-    private func requestActivityIfNeeded(for exercise: WorkoutExercise) {
-        guard liveActivityExerciseID == exercise.activityID, !exercise.isDeleted, liveActivitiesEnabled,
-              ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        if let activity, isRunning(activity) { return }
-        // A previous background denial must not suppress a later foreground tap,
-        // even if SwiftUI hasn't delivered its scene-phase callback yet.
-        if UIApplication.shared.applicationState == .active { awaitingForeground = false }
-        guard !awaitingForeground else { return }
+    private func requestActivityIfNeeded(for exercise: WorkoutExercise, userInitiated: Bool = false) {
+        guard liveActivitiesEnabled, liveActivityExerciseID == exercise.activityID, !exercise.isDeleted else { return }
+        guard areActivitiesAuthorized() else {
+            if liveActivityStatus != .disabled { Self.logger.notice("Live Activities are disabled by iOS") }
+            liveActivityStatus = .disabled
+            if userInitiated { showingLiveActivityPermissionAlert = true }
+            return
+        }
+        if activity.map(isRunning) != true { restoreCurrentActivity() }
+        if let activity, isRunning(activity) {
+            liveActivityStatus = .active
+            showingLiveActivityPermissionAlert = false
+            return
+        }
+        liveActivityStatus = .unavailable
+        guard UIApplication.shared.applicationState != .background else { return }
         do {
             activity = try Activity.request(attributes: ExerciseActivityAttributes(),
                                             content: ActivityContent(state: content(for: exercise), staleDate: nil), pushType: nil)
+            liveActivityStatus = .active
+            showingLiveActivityPermissionAlert = false
+            Self.logger.notice("iOS accepted the Live Activity request")
             observeActivity()
-        } catch ActivityAuthorizationError.visibility {
-            // iOS can deny a new activity from a background snapshot. Foreground
-            // restoration retries it; repeated snapshots shouldn't produce alerts.
-            awaitingForeground = true
-        } catch { errorMessage = String(localized: "Exercise is running, but the Live Activity couldn't start: \(error.localizedDescription)") }
+        } catch {
+            let failure = error as NSError
+            Self.logger.error("Live Activity request failed: \(failure.domain, privacy: .public) \(failure.code)")
+            switch error as? ActivityAuthorizationError {
+            case .denied:
+                liveActivityStatus = .disabled
+                if userInitiated { showingLiveActivityPermissionAlert = true }
+            case .visibility, .persistenceFailure, .targetMaximumExceeded, .globalMaximumExceeded:
+                retryActivityInForeground()
+            default:
+                if userInitiated {
+                    errorMessage = String(localized: "Exercise is running, but the Live Activity couldn't start: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func retryActivityInForeground() {
+        guard activityRecovery == nil, UIApplication.shared.applicationState == .active else { return }
+        activityRecovery = Task { [weak self] in
+            defer { self?.activityRecovery = nil }
+            for delay: Duration in [.milliseconds(250), .seconds(1), .seconds(2)] {
+                try? await Task.sleep(for: delay)
+                guard !Task.isCancelled, let self, self.liveActivityStatus == .unavailable,
+                      self.liveActivityExerciseID != nil, self.context != nil,
+                      UIApplication.shared.applicationState == .active else { return }
+                // Read the current exercise again. It may have changed during the delay.
+                self.synchronize(exercises: [])
+                await self.waitForPendingUpdates()
+            }
+        }
     }
 
     private func enqueue(_ operation: @escaping @MainActor () async -> Void) {

@@ -2149,6 +2149,24 @@
       },
       "generatesSymbol": false
     },
+    "Disabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disabled"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivada"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Disables bump": {
       "extractionState": "manual",
       "localizations": {
@@ -3517,6 +3535,42 @@
       },
       "generatesSymbol": false
     },
+    "Live Activities are disabled for Workoutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Activities are disabled for Workoutes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las actividades en directo están desactivadas para Workoutes."
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Live Activity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actividad en directo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Loading": {
       "extractionState": "manual",
       "localizations": {
@@ -4862,6 +4916,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reanudar entrenamiento"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar"
           }
         }
       },
