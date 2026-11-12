@@ -3,11 +3,8 @@ import SwiftUI
 import UIKit
 
 struct DockableTagWheel: View {
-    let tags: [Tag]
+    let groups: [TagGroup]
     @Binding var selection: PersistentIdentifier?
-    let onAdd: () -> Void
-    let onEdit: (Tag) -> Void
-    let onDelete: (Tag) -> Void
 
     static let coordinateSpace = "dockable-tag-wheel"
     static let hubInset: CGFloat = 34
@@ -25,7 +22,7 @@ struct DockableTagWheel: View {
             let restCenter = dock.center(in: bounds)
             let center = TagWheelDock.clamped(CGPoint(x: (dragOrigin ?? restCenter).x + translation.width,
                                                       y: (dragOrigin ?? restCenter).y + translation.height), in: bounds)
-            TagWheelPicker(tags: tags, selection: $selection, onAdd: onAdd, onEdit: onEdit, onDelete: onDelete,
+            TagWheelPicker(groups: groups, selection: $selection,
                            screenCenter: center, selectionAngle: dock.selectionAngle,
                            onMove: { delta in
                                if dragOrigin == nil { dragOrigin = restCenter }

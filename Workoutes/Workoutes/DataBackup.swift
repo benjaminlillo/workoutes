@@ -6,10 +6,20 @@ struct ExportDataDTO: Codable {
     var exercises: [WorkoutExerciseDTO]
     var tags: [TagDTO]
     var history: [ExerciseCompletionDTO]? = nil
+    var tagGroups: [TagGroupDTO]? = nil
 }
 
 struct WorkoutDTO: Codable { var id: String; var name: String }
 struct TagDTO: Codable { var id: String; var name: String; var colorHex: String; var iconName: String? = nil; var paletteColorID: String? = nil }
+struct TagGroupDTO: Codable {
+    var id: String
+    var name: String
+    var colorHex: String
+    var paletteColorID: String?
+    var iconName: String?
+    var tags: [EntityRefDTO]
+}
+
 struct EntityRefDTO: Codable { var id: String }
 struct WorkoutExerciseDTO: Codable {
     var id: String
@@ -57,7 +67,11 @@ enum DataBackup {
             tags: tags.map { .init(id: $0.stableID!, name: $0.name, colorHex: $0.colorHex, iconName: $0.iconName, paletteColorID: $0.paletteColorID) },
             history: includeHistory ? try context.fetch(FetchDescriptor<ExerciseCompletion>()).map {
                 .init(id: $0.id, completedAt: $0.completedAt, exerciseID: $0.exercise?.stableID, snapshot: $0.snapshot)
-            } : nil
+            } : nil,
+            tagGroups: try context.fetch(FetchDescriptor<TagGroup>()).map {
+                .init(id: $0.stableID, name: $0.name, colorHex: $0.colorHex, paletteColorID: $0.paletteColorID,
+                      iconName: $0.iconName, tags: $0.tags.map { .init(id: $0.stableID!) })
+            }
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -93,6 +107,21 @@ enum DataBackup {
                 tag.paletteColorID = dto.paletteColorID
                 tags[dto.id] = tag
             }
+            if let importedGroups = payload.tagGroups, !importedGroups.isEmpty {
+                let groups = Dictionary(uniqueKeysWithValues: try context.fetch(FetchDescriptor<TagGroup>()).map { ($0.stableID, $0) })
+                for dto in importedGroups {
+                    let group = groups[dto.id] ?? TagGroup(name: dto.name, colorHex: dto.colorHex)
+                    if groups[dto.id] == nil {
+                        group.stableID = dto.id
+                        context.insert(group)
+                    }
+                    group.name = dto.name
+                    group.colorHex = dto.colorHex
+                    group.paletteColorID = dto.paletteColorID
+                    group.iconName = dto.iconName
+                    group.tags = dto.tags.compactMap { tags[$0.id] }
+                }
+            }
             for dto in payload.exercises {
                 let exercise = exercises[dto.id] ?? WorkoutExercise(
                     title: dto.title, subtitle: dto.subtitle, details: dto.details, numberOfSets: dto.numberOfSets,
@@ -120,7 +149,7 @@ enum DataBackup {
     }
 
     private static func validate(_ payload: ExportDataDTO, workoutIDs: Set<String>, tagIDs: Set<String>, exerciseIDs: Set<String>) throws {
-        for ids in [payload.workouts.map(\.id), payload.tags.map(\.id), payload.exercises.map(\.id), (payload.history ?? []).map(\.id)] {
+        for ids in [payload.workouts.map(\.id), payload.tags.map(\.id), payload.exercises.map(\.id), (payload.history ?? []).map(\.id), (payload.tagGroups ?? []).map(\.id)] {
             guard ids.allSatisfy({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }), Set(ids).count == ids.count else {
                 throw ImportError.invalid(String(localized: "Each item must have a nonempty, unique ID."))
             }
@@ -134,6 +163,12 @@ enum DataBackup {
                   Set(dto.workouts.map(\.id)).count == dto.workouts.count,
                   Set(dto.tags.map(\.id)).count == dto.tags.count else {
                 throw ImportError.invalid(String(localized: "Invalid exercise values or workout/tag references."))
+            }
+        }
+        for dto in payload.tagGroups ?? [] {
+            guard dto.tags.allSatisfy({ allTags.contains($0.id) }),
+                  Set(dto.tags.map(\.id)).count == dto.tags.count else {
+                throw ImportError.invalid(String(localized: "Invalid tag group references."))
             }
         }
         for dto in payload.history ?? [] {

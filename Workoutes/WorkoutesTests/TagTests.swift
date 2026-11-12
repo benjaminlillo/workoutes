@@ -61,6 +61,41 @@ final class TagTests: XCTestCase {
         XCTAssertEqual(saved.tags.first { $0.name == "Custom" }?.resolvedColorHex(for: .cherryIce), "50B3B1")
     }
 
+    func testGroupBackupPreservesSharedMembershipAndDeletingAGroupKeepsTags() throws {
+        let source = try store()
+        let tag = Tag(name: "Chest", colorHex: "123456")
+        let first = TagGroup(name: "Push", colorHex: "50B3B1", paletteColorID: "teal",
+                             iconName: MuscleIcon.chest.rawValue, tags: [tag])
+        let second = TagGroup(name: "Upper Body", colorHex: "654321", tags: [tag])
+        source.mainContext.insert(tag)
+        source.mainContext.insert(first)
+        source.mainContext.insert(second)
+        try source.mainContext.save()
+
+        let target = try store()
+        let context = target.mainContext
+        let backup = try DataBackup.export(from: source.mainContext, includeHistory: false)
+        try DataBackup.importData(backup, into: context)
+        try DataBackup.importData(backup, into: context)
+        let groups = try context.fetch(FetchDescriptor<TagGroup>())
+        XCTAssertEqual(groups.count, 2)
+        let restored = try XCTUnwrap(groups.first { $0.stableID == first.stableID })
+        XCTAssertEqual(restored.muscleIcon, .chest)
+        XCTAssertEqual(restored.resolvedColorHex(for: .cherryIce), TagColorPalette.teal.hex(for: .cherryIce))
+        XCTAssertEqual(restored.tags.first?.stableID, tag.stableID)
+
+        context.delete(restored)
+        try context.save()
+        let remaining = try XCTUnwrap(context.fetch(FetchDescriptor<TagGroup>()).first)
+        XCTAssertEqual(remaining.tags.first?.stableID, tag.stableID)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<Tag>()), 1)
+
+        let restoredTag = try XCTUnwrap(remaining.tags.first)
+        context.delete(restoredTag)
+        try context.save()
+        XCTAssertTrue(remaining.tags.isEmpty)
+    }
+
     func testChangingThemeUpdatesExistingTagConsumersThroughTheRootView() async throws {
         let store = try store()
         let suggested = Tag(name: "Suggested", colorHex: "5B92E5", paletteColorID: "blue")

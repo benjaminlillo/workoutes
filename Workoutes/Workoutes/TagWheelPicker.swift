@@ -2,11 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct TagWheelPicker: View {
-    let tags: [Tag]
+    let groups: [TagGroup]
     @Binding var selection: PersistentIdentifier?
-    var onAdd: () -> Void
-    var onEdit: (Tag) -> Void
-    var onDelete: (Tag) -> Void
     var screenCenter = CGPoint(x: 142, y: 142)
     var selectionAngle = TagWheelPosition.selectionAngle
     var onMove: (CGSize) -> Void = { _ in }
@@ -21,6 +18,7 @@ struct TagWheelPicker: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("appAccentColor") private var accentColor = ThemeColor.indigo.rawValue
     @Environment(\.scenePhase) private var scenePhase
     @State private var wheel = TagWheelPosition()
     @State private var drag = TagWheelDrag()
@@ -28,11 +26,11 @@ struct TagWheelPicker: View {
     @State private var isMoving = false
     @GestureState private var gestureIsActive = false
 
-    private var count: Int { tags.count }
+    private var count: Int { groups.count }
     private var selectedIndex: Int? {
-        selection.flatMap { id in tags.firstIndex { $0.persistentModelID == id } }
+        selection.flatMap { id in groups.firstIndex { $0.persistentModelID == id } }
     }
-    private var selectedTag: Tag? { selectedIndex.map { tags[$0] } }
+    private var selectedGroup: TagGroup? { selectedIndex.map { groups[$0] } }
     private var isInactive: Bool { selectedIndex == nil }
     private var snapAnimation: Animation? { reduceMotion ? nil : .snappy(duration: 0.3, extraBounce: 0.04) }
     private var colorAnimation: Animation? { reduceMotion ? nil : .easeInOut(duration: 0.35) }
@@ -40,21 +38,17 @@ struct TagWheelPicker: View {
     var body: some View {
         observedDisc
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Filter by Tag")
+        .accessibilityLabel("Filter by Group")
         .accessibilityValue(accessibilityValue)
-        .accessibilityHint("Rotate to select a tag. Drag the center to move the wheel. Manage tags in the toolbar.")
+        .accessibilityHint("Rotate to select a group. Drag the center to move the wheel.")
         .accessibilityAdjustableAction { adjustSelection($0) }
         .accessibilityActions {
-            Button("Deselect All Tags") { deactivate() }
-            Button("Add Tag") { onAdd() }
+            Button("Clear Group Filter") { deactivate() }
             Button("Move Wheel to Left Edge") { onDock(.leading) }
             Button("Move Wheel to Right Edge") { onDock(.trailing) }
             Button("Move Wheel to Top Edge") { onDock(.top) }
             Button("Move Wheel to Bottom Edge") { onDock(.bottom) }
-            if let selectedTag {
-                Button("Edit Tag") { onEdit(selectedTag) }
-                Button("Delete Tag") { onDelete(selectedTag) }
-            }
+
         }
         .accessibilityIdentifier("tag-wheel")
     }
@@ -70,7 +64,7 @@ struct TagWheelPicker: View {
         positionedDisc
         .sensoryFeedback(.selection, trigger: selection)
         .onChange(of: selection, initial: true) { synchronizeSelection() }
-        .onChange(of: tags.map(\.persistentModelID)) { synchronizeSelection(force: true) }
+        .onChange(of: groups.map(\.persistentModelID)) { synchronizeSelection(force: true) }
         .onDisappear(perform: resetInteraction)
         .onChange(of: gestureIsActive) { _, active in
             if !active {
@@ -89,14 +83,14 @@ struct TagWheelPicker: View {
                 .accessibilityHidden(true)
             Circle().fill(.clear)
                 .contentShape(Circle())
-                .gesture(SpatialTapGesture().onEnded { chooseTag(at: $0.location) })
+                .gesture(SpatialTapGesture().onEnded { chooseGroup(at: $0.location) })
 
-            ForEach(tags) { tag in
-                let index = tags.firstIndex { $0.persistentModelID == tag.persistentModelID } ?? 0
+            ForEach(Array(groups.enumerated()), id: \.element.persistentModelID) { index, group in
                 let angle = selectionAngle
                     - (Double(index) - wheel.position) * TagWheelPosition.angularSpacing(for: count)
-                TagWheelSlot(tag: tag, angle: angle, count: count, isSelected: index == selectedIndex,
-                             onChoose: { toggleTag(index) }, onEdit: { onEdit(tag) }, onDelete: { onDelete(tag) })
+                TagWheelSlot(group: group, angle: angle, count: count, isSelected: index == selectedIndex,
+                             colorHex: group.resolvedColorHex(for: ThemeColor.resolve(accentColor)),
+                             onChoose: { toggleGroup(index) })
                     .animation(colorAnimation) { content in
                         content.opacity(isInactive ? 0.65 : 1)
                     }
@@ -119,8 +113,8 @@ struct TagWheelPicker: View {
     }
 
     private var accessibilityValue: String {
-        guard let selectedTag, let selectedIndex else { return String(localized: "No Tag Selected") }
-        return String(localized: "\(selectedTag.name), \(selectedIndex + 1) of \(count)")
+        guard let selectedGroup, let selectedIndex else { return String(localized: "No Group Selected") }
+        return String(localized: "\(selectedGroup.name), \(selectedIndex + 1) of \(count)")
     }
 
     private var plate: some View {
@@ -184,23 +178,23 @@ struct TagWheelPicker: View {
         atan2(point.y - center.y, point.x - center.x)
     }
 
-    private func chooseTag(at point: CGPoint) {
+    private func chooseGroup(at point: CGPoint) {
         let center = CGPoint(x: Self.diameter / 2, y: Self.diameter / 2)
         guard hypot(point.x - center.x, point.y - center.y) >= 42 else { return }
-        guard !tags.isEmpty else { onAdd(); return }
+        guard !groups.isEmpty else { return }
         let index = wheel.index(at: angle(at: point, around: center), count: count, referenceAngle: selectionAngle)
-        toggleTag(index)
+        toggleGroup(index)
     }
 
-    private func toggleTag(_ index: Int) {
+    private func toggleGroup(_ index: Int) {
         if selectedIndex == index { deactivate() }
         else { choose(index) }
     }
 
     private func choose(_ index: Int) {
-        guard tags.indices.contains(index) else { return }
+        guard groups.indices.contains(index) else { return }
         drag = TagWheelDrag()
-        selection = tags[index].persistentModelID
+        selection = groups[index].persistentModelID
         withAnimation(snapAnimation) { wheel.select(index, count: count) }
     }
 
@@ -220,8 +214,8 @@ struct TagWheelPicker: View {
     }
 
     private func updateSelection() {
-        guard !tags.isEmpty else { return }
-        let id = tags[wheel.selectedIndex(count: count)].persistentModelID
+        guard !groups.isEmpty else { return }
+        let id = groups[wheel.selectedIndex(count: count)].persistentModelID
         if selection != id { selection = id }
     }
 
@@ -239,13 +233,12 @@ struct TagWheelPicker: View {
 
 /// Interpolating the angle keeps icons and inscriptions on a circular path while snapping.
 private struct TagWheelSlot: View, Animatable {
-    let tag: Tag
+    let group: TagGroup
     var angle: Double
     let count: Int
     let isSelected: Bool
+    let colorHex: String
     let onChoose: () -> Void
-    let onEdit: () -> Void
-    let onDelete: () -> Void
     private let iconRadius = 84.0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -256,11 +249,11 @@ private struct TagWheelSlot: View, Animatable {
     }
 
     private var color: Color {
-        isSelected ? Color(hex: tag.colorHex) : Color(white: colorScheme == .dark ? 0.72 : 0.43)
+        isSelected ? Color(hex: colorHex) : Color(white: colorScheme == .dark ? 0.72 : 0.43)
     }
     private var iconSize: CGFloat {
         let base: CGFloat
-        switch tag.muscleIcon {
+        switch group.muscleIcon {
         case nil: base = 20
         case .fullBody, .lowerBody, .forearms, .quadriceps, .hamstrings, .adductors: base = 48
         default: base = 40
@@ -273,10 +266,8 @@ private struct TagWheelSlot: View, Animatable {
     var body: some View {
         ZStack {
             ZStack {
-                // Keep the artwork outside the context menu's lifted source view.
-                // Its preview can otherwise pin the icon while the disc rotates underneath it.
                 Group {
-                    if let icon = tag.muscleIcon {
+                    if let icon = group.muscleIcon {
                         MuscleIconView(icon: icon, color: color)
                             .frame(width: iconSize, height: iconSize)
                     } else {
@@ -293,17 +284,14 @@ private struct TagWheelSlot: View, Animatable {
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(tag.name)
+                .accessibilityLabel(group.name)
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
                 .accessibilityIdentifier(isSelected ? "tag-wheel-selected" : "tag-wheel-option")
-                .contextMenu {
-                    Button("Edit Tag", systemImage: "pencil", action: onEdit)
-                    Button("Delete Tag", systemImage: "trash", role: .destructive, action: onDelete)
-                }
+
             }
             .position(x: TagWheelPicker.diameter / 2 + cos(angle) * iconRadius,
                       y: TagWheelPicker.diameter / 2 + sin(angle) * iconRadius)
-            PlateInscription(text: tag.name, angle: angle,
+            PlateInscription(text: group.name, angle: angle,
                              arc: min(80 * .pi / 180, TagWheelPosition.angularSpacing(for: count) * 0.82), color: color)
         }
         .frame(width: TagWheelPicker.diameter, height: TagWheelPicker.diameter)

@@ -63,7 +63,7 @@ final class PersistenceMigrationTests: XCTestCase {
     }
 
     private func openStore(at url: URL) throws -> ModelContainer {
-        let schema = Schema([Workout.self, WorkoutExercise.self, Tag.self, ExerciseSession.self, ExerciseCompletion.self])
+        let schema = Schema([Workout.self, WorkoutExercise.self, Tag.self, TagGroup.self, ExerciseSession.self, ExerciseCompletion.self])
         return try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, url: url))
     }
 

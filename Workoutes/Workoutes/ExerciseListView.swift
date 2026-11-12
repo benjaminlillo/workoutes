@@ -5,31 +5,35 @@ struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ExerciseActivityController.self) private var exerciseActivity
     @Query(sort: \WorkoutExercise.title) private var allExercises: [WorkoutExercise]
-    @Query(sort: \Tag.name) private var allTags: [Tag]
+    @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     
     @Namespace private var toolbarGlass
     @State private var showingAddExerciseSheet = false
-    @State private var showingAddTagSheet = false
-    @State private var editingTag: Tag?
-    @State private var tagPendingDeletion: Tag?
+    @State private var showingTagManagement = false
     
     @State var navigation = ExerciseNavigation()
     @State private var highlightedRequest: ExerciseRevealRequest?
     @State private var revealPosition: ExerciseRevealPosition?
     @State private var viewportSize: CGSize = .zero
-    @State private var displayedTagIDs: Set<PersistentIdentifier>?
+    @State private var displayedFilterChange: FilterChange?
     @State private var filterTransition = ExerciseFilterTransition()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var filterChange: FilterChange {
-        FilterChange(tags: navigation.selectedTagIDs, reveal: navigation.revealRequest)
+        FilterChange(tags: navigation.selectedGroupTagIDs, reveal: navigation.revealRequest)
     }
-    private var tagSelection: Binding<PersistentIdentifier?> {
-        Binding(get: { navigation.selectedTagIDs.first },
-                set: { navigation.selectedTagIDs = $0.map { [$0] } ?? [] })
+
+    private var displayedFilter: Set<PersistentIdentifier>? {
+        if let displayedFilterChange { return displayedFilterChange.tags }
+        return navigation.selectedGroupTagIDs
     }
+
+    private var groupSelection: Binding<PersistentIdentifier?> {
+        Binding(get: { navigation.selectedGroup?.persistentModelID },
+                set: { id in navigation.selectedGroup = groups.first { $0.persistentModelID == id } })
+    }
+
     private var pageTitle: String {
-        allTags.first { $0.persistentModelID == tagSelection.wrappedValue }?.name
-            ?? String(localized: "All Exercises")
+        navigation.selectedGroup?.name ?? String(localized: "All Exercises")
     }
 
     private var activeExercise: WorkoutExercise? {
@@ -56,15 +60,13 @@ struct ExerciseListView: View {
                 ResetCompletedExercisesButton(exercises: allExercises)
                     .buttonStyle(.plain)
                     .tint(.primary)
-                TagWheelMenu(tags: allTags, selection: tagSelection.wrappedValue,
-                             onChoose: { tag in
-                                 let id = tag.persistentModelID
-                                 tagSelection.wrappedValue = tagSelection.wrappedValue == id ? nil : id
-                             }, onDeselect: { navigation.selectedTagIDs.removeAll() },
-                             onAdd: { showingAddTagSheet = true },
-                             onEdit: { editingTag = $0 },
-                             onDelete: { tagPendingDeletion = $0 })
-                    .frame(width: ExerciseToolbarStyle.targetSize, height: ExerciseToolbarStyle.targetSize)
+                Button {
+                    showingTagManagement = true
+                } label: {
+                    ExerciseToolbarLabel(title: "Manage Tags", systemImage: "tag")
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("tag-management")
             }
             .frame(width: ExerciseToolbarStyle.targetSize * (activeExercise == nil ? 2 : 3),
                    height: ExerciseToolbarStyle.targetSize, alignment: .trailing)
@@ -76,10 +78,7 @@ struct ExerciseListView: View {
     }
 
     var filteredExercises: [WorkoutExercise] {
-        let tagIDs = displayedTagIDs ?? navigation.selectedTagIDs
-        if tagIDs.isEmpty {
-            return allExercises
-        }
+        guard let tagIDs = displayedFilter else { return allExercises }
         return allExercises.filter { exercise in
             exercise.tags.contains { tag in
                 tagIDs.contains(tag.persistentModelID)
@@ -123,7 +122,7 @@ struct ExerciseListView: View {
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { viewportSize = $0 }
                 .onPreferenceChange(ExerciseRevealPositionKey.self) { revealPosition = $0 }
                 .onChange(of: filterChange, initial: true) { _, _ in transitionFilter() }
-                .task(id: FilterChange(tags: displayedTagIDs ?? navigation.selectedTagIDs,
+                .task(id: FilterChange(tags: displayedFilter,
                                        reveal: navigation.revealRequest)) {
                     guard let request = navigation.revealRequest,
                           navigation.selectedTab == .exercises,
@@ -155,18 +154,20 @@ struct ExerciseListView: View {
                 .scrollContentBackground(.hidden)
                 .overlay {
                     ExerciseFilterTransitionLayer(transition: filterTransition,
-                        showsEmptyMessage: filteredExercises.isEmpty && !(displayedTagIDs ?? navigation.selectedTagIDs).isEmpty)
+                        showsEmptyMessage: filteredExercises.isEmpty && displayedFilter != nil)
                         .allowsHitTesting(false)
                 }
                 .background { DefaultScreenBackground().ignoresSafeArea() }
                 .navigationTitle(pageTitle)
                 .navigationBarTitleDisplayMode(.large)
-                .onChange(of: allTags.map(\.persistentModelID)) { _, ids in
-                    navigation.selectedTagIDs.formIntersection(ids)
+                .onChange(of: groups.map(\.persistentModelID), initial: true) { _, ids in
+                    if let selected = navigation.selectedGroup, !ids.contains(selected.persistentModelID) {
+                        navigation.selectedGroup = nil
+                    }
                 }
                 .onDisappear {
                     filterTransition.cancel()
-                    displayedTagIDs = nil
+                    displayedFilterChange = nil
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -190,51 +191,31 @@ struct ExerciseListView: View {
                 .sheet(isPresented: $showingAddExerciseSheet) {
                     CreateGlobalExerciseSheet()
                 }
-                .sheet(isPresented: $showingAddTagSheet) {
-                    ManageTagSheet()
-                }
-                .confirmationDialog("Delete Tag?", isPresented: Binding(
-                    get: { tagPendingDeletion != nil },
-                    set: { if !$0 { tagPendingDeletion = nil } }
-                ), titleVisibility: .visible, presenting: tagPendingDeletion) { tag in
-                    Button("Delete Tag", role: .destructive) {
-                        withAnimation {
-                            navigation.selectedTagIDs.remove(tag.persistentModelID)
-                            modelContext.delete(tag)
-                        }
-                        tagPendingDeletion = nil
-                    }
-                    Button("Cancel", role: .cancel) { tagPendingDeletion = nil }
-                } message: { tag in
-                    Text("Delete \"\(tag.name)\"? Your exercises will be kept.")
-                }
-                .sheet(item: $editingTag) { tag in
-                    ManageTagSheet(editingTag: tag)
+                .navigationDestination(isPresented: $showingTagManagement) {
+                    TagManagementView()
                 }
             }
         }
         .overlay {
-            DockableTagWheel(tags: allTags,
-                             selection: tagSelection,
-                             onAdd: { showingAddTagSheet = true },
-                             onEdit: { editingTag = $0 },
-                             onDelete: { tagPendingDeletion = $0 })
+            if !showingTagManagement, !groups.isEmpty {
+                DockableTagWheel(groups: groups, selection: groupSelection)
+            }
         }
     }
 
     private func transitionFilter() {
         let change = filterChange
-        guard displayedTagIDs != nil, !reduceMotion, change.reveal == nil else {
+        guard displayedFilterChange != nil, !reduceMotion, change.reveal == nil else {
             filterTransition.cancel()
             withoutFilterAnimation {
-                displayedTagIDs = change.tags
+                displayedFilterChange = change
             }
             return
         }
-        guard displayedTagIDs != change.tags else { return }
+        guard displayedFilter != change.tags else { return }
         filterTransition.begin()
         withoutFilterAnimation {
-            displayedTagIDs = change.tags
+            displayedFilterChange = change
         }
     }
 
@@ -245,7 +226,7 @@ struct ExerciseListView: View {
     }
 
     private struct FilterChange: Equatable {
-        let tags: Set<PersistentIdentifier>
+        let tags: Set<PersistentIdentifier>?
         let reveal: ExerciseRevealRequest?
     }
 

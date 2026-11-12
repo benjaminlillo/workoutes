@@ -26,12 +26,14 @@ final class ExerciseNavigationTests: XCTestCase {
         item.tags = [matching]
         try store.mainContext.save()
         let navigation = ExerciseNavigation()
-        navigation.selectedTagIDs = [matching.persistentModelID, other.persistentModelID]
+        let group = TagGroup(name: "Upper body", colorHex: "FF8800", tags: [matching, other])
+        store.mainContext.insert(group)
+        navigation.selectedGroup = group
 
         navigation.reveal(item)
 
         XCTAssertEqual(navigation.selectedTab, .exercises)
-        XCTAssertEqual(navigation.selectedTagIDs, [matching.persistentModelID, other.persistentModelID])
+        XCTAssertEqual(navigation.selectedGroup, group)
         XCTAssertEqual(navigation.revealRequest?.exerciseID, item.persistentModelID)
     }
 
@@ -45,12 +47,14 @@ final class ExerciseNavigationTests: XCTestCase {
         store.mainContext.insert(second)
         try store.mainContext.save()
         let navigation = ExerciseNavigation()
-        navigation.selectedTagIDs = [first.persistentModelID, second.persistentModelID]
+        let group = TagGroup(name: "Strength", colorHex: "FF8800", tags: [first, second])
+        store.mainContext.insert(group)
+        navigation.selectedGroup = group
         navigation.selectedTab = .settings
 
         navigation.reveal(item)
         let firstRequest = try XCTUnwrap(navigation.revealRequest)
-        XCTAssertTrue(navigation.selectedTagIDs.isEmpty)
+        XCTAssertNil(navigation.selectedGroup)
         XCTAssertEqual(navigation.selectedTab, .exercises)
 
         navigation.reveal(item)
@@ -63,6 +67,8 @@ final class ExerciseNavigationTests: XCTestCase {
         let context = store.mainContext
         let otherTag = Tag(name: "Other exercises", colorHex: "FF8800")
         context.insert(otherTag)
+        let group = TagGroup(name: "Other group", colorHex: "FF8800", tags: [otherTag])
+        context.insert(group)
         let items = (0..<30).map { exercise(String(format: "Exercise %02d", $0)) }
         for (index, item) in items.enumerated() {
             context.insert(item)
@@ -75,7 +81,7 @@ final class ExerciseNavigationTests: XCTestCase {
         await controller.waitForPendingUpdates()
         let navigation = ExerciseNavigation()
         navigation.selectedTab = .settings
-        navigation.selectedTagIDs = [otherTag.persistentModelID]
+        navigation.selectedGroup = group
         let root = UIHostingController(rootView: ContentView(navigation: navigation)
             .environment(controller).environment(ExerciseBackgroundStore()).modelContainer(store))
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
@@ -91,14 +97,14 @@ final class ExerciseNavigationTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(500))
         let tabs = try XCTUnwrap(findTabs(root))
         XCTAssertEqual(tabs.selectedIndex, 2)
-        XCTAssertTrue(navigation.selectedTagIDs.isEmpty)
+        XCTAssertNil(navigation.selectedGroup)
         XCTAssertTrue(controller.isActive(target))
         let list = try XCTUnwrap(findList(try XCTUnwrap(tabs.selectedViewController).view))
         XCTAssertGreaterThan(list.contentOffset.y, 1_000)
         try snapshot(window, name: "first")
 
         // Repeating the action on an already mounted, filtered list must unfilter and scroll again.
-        navigation.selectedTagIDs = [otherTag.persistentModelID]
+        navigation.selectedGroup = group
         try await Task.sleep(for: .milliseconds(150))
         list.setContentOffset(CGPoint(x: 0, y: -list.adjustedContentInset.top), animated: false)
         try await Task.sleep(for: .milliseconds(100))

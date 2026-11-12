@@ -53,7 +53,7 @@ final class ExerciseFilterViewport: UIView {
         var configuration = UIContentUnavailableConfiguration.empty()
         configuration.image = UIImage(systemName: "dumbbell")
         configuration.text = String(localized: "No Exercises")
-        configuration.secondaryText = String(localized: "No exercises with this tag.")
+        configuration.secondaryText = String(localized: "No exercises in this group.")
         emptyMessage = UIContentUnavailableView(configuration: configuration)
         super.init(frame: frame)
         isUserInteractionEnabled = false

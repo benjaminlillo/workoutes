@@ -86,7 +86,7 @@ final class TagWheelDockTests: XCTestCase {
             defaults.set(TagWheelDock(edge: edge, fraction: 0.4).encoded, forKey: "tagWheelDockPosition")
             window.rootViewController = UIHostingController(rootView:
                 Color.clear.overlay {
-                    DockableTagWheel(tags: [], selection: .constant(nil), onAdd: {}, onEdit: { _ in }, onDelete: { _ in })
+                    DockableTagWheel(groups: [], selection: .constant(nil))
                 }.defaultAppStorage(defaults))
             window.makeKeyAndVisible()
             try await Task.sleep(for: .milliseconds(150))

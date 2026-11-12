@@ -31,13 +31,45 @@ final class Tag {
     
     @Relationship(inverse: \WorkoutExercise.tags)
     var exercises: [WorkoutExercise] = []
-    
+    var groups: [TagGroup] = []
+
     init(name: String, colorHex: String, iconName: String? = nil, paletteColorID: String? = nil) {
         self.stableID = UUID().uuidString
         self.name = name
         self.colorHex = colorHex
         self.paletteColorID = paletteColorID
         self.iconName = iconName
+    }
+}
+
+@Model
+final class TagGroup {
+    @Attribute(.unique) var stableID: String
+    var name: String
+    var colorHex: String
+    var paletteColorID: String?
+    var iconName: String?
+
+    @Relationship(deleteRule: .nullify, inverse: \Tag.groups)
+    var tags: [Tag] = []
+
+    init(name: String, colorHex: String, paletteColorID: String? = nil, iconName: String? = nil, tags: [Tag] = []) {
+        stableID = UUID().uuidString
+        self.name = name
+        self.colorHex = colorHex
+        self.paletteColorID = paletteColorID
+        self.iconName = iconName
+        self.tags = tags
+    }
+
+    var muscleIcon: MuscleIcon? { iconName.flatMap(MuscleIcon.init(rawValue:)) }
+
+    func resolvedColorHex(for theme: ThemeColor) -> String {
+        TagColorSelection(paletteID: paletteColorID, customHex: colorHex).hex(for: theme)
+    }
+
+    var tagIDs: Set<PersistentIdentifier> {
+        Set(tags.lazy.filter { !$0.isDeleted }.map(\.persistentModelID))
     }
 }
 

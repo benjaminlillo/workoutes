@@ -120,42 +120,6 @@ final class TagWheelTests: XCTestCase {
         XCTAssertEqual(fixed.convert(fixed.bounds, to: window).maxY, expanded.maxY, accuracy: 0.5)
     }
 
-    func testManagementActionsWaitForMenuDismissalBeforePresentingAnotherInterface() throws {
-        let button = TagWheelMenuButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
-        button.menu = UIMenu(children: [UIAction(title: "Deselect All Tags") { _ in }])
-        let interaction = try XCTUnwrap(button.contextMenuInteraction)
-        let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in button.menu }
-        let animator = MenuAnimator()
-        var changes = 0
-
-        button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
-        button.performAfterMenuDismissal { changes += 1 }
-        button.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
-        XCTAssertEqual(changes, 0, "Selection must wait until the menu's preview has returned")
-        animator.complete()
-        XCTAssertEqual(changes, 1, "Selection can change once the native preview has finished returning")
-
-        // Closing without choosing anything must leave the wheel unchanged.
-        button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
-        button.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
-        animator.complete()
-        XCTAssertEqual(changes, 1)
-
-        // UIKit may omit an animator, including when system animations are disabled.
-        button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
-        button.performAfterMenuDismissal { changes += 1 }
-        button.contextMenuInteraction(interaction, willEndFor: configuration, animator: nil)
-        XCTAssertEqual(changes, 2)
-
-        // Menu action handlers can also arrive after UIKit has started dismissing.
-        button.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: nil)
-        button.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
-        button.performAfterMenuDismissal { changes += 1 }
-        XCTAssertEqual(changes, 2)
-        animator.complete()
-        XCTAssertEqual(changes, 3)
-    }
-
     func testWheelInExerciseScreenWithMuscleIconsAndExternalFilterChanges() async throws {
         let store = try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
                                        configurations: ModelConfiguration(isStoredInMemoryOnly: true))
@@ -166,6 +130,10 @@ final class TagWheelTests: XCTestCase {
         ]
         let tags = definitions.map { Tag(name: $0.0, colorHex: $0.1, iconName: $0.2.rawValue) }
         for tag in tags { store.mainContext.insert(tag) }
+        let groups = tags.map { tag in
+            TagGroup(name: tag.name, colorHex: tag.colorHex, iconName: tag.iconName, tags: [tag])
+        }
+        for group in groups { store.mainContext.insert(group) }
         let titles = ["Fondos de tríceps", "Tríceps polea alta agarre V o recto", "Tríceps polea alta con cuerda", "Extensión de tríceps"]
         for title in titles {
             let item = WorkoutExercise(title: title, subtitle: "Cabeza larga y media", details: "", numberOfSets: 3,
@@ -176,7 +144,7 @@ final class TagWheelTests: XCTestCase {
         try store.mainContext.save()
         let navigation = ExerciseNavigation()
         navigation.selectedTab = .exercises
-        navigation.selectedTagIDs = [tags[4].persistentModelID]
+        navigation.selectedGroup = groups[4]
         let activity = ExerciseActivityController(context: store.mainContext, liveActivitiesEnabled: false)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
@@ -194,7 +162,7 @@ final class TagWheelTests: XCTestCase {
         let list = try XCTUnwrap(findList(in: try XCTUnwrap(window.rootViewController).view))
         // Intermediate wheel selections must share one bounded exit.
         transition.duration = 0.3
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        navigation.selectedGroup = groups[0]
         try await waitFor { transition.outgoing?.alpha == 0 }
         let outgoing = try XCTUnwrap(transition.outgoing, "Outgoing cards must fade before the next entrance")
         XCTAssertFalse(outgoing.subviews.isEmpty)
@@ -203,11 +171,11 @@ final class TagWheelTests: XCTestCase {
         XCTAssertEqual(outgoing.alpha, 0)
         XCTAssertTrue(outgoing.superview?.accessibilityElementsHidden == true,
                       "Snapshots must not duplicate interactive or accessible cards")
-        navigation.selectedTagIDs = [tags[4].persistentModelID]
+        navigation.selectedGroup = groups[4]
         try await waitFor { rowCount(in: list) == titles.count }
         XCTAssertTrue(transition.outgoing === outgoing, "Fast changes must reuse the original exit instead of recapturing ghosts")
         XCTAssertTrue(transition.isActive)
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        navigation.selectedGroup = groups[0]
         try await waitFor { rowCount(in: list) == 0 }
         XCTAssertTrue(transition.outgoing === outgoing, "Intermediate selections must not restart the exit")
         try await waitFor { transition.outgoing == nil }
@@ -220,13 +188,13 @@ final class TagWheelTests: XCTestCase {
         try snapshot(window, name: "no-matches")
 
         // A fast spin can remain blank and must finish on the newest selection.
-        navigation.selectedTagIDs = [tags[4].persistentModelID]
+        navigation.selectedGroup = groups[4]
         try await Task.sleep(for: .milliseconds(30))
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        navigation.selectedGroup = groups[0]
         try await Task.sleep(for: .milliseconds(30))
-        navigation.selectedTagIDs = []
+        navigation.selectedGroup = nil
         try await waitFor { !transition.isActive }
-        XCTAssertTrue(navigation.selectedTagIDs.isEmpty, "An external reset must not be overwritten by the wheel")
+        XCTAssertNil(navigation.selectedGroup, "An external reset must not be overwritten by the wheel")
         XCTAssertEqual(rowCount(in: list), titles.count, "A cancelled transition must not restore stale rows")
         XCTAssertEqual(list.alpha, 1)
         XCTAssertEqual(list.transform, .identity)
@@ -235,9 +203,9 @@ final class TagWheelTests: XCTestCase {
         try snapshot(window, name: "all")
 
         // Interrupt an actual entrance, including rows still waiting for their stagger.
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        navigation.selectedGroup = groups[0]
         try await waitFor { !transition.isActive && rowCount(in: list) == 0 }
-        navigation.selectedTagIDs = [tags[4].persistentModelID]
+        navigation.selectedGroup = groups[4]
         try await waitFor { transition.isEntering }
         try await Task.sleep(for: .milliseconds(100))
         let visibleBounds = list.bounds.inset(by: list.adjustedContentInset)
@@ -249,30 +217,30 @@ final class TagWheelTests: XCTestCase {
         XCTAssertGreaterThan(top.layer.presentation()?.opacity ?? Float(top.alpha),
                              bottom.layer.presentation()?.opacity ?? Float(bottom.alpha),
                              "Upper cards must appear before lower cards")
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        navigation.selectedGroup = groups[0]
         try await waitFor { transition.outgoing != nil }
         XCTAssertFalse(transition.isEntering, "An interrupted entrance must not keep revealing pending cards")
-        navigation.selectedTagIDs = []
+        navigation.selectedGroup = nil
         try await waitFor { !transition.isActive }
         XCTAssertEqual(rowCount(in: list), titles.count)
         XCTAssertTrue(list.visibleCells.allSatisfy { $0.alpha == 1 })
         XCTAssertNil(transition.outgoing)
 
         // Leaving the screen cancels both scheduled cards and outgoing snapshots.
-        navigation.selectedTagIDs = [tags[0].persistentModelID]
+        navigation.selectedGroup = groups[0]
         try await waitFor { transition.isActive }
         navigation.selectedTab = .settings
         try await waitFor { !transition.isActive }
         XCTAssertNil(transition.outgoing)
         XCTAssertEqual(list.alpha, 1)
         navigation.selectedTab = .exercises
-        navigation.selectedTagIDs = []
+        navigation.selectedGroup = nil
         try await waitFor { rowCount(in: list) == titles.count && !transition.isActive }
 
-        for tag in tags { store.mainContext.delete(tag) }
+        for group in groups { store.mainContext.delete(group) }
         try store.mainContext.save()
         try await Task.sleep(for: .milliseconds(450))
-        XCTAssertTrue(navigation.selectedTagIDs.isEmpty)
+        XCTAssertNil(navigation.selectedGroup)
         try snapshot(window, name: "empty")
     }
 
@@ -316,20 +284,6 @@ final class TagWheelTests: XCTestCase {
         var movingView: UIView?
     }
 
-    private final class MenuAnimator: NSObject, UIContextMenuInteractionAnimating {
-        var previewViewController: UIViewController? { nil }
-        private var completions: [() -> Void] = []
-
-        func addAnimations(_ animations: @escaping () -> Void) { animations() }
-        func addCompletion(_ completion: @escaping () -> Void) { completions.append(completion) }
-
-        func complete() {
-            let pending = completions
-            completions.removeAll()
-            pending.forEach { $0() }
-        }
-    }
-
     private struct BottomBarFixture: View {
         @ObservedObject var state: BottomBarState
 
@@ -342,7 +296,7 @@ final class TagWheelTests: XCTestCase {
                     Color.clear.frame(height: state.bottomHeight)
                 }
                 .overlay {
-                    DockableTagWheel(tags: [], selection: .constant(nil), onAdd: {}, onEdit: { _ in }, onDelete: { _ in })
+                    DockableTagWheel(groups: [], selection: .constant(nil))
                 }
         }
     }

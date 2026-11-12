@@ -27,14 +27,19 @@ struct ExerciseRevealPositionKey: PreferenceKey {
 @Observable
 final class ExerciseNavigation {
     var selectedTab: AppTab = .summary
-    var selectedTagIDs: Set<PersistentIdentifier> = []
+    var selectedGroup: TagGroup?
+
+    var selectedGroupTagIDs: Set<PersistentIdentifier>? {
+        guard let selectedGroup, !selectedGroup.isDeleted else { return nil }
+        return selectedGroup.tagIDs
+    }
     var revealRequest: ExerciseRevealRequest?
 
     func reveal(_ exercise: WorkoutExercise) {
         guard !exercise.isDeleted else { return }
-        if !selectedTagIDs.isEmpty,
-           !exercise.tags.contains(where: { selectedTagIDs.contains($0.persistentModelID) }) {
-            selectedTagIDs.removeAll()
+        if let tagIDs = selectedGroupTagIDs,
+           !exercise.tags.contains(where: { tagIDs.contains($0.persistentModelID) }) {
+            selectedGroup = nil
         }
         // A fresh token also handles repeated taps on the same active exercise.
         revealRequest = ExerciseRevealRequest(exerciseID: exercise.persistentModelID)

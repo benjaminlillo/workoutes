@@ -9,7 +9,7 @@ final class ExerciseActivityRuntime {
     let training: PhoneTrainingController
 
     private init() {
-        let schema = Schema([Workout.self, WorkoutExercise.self, Tag.self, ExerciseSession.self, ExerciseCompletion.self])
+        let schema = Schema([Workout.self, WorkoutExercise.self, Tag.self, TagGroup.self, ExerciseSession.self, ExerciseCompletion.self])
         do {
             container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema)])
             try CatalogIdentity.backfill(in: container.mainContext)
