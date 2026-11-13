@@ -3,6 +3,8 @@ import SwiftUI
 struct TagLabel: View {
     let tag: Tag
     var isSelected = false
+    var nameLineLimit: Int? = 1
+    var reservesSelectionSpace = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -16,11 +18,14 @@ struct TagLabel: View {
             Text(tag.name)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.primary)
-                .lineLimit(1)
-            if isSelected {
+                .lineLimit(nameLineLimit)
+                .fixedSize(horizontal: false, vertical: nameLineLimit == nil)
+            if isSelected || reservesSelectionSpace {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.caption)
                     .foregroundStyle(Color(hex: tag.colorHex))
+                    .opacity(isSelected ? 1 : 0)
+                    .accessibilityHidden(true)
             }
         }
     }
@@ -29,9 +34,11 @@ struct TagLabel: View {
 struct TagSelectionLabel: View {
     let tag: Tag
     let isSelected: Bool
+    var wrapsName = false
 
     var body: some View {
-        TagLabel(tag: tag, isSelected: isSelected)
+        TagLabel(tag: tag, isSelected: isSelected, nameLineLimit: wrapsName ? nil : 1,
+                 reservesSelectionSpace: wrapsName)
             .padding(.horizontal, 12)
             .frame(minHeight: 44)
             .background {
