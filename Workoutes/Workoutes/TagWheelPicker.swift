@@ -252,12 +252,7 @@ private struct TagWheelSlot: View, Animatable {
         isSelected ? Color(hex: colorHex) : Color(white: colorScheme == .dark ? 0.72 : 0.43)
     }
     private var iconSize: CGFloat {
-        let base: CGFloat
-        switch group.muscleIcon {
-        case nil: base = 20
-        case .fullBody, .lowerBody, .forearms, .quadriceps, .hamstrings, .adductors: base = 48
-        default: base = 40
-        }
+        let base: CGFloat = group.compositionIcons.isEmpty ? 20 : 48
         let available = 2 * sin(TagWheelPosition.angularSpacing(for: count) / 2) * iconRadius - 8
         let scale = count <= 2 ? 1 : min(1, max(0.42, available / 48))
         return base * scale
@@ -267,8 +262,9 @@ private struct TagWheelSlot: View, Animatable {
         ZStack {
             ZStack {
                 Group {
-                    if let icon = group.muscleIcon {
-                        MuscleIconView(icon: icon, color: color)
+                    let icons = group.compositionIcons
+                    if !icons.isEmpty {
+                        TintedMuscleComposition(icons: icons, color: color)
                             .frame(width: iconSize, height: iconSize)
                     } else {
                         Circle().fill(color).frame(width: iconSize, height: iconSize)

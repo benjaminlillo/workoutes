@@ -64,6 +64,12 @@ final class TagGroup {
 
     var muscleIcon: MuscleIcon? { iconName.flatMap(MuscleIcon.init(rawValue:)) }
 
+    var compositionIcons: [MuscleIcon] {
+        let members = tags.compactMap { $0.isDeleted ? nil : $0.muscleIcon }
+        if !members.isEmpty { return members }
+        return muscleIcon.map { [$0] } ?? []
+    }
+
     func resolvedColorHex(for theme: ThemeColor) -> String {
         TagColorSelection(paletteID: paletteColorID, customHex: colorHex).hex(for: theme)
     }

@@ -81,6 +81,10 @@ final class ExerciseActivityTests: XCTestCase {
         for icon in MuscleIcon.allCases {
             XCTAssertNotNil(UIImage(named: icon.baseAsset, in: widget, compatibleWith: nil), icon.rawValue)
             XCTAssertNotNil(UIImage(named: icon.highlightAsset, in: widget, compatibleWith: nil), icon.rawValue)
+            for panel in icon.panels {
+                XCTAssertNotNil(UIImage(named: panel.asset("base"), in: widget, compatibleWith: nil))
+                XCTAssertNotNil(UIImage(named: panel.asset(icon.rawValue), in: widget, compatibleWith: nil))
+            }
         }
     }
 
@@ -375,7 +379,9 @@ final class ExerciseActivityTests: XCTestCase {
         )
         let chest = Tag(name: "Chest", colorHex: "FF8800", iconName: MuscleIcon.chest.rawValue)
         let strength = Tag(name: "Strength", colorHex: "5599FF")
-        item.tags = [chest, strength]
+        let triceps = Tag(name: "Triceps", colorHex: "5599FF", iconName: MuscleIcon.tricepsLongHead.rawValue)
+        let legs = Tag(name: "Legs", colorHex: "CC5E55", iconName: MuscleIcon.quadriceps.rawValue)
+        item.tags = [chest, strength, triceps, legs]
         container.mainContext.insert(item)
 
         let renderer = ImageRenderer(

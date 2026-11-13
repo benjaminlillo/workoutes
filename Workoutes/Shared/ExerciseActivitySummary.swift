@@ -13,7 +13,8 @@ struct ExerciseActivitySummary: View {
             ExerciseCardHeader(
                 title: state.title, subtitle: state.subtitle, details: state.details ?? "",
                 increaseLoadNextTime: state.increaseLoadNextTime, accentColor: accentColor,
-                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? []
+                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? [],
+                tagIconHeight: 24
             ) {
                 statusControl
             }

@@ -10,6 +10,7 @@ struct ExerciseCardHeader<StatusControl: View>: View {
     let tagColors: [String]
     var tagIconNames: [String?] = []
     var tagNames: [String] = []
+    var tagIconHeight: CGFloat = 44
     @ViewBuilder var statusControl: () -> StatusControl
 
     var body: some View {
@@ -55,24 +56,19 @@ struct ExerciseCardHeader<StatusControl: View>: View {
     }
 
     private var tagIcons: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.fixed(20), spacing: 3),
-                                 count: min(3, tagColors.count)), alignment: .trailing, spacing: 3) {
-            ForEach(tagColors.indices, id: \.self) { index in
-                let icon = tagIconNames.indices.contains(index)
-                    ? tagIconNames[index].flatMap(MuscleIcon.init(rawValue:)) : nil
-                Group {
-                    if let icon {
-                        MuscleIconView(icon: icon, color: Color(hex: tagColors[index]))
-                            .frame(width: 20, height: 20)
-                    } else {
-                        Circle()
-                            .fill(Color(hex: tagColors[index]))
-                            .frame(width: 7, height: 7)
-                    }
-                }
-                .accessibilityLabel(tagNames.indices.contains(index) ? String(localized: "Tag: \(tagNames[index])") : icon?.name ?? String(localized: "Tag"))
-            }
+        let tags = tagColors.enumerated().map { index, color in
+            let icon = tagIconNames.indices.contains(index)
+                ? tagIconNames[index].flatMap(MuscleIcon.init(rawValue:)) : nil
+            let name = tagNames.indices.contains(index) ? tagNames[index] : icon?.name ?? String(localized: "Tag")
+            return (icon: icon, color: color, name: name)
         }
-        .fixedSize()
+        let composition = MuscleComposition(
+            highlights: tags.compactMap { tag in tag.icon.map { .init(icon: $0, colorHex: tag.color) } },
+            dotColors: tags.filter { $0.icon == nil }.map(\.color)
+        )
+        return ComposedMuscleIcon(composition: composition,
+                                  size: CGSize(width: 44, height: composition.highlights.isEmpty ? 12 : tagIconHeight))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(tags.map(\.name).joined(separator: ", "))
     }
 }

@@ -103,7 +103,7 @@ private struct TagGroupCard: View {
                     }
                 } label: {
                     HStack(spacing: 12) {
-                        TagGroupMark(icon: group.muscleIcon, color: Color(hex: group.resolvedColorHex(for: theme)))
+                        TagGroupMark(icons: group.compositionIcons, color: Color(hex: group.resolvedColorHex(for: theme)))
                         VStack(alignment: .leading, spacing: 3) {
                             Text(group.name).font(.headline)
                             Text("\(group.tags.count) tags")
@@ -171,14 +171,14 @@ private struct EditableTagRow: View {
 }
 
 private struct TagGroupMark: View {
-    let icon: MuscleIcon?
+    let icons: [MuscleIcon]
     let color: Color
 
     var body: some View {
         Group {
-            if let icon {
-                MuscleIconView(icon: icon, color: color)
-                    .frame(width: 34, height: 34)
+            if !icons.isEmpty {
+                TintedMuscleComposition(icons: icons, color: color)
+                    .frame(width: 36, height: 36)
             } else {
                 Circle().fill(color).frame(width: 16, height: 16)
             }
@@ -215,6 +215,9 @@ private struct ManageTagGroupSheet: View {
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var colorHex: String { colorSelection.hex(for: ThemeColor.resolve(accentColor)) }
+    private var memberIcons: [MuscleIcon] {
+        tags.filter { selectedTags.contains($0.persistentModelID) }.compactMap(\.muscleIcon)
+    }
 
     var body: some View {
         NavigationStack {
@@ -222,19 +225,26 @@ private struct ManageTagGroupSheet: View {
                 Section("Group Details") {
                     TextField("Name", text: $name)
                     TagColorPicker(selection: $colorSelection, isExpanded: $colorsExpanded)
-                    NavigationLink {
-                        MuscleIconPicker(selection: $icon, color: Color(hex: colorHex))
-                    } label: {
-                        HStack {
-                            Text("Muscle Icon")
-                            Spacer()
-                            if let icon {
-                                MuscleIconView(icon: icon, color: Color(hex: colorHex))
-                                    .frame(width: 24, height: 24)
-                                    .accessibilityHidden(true)
+                    if memberIcons.isEmpty {
+                        NavigationLink {
+                            MuscleIconPicker(selection: $icon, color: Color(hex: colorHex))
+                        } label: {
+                            HStack {
+                                Text("Muscle Icon")
+                                Spacer()
+                                if let icon {
+                                    MuscleIconView(icon: icon, color: Color(hex: colorHex))
+                                        .frame(width: 24, height: 24)
+                                        .accessibilityHidden(true)
+                                }
+                                Text(icon?.name ?? String(localized: "None"))
+                                    .foregroundStyle(.secondary)
                             }
-                            Text(icon?.name ?? String(localized: "None"))
-                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        LabeledContent("Muscle Icon") {
+                            TintedMuscleComposition(icons: memberIcons, color: Color(hex: colorHex))
+                                .frame(width: 44, height: 44)
                         }
                     }
                 }
