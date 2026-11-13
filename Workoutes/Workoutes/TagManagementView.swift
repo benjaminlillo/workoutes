@@ -2,10 +2,12 @@ import SwiftData
 import SwiftUI
 
 struct TagManagementView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     @Query(sort: \Tag.name) private var tags: [Tag]
     @AppStorage("appAccentColor") private var accentColor = ThemeColor.indigo.rawValue
     @State private var editor: Editor?
+    @State private var setupFailed = false
 
     private enum Editor: Identifiable {
         case group(TagGroup?)
@@ -22,6 +24,23 @@ struct TagManagementView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 12) {
+                if groups.isEmpty && tags.isEmpty {
+                    Button {
+                        do {
+                            try DefaultTagConfiguration.install(in: modelContext, theme: ThemeColor.resolve(accentColor))
+                        } catch {
+                            setupFailed = true
+                        }
+                    } label: {
+                        Label("Create Default Groups and Tags", systemImage: "square.stack.3d.up")
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.large)
+                    .accessibilityIdentifier("createDefaultTagConfiguration")
+                }
+
                 sectionHeader("Groups", add: "New Group") { editor = .group(nil) }
                 ForEach(groups) { group in
                     TagGroupCard(group: group, theme: ThemeColor.resolve(accentColor),
@@ -42,6 +61,9 @@ struct TagManagementView: View {
         .defaultScreenBackground()
         .transparentNavigationChrome()
         .navigationTitle("Manage Tags")
+        .alert("Could Not Create Groups and Tags", isPresented: $setupFailed) {
+            Button("OK", role: .cancel) {}
+        }
         .sheet(item: $editor) { editor in
             switch editor {
             case .group(let group): ManageTagGroupSheet(group: group)

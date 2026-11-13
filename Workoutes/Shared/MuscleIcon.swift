@@ -4,6 +4,12 @@ nonisolated enum MuscleIcon: String, CaseIterable, Identifiable {
     case fullBody, upperBody, lowerBody, arms, core
     case chest, back, shoulders, biceps, triceps, forearms, trapezius, upperBack, lowerBack, abdominals, obliques, neck
     case glutes, quadriceps, hamstrings, calves, adductors, abductors, tibialis
+    case upperChest, middleChest, lowerChest
+    case anteriorDeltoid, lateralDeltoid, posteriorDeltoid
+    case bicepsLongHead, bicepsShortHead
+    case tricepsLongHead, tricepsLateralHead, tricepsMedialHead
+    case forearmFlexors, forearmExtensors, brachioradialis
+    case lats, transverseAbdominis, externalObliques, internalObliques
 
     var id: String { rawValue }
     var baseAsset: String { "muscle-\(rawValue)-base" }
@@ -25,7 +31,7 @@ nonisolated enum MuscleIcon: String, CaseIterable, Identifiable {
         case .trapezius: String(localized: "Trapezius")
         case .upperBack: String(localized: "Upper Back")
         case .lowerBack: String(localized: "Lower Back")
-        case .abdominals: String(localized: "Abdominals")
+        case .abdominals: String(localized: "Rectus Abdominis")
         case .obliques: String(localized: "Obliques")
         case .neck: String(localized: "Neck")
         case .glutes: String(localized: "Glutes")
@@ -35,6 +41,24 @@ nonisolated enum MuscleIcon: String, CaseIterable, Identifiable {
         case .adductors: String(localized: "Adductors")
         case .abductors: String(localized: "Abductors")
         case .tibialis: String(localized: "Tibialis")
+        case .upperChest: String(localized: "Upper Chest")
+        case .middleChest: String(localized: "Middle Chest")
+        case .lowerChest: String(localized: "Lower Chest")
+        case .anteriorDeltoid: String(localized: "Anterior Deltoid")
+        case .lateralDeltoid: String(localized: "Middle Deltoid")
+        case .posteriorDeltoid: String(localized: "Posterior Deltoid")
+        case .bicepsLongHead: String(localized: "Biceps Long Head")
+        case .bicepsShortHead: String(localized: "Biceps Short Head")
+        case .tricepsLongHead: String(localized: "Triceps Long Head")
+        case .tricepsLateralHead: String(localized: "Triceps Lateral Head")
+        case .tricepsMedialHead: String(localized: "Triceps Medial Head")
+        case .forearmFlexors: String(localized: "Forearm Flexors")
+        case .forearmExtensors: String(localized: "Forearm Extensors")
+        case .brachioradialis: String(localized: "Brachioradialis")
+        case .lats: String(localized: "Lats")
+        case .transverseAbdominis: String(localized: "Transverse Abdominis")
+        case .externalObliques: String(localized: "External Obliques")
+        case .internalObliques: String(localized: "Internal Obliques")
         }
     }
 

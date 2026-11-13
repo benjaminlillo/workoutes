@@ -949,6 +949,24 @@
       },
       "generatesSymbol": false
     },
+    "Anterior Deltoid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anterior Deltoid"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deltoide anterior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Appearance": {
       "extractionState": "manual",
       "localizations": {
@@ -1219,6 +1237,42 @@
       },
       "generatesSymbol": false
     },
+    "Biceps Long Head": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biceps Long Head"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bíceps · cabeza larga"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Biceps Short Head": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biceps Short Head"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bíceps · cabeza corta"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Block %lld / %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -1268,6 +1322,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Azul"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Brachioradialis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brachioradialis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Braquiorradial"
           }
         }
       },
@@ -1861,7 +1933,25 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zona media"
+            "value": "Core"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Could Not Create Groups and Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could Not Create Groups and Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron crear los grupos y etiquetas"
           }
         }
       },
@@ -1970,6 +2060,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se pudo guardar el entrenamiento: %@"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Create Default Groups and Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Default Groups and Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crear grupos y etiquetas predeterminados"
           }
         }
       },
@@ -2857,6 +2965,24 @@
       },
       "generatesSymbol": false
     },
+    "External Obliques": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "External Obliques"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oblicuos externos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Filter and Manage Tags": {
       "extractionState": "manual",
       "localizations": {
@@ -3068,6 +3194,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Terminar esta serie u omitir el descanso actual"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Forearm Extensors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forearm Extensors"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extensores del antebrazo"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Forearm Flexors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forearm Flexors"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flexores del antebrazo"
           }
         }
       },
@@ -3631,6 +3793,24 @@
       },
       "generatesSymbol": false
     },
+    "Internal Obliques": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internal Obliques"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oblicuos internos"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Invalid exercise values or workout/tag references.": {
       "extractionState": "manual",
       "localizations": {
@@ -3757,6 +3937,24 @@
       },
       "generatesSymbol": false
     },
+    "Lats": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dorsales"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Legs": {
       "extractionState": "manual",
       "localizations": {
@@ -3865,6 +4063,24 @@
       },
       "generatesSymbol": false
     },
+    "Lower Chest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower Chest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pectoral inferior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Manage Tags": {
       "extractionState": "manual",
       "localizations": {
@@ -3914,6 +4130,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Métrico (kg)"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Middle Chest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle Chest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pectoral medio"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Middle Deltoid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle Deltoid"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deltoide medio"
           }
         }
       },
@@ -4729,6 +4981,24 @@
       },
       "generatesSymbol": false
     },
+    "Posterior Deltoid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posterior Deltoid"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deltoide posterior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Preview": {
       "extractionState": "manual",
       "localizations": {
@@ -4940,6 +5210,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recuperación: %lld lpm"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Rectus Abdominis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rectus Abdominis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recto abdominal"
           }
         }
       },
@@ -6690,6 +6978,24 @@
       },
       "generatesSymbol": false
     },
+    "Transverse Abdominis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transverse Abdominis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transverso abdominal"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Trapezius": {
       "extractionState": "manual",
       "localizations": {
@@ -6721,6 +7027,60 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tríceps"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Triceps Lateral Head": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triceps Lateral Head"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tríceps · cabeza lateral"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Triceps Long Head": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triceps Long Head"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tríceps · cabeza larga"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Triceps Medial Head": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triceps Medial Head"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tríceps · cabeza medial"
           }
         }
       },
@@ -6919,6 +7279,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tren superior"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Upper Chest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper Chest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pectoral superior"
           }
         }
       },

@@ -52,17 +52,24 @@ enum MuscleBodyAnatomy {
             names = ["quadriceps", "adductors", "calves", "tibialis", "hamstring", "gluteal-lateral", "gluteal-medial"]
         case .arms: names = ["biceps", "triceps", "forearm"]
         case .core: names = ["abs", "obliques"]
-        case .chest: names = ["chest"]
+        case .chest, .upperChest, .middleChest, .lowerChest: names = ["chest"]
         case .back: names = side == .back ? ["upper-back", "lats", "lower-back", "trapezius"] : []
         case .shoulders: names = ["deltoids"]
-        case .biceps: names = ["biceps"]
+        case .anteriorDeltoid: names = side == .front ? ["deltoids"] : []
+        case .lateralDeltoid: names = ["deltoids"]
+        case .posteriorDeltoid: names = side == .back ? ["deltoids"] : []
+        case .biceps, .bicepsLongHead, .bicepsShortHead: names = ["biceps"]
         case .triceps: names = ["triceps"]
+        case .tricepsLongHead, .tricepsLateralHead, .tricepsMedialHead: names = side == .back ? ["triceps"] : []
         case .forearms: names = ["forearm"]
+        case .forearmFlexors, .brachioradialis: names = side == .front ? ["forearm"] : []
+        case .forearmExtensors: names = side == .back ? ["forearm"] : []
         case .trapezius: names = ["trapezius"]
+        case .lats: names = side == .back ? ["lats"] : []
         case .upperBack: names = ["upper-back", "trapezius"]
         case .lowerBack: names = ["lower-back"]
         case .abdominals: names = ["abs"]
-        case .obliques: names = ["obliques"]
+        case .obliques, .externalObliques, .internalObliques, .transverseAbdominis: names = ["obliques"]
         case .neck: names = ["neck"]
         case .glutes: names = ["gluteal-lateral", "gluteal-medial"]
         case .quadriceps: names = ["quadriceps"]
@@ -78,17 +85,23 @@ enum MuscleBodyAnatomy {
     static func anchor(for icon: MuscleIcon) -> MuscleBodyAnchor {
         switch icon {
         case .fullBody, .core, .abdominals: MuscleBodyAnchor(335, 627)
-        case .upperBody, .chest: MuscleBodyAnchor(305, 337)
+        case .upperBody, .chest, .middleChest: MuscleBodyAnchor(305, 337)
+        case .upperChest: MuscleBodyAnchor(305, 292)
+        case .lowerChest: MuscleBodyAnchor(305, 381)
         case .lowerBody, .quadriceps: MuscleBodyAnchor(302, 842)
-        case .arms, .biceps: MuscleBodyAnchor(190, 431)
-        case .back: MuscleBodyAnchor(429, 464, side: .back)
+        case .arms, .biceps, .bicepsLongHead, .bicepsShortHead: MuscleBodyAnchor(190, 431)
+        case .back, .lats: MuscleBodyAnchor(429, 464, side: .back)
         case .upperBack: MuscleBodyAnchor(436, 321, side: .back)
-        case .shoulders: MuscleBodyAnchor(216, 305)
-        case .triceps: MuscleBodyAnchor(543, 431, side: .back)
-        case .forearms: MuscleBodyAnchor(153, 597)
+        case .shoulders, .anteriorDeltoid, .lateralDeltoid: MuscleBodyAnchor(216, 305)
+        case .posteriorDeltoid: MuscleBodyAnchor(216, 305, side: .back)
+        case .triceps, .tricepsLongHead, .tricepsLateralHead, .tricepsMedialHead: MuscleBodyAnchor(543, 431, side: .back)
+        case .forearms, .forearmFlexors, .brachioradialis: MuscleBodyAnchor(153, 597)
+        case .forearmExtensors: MuscleBodyAnchor(153, 597, side: .back)
         case .trapezius: MuscleBodyAnchor(382, 354, side: .back)
         case .lowerBack: MuscleBodyAnchor(454, 571, side: .back)
-        case .obliques: MuscleBodyAnchor(277, 538)
+        case .obliques, .externalObliques: MuscleBodyAnchor(277, 538)
+        case .internalObliques: MuscleBodyAnchor(287, 565)
+        case .transverseAbdominis: MuscleBodyAnchor(296, 593)
         case .neck: MuscleBodyAnchor(370, 237)
         case .glutes: MuscleBodyAnchor(415, 706, side: .back)
         case .hamstrings: MuscleBodyAnchor(438, 879, side: .back)

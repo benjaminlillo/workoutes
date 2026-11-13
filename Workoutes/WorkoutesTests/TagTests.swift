@@ -61,6 +61,42 @@ final class TagTests: XCTestCase {
         XCTAssertEqual(saved.tags.first { $0.name == "Custom" }?.resolvedColorHex(for: .cherryIce), "50B3B1")
     }
 
+    func testDefaultConfigurationRequiresEmptyGroupsAndTagsAndCanOnlyBeInstalledOnce() throws {
+        let container = try store()
+        let context = container.mainContext
+        let tag = Tag(name: "Existing Tag", colorHex: "123456")
+        context.insert(tag)
+        try DefaultTagConfiguration.install(in: context, theme: .indigo)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<Tag>()), 1)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<TagGroup>()), 0)
+        context.delete(tag)
+        try context.save()
+
+        let group = TagGroup(name: "Existing Group", colorHex: "123456")
+        context.insert(group)
+        try DefaultTagConfiguration.install(in: context, theme: .indigo)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<Tag>()), 0)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<TagGroup>()), 1)
+        context.delete(group)
+        try context.save()
+
+        try DefaultTagConfiguration.install(in: context, theme: .indigo)
+        try DefaultTagConfiguration.install(in: context, theme: .indigo)
+
+        let groups = try context.fetch(FetchDescriptor<TagGroup>())
+        XCTAssertEqual(groups.count, 8)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<Tag>()), 30)
+        let back = try XCTUnwrap(groups.first { $0.muscleIcon == .back })
+        let core = try XCTUnwrap(groups.first { $0.muscleIcon == .core })
+        let lowerBack = try XCTUnwrap(back.tags.first { $0.muscleIcon == .lowerBack })
+        XCTAssertTrue(core.tags.contains { $0.persistentModelID == lowerBack.persistentModelID })
+        XCTAssertEqual(Set(core.tags.compactMap(\.muscleIcon)),
+                       [.abdominals, .externalObliques, .internalObliques, .transverseAbdominis, .lowerBack])
+        let legs = try XCTUnwrap(groups.first { $0.muscleIcon == .lowerBody })
+        XCTAssertEqual(Set(legs.tags.compactMap(\.muscleIcon)),
+                       Set(MuscleIcon.allCases.filter { $0.group == .lowerBody }))
+    }
+
     func testGroupBackupPreservesSharedMembershipAndDeletingAGroupKeepsTags() throws {
         let source = try store()
         let tag = Tag(name: "Chest", colorHex: "123456")
