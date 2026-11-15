@@ -4639,6 +4639,24 @@
       },
       "generatesSymbol": false
     },
+    "No muscle areas recorded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No muscle areas recorded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin zonas musculares registradas"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "No paired Apple Watch is available for this iPhone.": {
       "extractionState": "manual",
       "localizations": {

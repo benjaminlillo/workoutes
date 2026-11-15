@@ -39,8 +39,6 @@ final class WeeklyMuscleActivityTests: XCTestCase {
         XCTAssertEqual(Set(activity.entries(for: "chest", on: .front).compactMap(\.colorHex)), [chest.colorHex, upper.colorHex])
         XCTAssertEqual(activity.entries.first { $0.id == .tag(generic.persistentModelID) }?.count, 2)
         XCTAssertEqual(activity.entries.first { $0.id == .untagged }?.count, 1)
-        XCTAssertEqual(activity.callouts(on: .front).count, 2)
-        XCTAssertTrue(activity.callouts(on: .back).isEmpty)
         let previous = WeeklyMuscleActivity(summary: WeeklySummary(completions: records, date: week.start.addingTimeInterval(-1)))
         XCTAssertEqual(previous.entries.first?.count, 1)
         let empty = WeeklyMuscleActivity(summary: WeeklySummary(completions: [], date: .now))
@@ -55,28 +53,16 @@ final class WeeklyMuscleActivityTests: XCTestCase {
             }
         }
         for icon in MuscleIcon.allCases {
-            let anchor = MuscleBodyAnatomy.anchor(for: icon)
-            XCTAssertTrue((0...1).contains(anchor.point.x))
-            XCTAssertTrue((0...1).contains(anchor.point.y))
-            XCTAssertFalse(MuscleBodyAnatomy.regions(for: icon, on: anchor.side).isEmpty, icon.rawValue)
+            XCTAssertTrue(MuscleBodySide.allCases.contains {
+                !MuscleBodyAnatomy.regions(for: icon, on: $0).isEmpty
+            }, icon.rawValue)
         }
         XCTAssertEqual(MuscleBodyAnatomy.regions(for: .fullBody, on: .front), MuscleBodySide.front.regions)
         XCTAssertEqual(MuscleBodyAnatomy.regions(for: .abductors, on: .back), ["gluteal-lateral"])
         XCTAssertTrue(MuscleBodyAnatomy.regions(for: .back, on: .front).isEmpty)
     }
 
-    func testCalloutsRemainOrderedSeparatedAndInsideTheChartForCrowdedMuscles() {
-        for targets in [[CGFloat](), [5], [120, 120, 120, 121, 122, 126, 130, 250], [250, 250, 250, 250, 250, 250, 250, 250]] {
-            let positions = MuscleCalloutLayout.positions(targets: targets, height: 280, spacing: 34)
-            XCTAssertEqual(positions.count, targets.count)
-            XCTAssertTrue(positions.allSatisfy { $0 >= 17 && $0 <= 263 })
-            for (first, second) in zip(positions, positions.dropFirst()) {
-                XCTAssertGreaterThanOrEqual(second - first, 34)
-            }
-        }
-    }
-
-    func testCardRendersBothAppearancesEmptyWeeksAndAccessibleCounts() throws {
+    func testCardRendersBothAppearancesAndEmptyWeeks() throws {
         let store = try store()
         let tags = [Tag(name: "Pecho", colorHex: "F08B4F", iconName: "chest"),
                     Tag(name: "Hombros", colorHex: "A280D9", iconName: "shoulders"),

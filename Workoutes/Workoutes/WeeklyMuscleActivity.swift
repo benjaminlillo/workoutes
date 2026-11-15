@@ -17,27 +17,18 @@ enum MuscleBodySide: String, CaseIterable {
 
     func asset(_ region: String) -> String { "body-\(rawValue)-\(region)" }
 
-    var columnCenter: CGFloat { self == .front ? 0.285 : 0.715 }
+    var columnCenter: CGFloat { self == .front ? 0.25 : 0.75 }
 }
 
-/// Keep the original artwork proportions, with room for the count badges outside the hands.
+/// Shares the same layout between the chart and its loading placeholder.
 enum MuscleBodyLayout {
+    static let height: CGFloat = 280
+
     static func frame(for side: MuscleBodySide, in size: CGSize) -> CGRect {
-        let height = min(320, size.width * 0.74, size.height)
+        let height = min(Self.height, size.width, size.height)
         let center = size.width * side.columnCenter
         return CGRect(x: center - height / 4, y: (size.height - height) / 2,
                       width: height / 2, height: height)
-    }
-}
-
-struct MuscleBodyAnchor {
-    let side: MuscleBodySide
-    /// Original body coordinates, normalized to the common 724 × 1448 canvas.
-    let point: CGPoint
-
-    init(_ x: CGFloat, _ y: CGFloat, side: MuscleBodySide = .front) {
-        self.side = side
-        point = CGPoint(x: x / 724, y: y / 1448)
     }
 }
 
@@ -81,44 +72,12 @@ enum MuscleBodyAnatomy {
         }
         return side.regions.filter { names.contains($0) }
     }
-
-    static func anchor(for icon: MuscleIcon) -> MuscleBodyAnchor {
-        switch icon {
-        case .fullBody, .core, .abdominals: MuscleBodyAnchor(335, 627)
-        case .upperBody, .chest, .middleChest: MuscleBodyAnchor(305, 337)
-        case .upperChest: MuscleBodyAnchor(305, 292)
-        case .lowerChest: MuscleBodyAnchor(305, 381)
-        case .lowerBody, .quadriceps: MuscleBodyAnchor(302, 842)
-        case .arms, .biceps, .bicepsLongHead, .bicepsShortHead: MuscleBodyAnchor(190, 431)
-        case .back, .lats: MuscleBodyAnchor(429, 464, side: .back)
-        case .upperBack: MuscleBodyAnchor(436, 321, side: .back)
-        case .shoulders, .anteriorDeltoid, .lateralDeltoid: MuscleBodyAnchor(216, 305)
-        case .posteriorDeltoid: MuscleBodyAnchor(216, 305, side: .back)
-        case .triceps, .tricepsLongHead, .tricepsLateralHead, .tricepsMedialHead: MuscleBodyAnchor(543, 431, side: .back)
-        case .forearms, .forearmFlexors, .brachioradialis: MuscleBodyAnchor(153, 597)
-        case .forearmExtensors: MuscleBodyAnchor(153, 597, side: .back)
-        case .trapezius: MuscleBodyAnchor(382, 354, side: .back)
-        case .lowerBack: MuscleBodyAnchor(454, 571, side: .back)
-        case .obliques, .externalObliques: MuscleBodyAnchor(277, 538)
-        case .internalObliques: MuscleBodyAnchor(287, 565)
-        case .transverseAbdominis: MuscleBodyAnchor(296, 593)
-        case .neck: MuscleBodyAnchor(370, 237)
-        case .glutes: MuscleBodyAnchor(415, 706, side: .back)
-        case .hamstrings: MuscleBodyAnchor(438, 879, side: .back)
-        case .calves: MuscleBodyAnchor(471, 1115, side: .back)
-        case .adductors: MuscleBodyAnchor(328, 758)
-        case .abductors: MuscleBodyAnchor(471, 709, side: .back)
-        case .tibialis: MuscleBodyAnchor(258, 1129)
-        }
-    }
 }
 
 struct WeeklyMuscleActivity {
     typealias Entry = WeeklyTagDistribution.Entry
     let entries: [Entry]
-    let diagramSignature: String
     private let regionEntries: [MuscleBodySide: [String: [Entry]]]
-    private let sideCallouts: [MuscleBodySide: [Entry]]
 
     init(summary: WeeklySummary) {
         self.init(distribution: WeeklyTagDistribution(summary: summary))
@@ -127,60 +86,18 @@ struct WeeklyMuscleActivity {
     init(distribution: WeeklyTagDistribution) {
         entries = distribution.entries
         var regions: [MuscleBodySide: [String: [Entry]]] = [:]
-        var callouts: [MuscleBodySide: [(index: Int, entry: Entry, anchor: MuscleBodyAnchor)]] = [:]
-        for (index, entry) in entries.enumerated() {
+        for entry in entries {
             guard let icon = entry.icon else { continue }
             for side in MuscleBodySide.allCases {
                 for region in MuscleBodyAnatomy.regions(for: icon, on: side) {
                     regions[side, default: [:]][region, default: []].append(entry)
                 }
             }
-            let anchor = MuscleBodyAnatomy.anchor(for: icon)
-            callouts[anchor.side, default: []].append((index, entry, anchor))
         }
         regionEntries = regions
-        let sortedCallouts = callouts.mapValues { values in
-            values.sorted {
-                $0.anchor.point.y == $1.anchor.point.y ? $0.index < $1.index : $0.anchor.point.y < $1.anchor.point.y
-            }.map(\.entry)
-        }
-        sideCallouts = sortedCallouts
-        diagramSignature = MuscleBodySide.allCases.map { side in
-            let paints = side.regions.map { region in
-                region + ":" + (regions[side]?[region] ?? []).map { $0.colorHex ?? "808080" }.joined(separator: ",")
-            }.joined(separator: ";")
-            let labels = (sortedCallouts[side] ?? []).map { entry in
-                "\(entry.icon?.rawValue ?? ""):\(entry.colorHex ?? "808080"):\(entry.count)"
-            }.joined(separator: ";")
-            return side.rawValue + "|" + paints + "|" + labels
-        }.joined(separator: "/")
     }
 
     func entries(for region: String, on side: MuscleBodySide) -> [Entry] {
         regionEntries[side]?[region] ?? []
-    }
-
-    func callouts(on side: MuscleBodySide) -> [Entry] {
-        sideCallouts[side] ?? []
-    }
-}
-
-/// Moves crowded labels apart while preserving their anatomical order.
-enum MuscleCalloutLayout {
-    static func positions(targets: [CGFloat], height: CGFloat, spacing: CGFloat) -> [CGFloat] {
-        guard !targets.isEmpty else { return [] }
-        let lower = spacing / 2
-        let upper = height - lower
-        var positions: [CGFloat] = []
-        for target in targets {
-            positions.append(max(lower, min(upper, target), (positions.last ?? (lower - spacing)) + spacing))
-        }
-        if let last = positions.last, last > upper {
-            positions[positions.count - 1] = upper
-            for index in positions.indices.dropLast().reversed() {
-                positions[index] = min(positions[index], positions[index + 1] - spacing)
-            }
-        }
-        return positions
     }
 }

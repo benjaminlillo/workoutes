@@ -77,7 +77,7 @@ struct SummaryCardSkeleton: View {
                                         }
                                     }
                                 }
-                                .frame(height: 280)
+                                .frame(height: MuscleBodyLayout.height)
                             }
                             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         case .week:
@@ -143,7 +143,7 @@ struct SummaryCardSkeleton: View {
 
     private var idealHeight: CGFloat {
         switch kind {
-        case .muscle: 40 + titleHeight + 16 + 280
+        case .muscle: 40 + titleHeight + 16 + MuscleBodyLayout.height
         case .week: 40 + titleHeight + 20 + captionHeight + 8 + chartHeight
         case .tags, .totals: dynamicTypeSize.isAccessibilitySize ? 380 : 180
         }

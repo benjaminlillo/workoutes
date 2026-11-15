@@ -75,41 +75,30 @@ final class HomeRenderingTests: XCTestCase {
         XCTAssertNotEqual(blue.pngData(), image().pngData())
     }
 
-    func testDiagramSnapshotUpdatesNumbersAndAppearanceWithoutRepaintingOnReentry() throws {
+    func testMuscleActivityCardShowsTrainedAreasWithoutVisibleCounts() throws {
         let store = try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
                                        configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         let tag = Tag(name: "Pecho", colorHex: "FF0000", iconName: "chest")
         let item = WorkoutExercise(title: "Press", subtitle: "", details: "", numberOfSets: 3,
                                    reps: 10, increaseLoadNextTime: false, weight: 20)
         item.tags = [tag]
-        store.mainContext.insert(tag); store.mainContext.insert(item)
+        store.mainContext.insert(tag)
+        store.mainContext.insert(item)
         try store.mainContext.save()
-        let one = ExerciseCompletion(id: "1", completedAt: .now, exercise: item)
-        let two = ExerciseCompletion(id: "2", completedAt: .now, exercise: item)
-        let cache = MuscleDiagramImageCache()
-        func image(_ history: [ExerciseCompletion], scheme: ColorScheme = .light,
-                   type: DynamicTypeSize = .large, locale: Locale = Locale(identifier: "en")) throws -> UIImage {
-            let activity = WeeklyMuscleActivity(summary: WeeklySummary(completions: history, date: .now))
-            let style = MuscleDiagramStyle(colorScheme: scheme, contrast: .standard,
-                dynamicTypeSize: type, locale: locale, scale: 2)
-            return try XCTUnwrap(cache.image(activity: activity, size: CGSize(width: 350, height: 280), badgeHeight: 26, style: style) {
-                MuscleDiagramDrawing(activity: activity, badgeHeight: 26, background: style.background)
-            })
+        let now = Date.now
+        let one = ExerciseCompletion(id: "1", completedAt: now, exercise: item)
+        let two = ExerciseCompletion(id: "2", completedAt: now, exercise: item)
+
+        func snapshot(_ history: [ExerciseCompletion]) throws -> Data {
+            let summary = WeeklySummary(completions: history, date: now)
+            let renderer = ImageRenderer(content: WeeklyMuscleActivityCard(summary: summary)
+                .frame(width: 350).environment(\.colorScheme, .light))
+            return try XCTUnwrap(renderer.uiImage?.pngData())
         }
-        let first = try image([one])
-        XCTAssertTrue(first === (try image([one])))
-        XCTAssertEqual(first.cgImage?.width, 700)
-        XCTAssertEqual(first.cgImage?.height, 560)
-        tag.name = "Renombrado"
-        XCTAssertTrue(first === (try image([one])))
-        let second = try image([one, two])
-        XCTAssertFalse(first === second)
-        XCTAssertNotEqual(first.pngData(), second.pngData(), "The cached labels must show the new count")
-        XCTAssertNotEqual(first.pngData(), try image([one], scheme: .dark).pngData())
-        XCTAssertFalse(first === (try image([one], type: .xxxLarge)))
-        XCTAssertFalse(first === (try image([one], locale: Locale(identifier: "ar"))))
-        tag.colorHex = "0000FF"
-        XCTAssertNotEqual(first.pngData(), try image([one]).pngData())
+
+        let trained = try snapshot([one])
+        XCTAssertEqual(trained, try snapshot([one, two]))
+        XCTAssertNotEqual(trained, try snapshot([]))
     }
 
     func testComposedBodyPreservesBothColorsForOverlappingTags() throws {
