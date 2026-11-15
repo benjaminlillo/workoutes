@@ -157,6 +157,13 @@ struct ExerciseListView: View {
                         showsEmptyMessage: filteredExercises.isEmpty && displayedFilter != nil)
                         .allowsHitTesting(false)
                 }
+                .safeAreaBar(edge: .bottom, spacing: 6) {
+                    if !groups.isEmpty {
+                        ExerciseGroupBar(groups: groups, selection: groupSelection)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 6)
+                    }
+                }
                 .background { DefaultScreenBackground().ignoresSafeArea() }
                 .navigationTitle(pageTitle)
                 .navigationBarTitleDisplayMode(.large)
@@ -194,11 +201,6 @@ struct ExerciseListView: View {
                 .navigationDestination(isPresented: $showingTagManagement) {
                     TagManagementView()
                 }
-            }
-        }
-        .overlay {
-            if !showingTagManagement, !groups.isEmpty {
-                DockableTagWheel(groups: groups, selection: groupSelection)
             }
         }
     }
