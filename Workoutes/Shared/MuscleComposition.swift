@@ -22,11 +22,11 @@ extension MuscleIcon {
     var panels: [MusclePanel] {
         switch self {
         case .fullBody: MusclePanel.allCases
-        case .upperBody, .arms, .shoulders, .forearms, .trapezius: [.upperFront, .upperBack]
-        case .lowerBody, .calves, .adductors: [.lowerFront, .lowerBack]
-        case .quadriceps, .tibialis: [.lowerFront]
-        case .glutes, .hamstrings, .abductors: [.lowerBack]
-        case .back, .triceps, .upperBack, .lowerBack, .posteriorDeltoid, .tricepsLongHead,
+        case .upperBody, .arms, .shoulders, .forearms: [.upperFront, .upperBack]
+        case .lowerBody: [.lowerFront, .lowerBack]
+        case .quadriceps, .adductors, .tibialis: [.lowerFront]
+        case .glutes, .hamstrings, .calves, .abductors: [.lowerBack]
+        case .back, .trapezius, .triceps, .upperBack, .lowerBack, .posteriorDeltoid, .tricepsLongHead,
              .tricepsLateralHead, .tricepsMedialHead, .forearmExtensors, .lats:
             [.upperBack]
         case .core, .chest, .biceps, .abdominals, .obliques, .neck,
@@ -169,7 +169,7 @@ struct ComposedMuscleIcon: View {
     }
 }
 
-/// The wheel animates the tint of a cached highlight mask as selection changes.
+/// Group selectors animate the tint of a cached highlight mask as selection changes.
 struct TintedMuscleComposition: View {
     let icons: [MuscleIcon]
     let color: Color

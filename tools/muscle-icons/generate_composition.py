@@ -20,9 +20,6 @@ BOTH_FACES = {
     "arms": ["biceps", "triceps", "forearm"],
     "shoulders": ["deltoids"],
     "forearms": ["forearm"],
-    "trapezius": ["trapezius"],
-    "adductors": ["adductors"],
-    "calves": ["calves"],
 }
 
 

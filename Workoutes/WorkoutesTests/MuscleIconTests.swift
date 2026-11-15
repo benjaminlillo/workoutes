@@ -131,6 +131,27 @@ final class MuscleIconTests: XCTestCase {
         }
     }
 
+    func testTagsFacingTheSameSideShareOneSilhouette() throws {
+        func silhouette(_ icons: [MuscleIcon]) throws -> Data {
+            let highlights = icons.map { MuscleComposition.Highlight(icon: $0, colorHex: "427A9B") }
+            let image = MuscleCompositionCache.shared.image(
+                for: MuscleComposition(highlights: highlights), size: CGSize(width: 44, height: 44),
+                scale: 3, isDark: false, layer: .silhouette
+            )
+            return try XCTUnwrap(image.pngData())
+        }
+
+        for (first, second, otherSide): (MuscleIcon, MuscleIcon, MuscleIcon) in [
+            (.upperBack, .trapezius, .chest),
+            (.hamstrings, .calves, .quadriceps),
+            (.quadriceps, .adductors, .hamstrings)
+        ] {
+            let singleSide = try silhouette([first])
+            XCTAssertEqual(try silhouette([first, second]), singleSide, "\(first) + \(second)")
+            XCTAssertNotEqual(try silhouette([first, second, otherSide]), singleSide)
+        }
+    }
+
     func testTagChipsAndPickerRenderInLightAndDarkMode() async throws {
         let store = try container()
         let tags = [Tag(name: "Chest", colorHex: "326884", iconName: "chest"),
