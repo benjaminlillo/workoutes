@@ -10,7 +10,7 @@ struct TrainingSetResult: Codable, Equatable, Identifiable, Sendable {
 struct TrainingExerciseResult: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let blockID: UUID
-    let exercise: TrainingExercise
+    var exercise: TrainingExercise
     var sets: [TrainingSetResult] = []
     var isComplete: Bool { sets.count == exercise.sets }
     var completedAt: Date? { isComplete ? sets.last?.endedAt : nil }
@@ -18,7 +18,7 @@ struct TrainingExerciseResult: Codable, Equatable, Identifiable, Sendable {
 
 struct TrainingQueuedExercise: Codable, Equatable, Sendable {
     let blockID: UUID
-    let exercise: TrainingExercise
+    var exercise: TrainingExercise
 }
 
 struct TrainingMetrics: Codable, Equatable, Sendable {
@@ -77,6 +77,7 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
     var healthSaveSkipped: Bool?
     var isSimulatorPreview: Bool?
     var effortSaved = false
+    private var exerciseEditDates: [UUID: Date]?
 
     init(plan: TrainingPlan, at date: Date, id: UUID = UUID()) throws {
         guard plan.isValid else { throw TrainingFailure.invalidPlan }
@@ -103,6 +104,37 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
     }
     var canSelectExercise: Bool { exerciseSelectionBlockIndex != nil }
     var queuedExercise: TrainingExercise? { isActive ? progress.queuedExercise?.exercise : nil }
+
+    func editableExerciseBlocks(for id: String) -> [UUID] {
+        guard isActive else { return [] }
+        var blocks: [UUID] = []
+        if let result = currentResult, !result.isComplete, result.exercise.id == id {
+            blocks.append(result.blockID)
+        }
+        if let queued = progress.queuedExercise, queued.exercise.id == id {
+            blocks.append(queued.blockID)
+        }
+        return blocks
+    }
+
+    @discardableResult
+    mutating func updateExercise(_ exercise: TrainingExercise, blocks: [UUID], editedAt: Date) throws -> Bool {
+        let eligibleBlocks = Set(editableExerciseBlocks(for: exercise.id))
+        let targets = Set(blocks).intersection(eligibleBlocks).filter {
+            exerciseEditDates?[$0].map { $0 < editedAt } ?? true
+        }
+        guard !targets.isEmpty else { return false }
+        guard exercise.isValid else { throw TrainingFailure.invalidExercise }
+        progress.updateExercise(exercise, blocks: targets)
+        // Undo restores progress, while edits to the exercise survive it.
+        undo?.progress.updateExercise(exercise, blocks: targets)
+        if exerciseEditDates == nil { exerciseEditDates = [:] }
+        for block in targets {
+            exerciseEditDates?[block] = editedAt
+        }
+        revision += 1
+        return true
+    }
     var queuedExerciseNumber: Int? {
         guard let queued = progress.queuedExercise,
               let index = plan.blocks.firstIndex(where: { $0.id == queued.blockID }) else { return nil }
@@ -274,6 +306,23 @@ struct TrainingRun: Codable, Equatable, Identifiable, Sendable {
                 progress.queuedExercise = nil
             }
             progress.stage = currentResult == nil ? .choosingExercise : .series
+        }
+    }
+}
+
+private extension TrainingProgress {
+    mutating func updateExercise(_ exercise: TrainingExercise, blocks: Set<UUID>) {
+        if let queued = queuedExercise, blocks.contains(queued.blockID), queued.exercise.id == exercise.id {
+            queuedExercise?.exercise = exercise
+        }
+        for index in results.indices {
+            guard blocks.contains(results[index].blockID), results[index].exercise.id == exercise.id,
+                  !results[index].isComplete else { continue }
+            var updated = exercise
+            // Keep the next set available even if the edited target is already reached.
+            updated.sets = max(updated.sets, results[index].sets.count + 1)
+            updated.historySnapshot?.numberOfSets = updated.sets
+            results[index].exercise = updated
         }
     }
 }

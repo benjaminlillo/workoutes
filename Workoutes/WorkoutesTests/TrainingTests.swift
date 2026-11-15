@@ -28,10 +28,14 @@ final class TrainingTests: XCTestCase {
     func testHealthAuthorizationRequiresAnExplicitWorkoutWriteGrant() throws {
         XCTAssertNoThrow(try TrainingHealthAuthorization.check(.sharingAuthorized))
         XCTAssertThrowsError(try TrainingHealthAuthorization.check(.notDetermined)) { error in
-            XCTAssertTrue(error.localizedDescription.contains("hasn't been completed"))
+            guard case .notDetermined? = error as? TrainingHealthAuthorization.Failure else {
+                return XCTFail("Expected an undetermined authorization error, got \(error)")
+            }
         }
         XCTAssertThrowsError(try TrainingHealthAuthorization.check(.sharingDenied)) { error in
-            XCTAssertTrue(error.localizedDescription.contains("Allow Workoutes to Write"))
+            guard case .denied? = error as? TrainingHealthAuthorization.Failure else {
+                return XCTFail("Expected a denied authorization error, got \(error)")
+            }
         }
         XCTAssertTrue(TrainingHealthAuthorization.writeTypes.contains(HKObjectType.workoutType()))
         XCTAssertFalse(TrainingHealthAuthorization.writeTypes.contains(HKQuantityType(.heartRate)))
@@ -186,6 +190,61 @@ final class TrainingTests: XCTestCase {
         XCTAssertEqual(run.queuedExercise?.name, "Changed Later")
         XCTAssertEqual(run.queuedExercise?.sets, 2)
         XCTAssertEqual(run.phaseElapsed(at: date(46)), 6)
+    }
+
+    func testActiveEditPreservesRecordedSetsAndTheRestClock() throws {
+        var run = try makeRun()
+        try run.advance(at: date(40))
+        let recorded = try XCTUnwrap(run.currentResult?.sets)
+        let deadline = run.restDeadline
+        var edited = exercise(sets: 1)
+        edited.repetitions = 12
+        edited.weightKilograms = 45
+        let blocks = run.editableExerciseBlocks(for: edited.id)
+        XCTAssertTrue(try run.updateExercise(edited, blocks: blocks, editedAt: date(50)))
+        XCTAssertEqual(run.currentResult?.sets, recorded)
+        XCTAssertEqual(run.currentResult?.exercise.sets, 2)
+        XCTAssertEqual(run.currentResult?.exercise.repetitions, 12)
+        XCTAssertEqual(run.restDeadline, deadline)
+        try run.undoTransition(at: date(60))
+        XCTAssertEqual(run.currentResult?.exercise.weightKilograms, 45)
+    }
+
+    func testPhoneEditFollowsTheQueuedBlockWhenItStartsAndRejectsOlderEdits() throws {
+        let container = try container()
+        let item = WorkoutExercise(title: "Squat", subtitle: "", details: "", numberOfSets: 3,
+                                   reps: 10, increaseLoadNextTime: false, weight: 60)
+        container.mainContext.insert(item)
+        let id = try XCTUnwrap(item.stableID)
+        var watchRun = try makeRun(sets: 1)
+        try watchRun.advance(at: date(40))
+        try watchRun.select(exercise(id: id), at: date(100))
+        var commands: [TrainingCommand] = []
+        let phone = PhoneTrainingController(store: store(), activate: false, commandSender: {
+            commands.append(try XCTUnwrap($0.command))
+        })
+        phone.receive(.init(kind: .snapshot, run: watchRun))
+        item.title = "Front Squat"
+        phone.synchronizeExerciseEdit(item)
+        item.weight = 70
+        phone.synchronizeExerciseEdit(item)
+        XCTAssertEqual(commands.map(\.action), [.updateExercise, .updateExercise])
+
+        let older = try XCTUnwrap(commands.first)
+        let latest = try XCTUnwrap(commands.last)
+        let blocks = try XCTUnwrap(latest.exerciseBlockIDs)
+        let deadline = watchRun.restDeadline
+        XCTAssertTrue(try watchRun.updateExercise(XCTUnwrap(older.exercise), blocks: blocks, editedAt: date(110)))
+        XCTAssertEqual(watchRun.queuedExercise?.name, "Front Squat")
+        XCTAssertEqual(watchRun.restDeadline, deadline)
+        XCTAssertTrue(watchRun.tick(at: date(350)))
+        let startedAt = watchRun.progress.phaseStartedAt
+        XCTAssertTrue(try watchRun.updateExercise(XCTUnwrap(latest.exercise), blocks: blocks, editedAt: date(351)))
+        XCTAssertFalse(try watchRun.updateExercise(XCTUnwrap(older.exercise), blocks: blocks, editedAt: date(110)))
+        XCTAssertEqual(watchRun.currentResult?.exercise.name, "Front Squat")
+        XCTAssertEqual(watchRun.currentResult?.exercise.historySnapshot?.weight, 70)
+        XCTAssertEqual(watchRun.progress.phaseStartedAt, startedAt)
+        XCTAssertEqual(watchRun.progress.results.first?.exercise.name, "Bench Press")
     }
 
     func testQueuedExerciseWaitsForRestDeadlineAndStartsAtTheCorrectTime() throws {

@@ -115,13 +115,38 @@ final class PhoneTrainingController {
         let unit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .metric
         do {
             if let context { try CatalogIdentity.backfill(in: context) }
-            guard let id = exercise.stableID, !exercise.isDeleted else { throw TrainingFailure.invalidExercise }
-            let payload = TrainingExercise(id: id, name: String(exercise.title.prefix(160)),
-                                           weightKilograms: exercise.weight, repetitions: exercise.reps,
-                                           sets: exercise.numberOfSets, usesPounds: unit == .imperial,
-                                           historySnapshot: ExerciseCompletionSnapshot(exercise: exercise))
+            let payload = try trainingExercise(exercise, usesPounds: unit == .imperial)
             try send(.selectExercise, exercise: payload)
         } catch { errorMessage = error.localizedDescription }
+    }
+
+    func synchronizeExerciseEdit(_ exercise: WorkoutExercise) {
+        guard let run, let id = exercise.stableID, !exercise.isDeleted else { return }
+        let blocks = run.editableExerciseBlocks(for: id)
+        guard !blocks.isEmpty else { return }
+        let usesPounds = run.currentResult?.exercise.id == id && run.currentResult?.isComplete == false
+            ? run.currentResult?.exercise.usesPounds : run.queuedExercise?.usesPounds
+        do {
+            let payload = try trainingExercise(exercise, usesPounds: usesPounds ?? false)
+            let command = TrainingCommand(action: .updateExercise, runID: run.id, exercise: payload,
+                                          exerciseBlockIDs: blocks)
+            let envelope = TrainingEnvelope(kind: .command, command: command)
+            if let commandSender { try commandSender(envelope) }
+            else {
+                // Deliver immediately when possible and retain it across temporary disconnections.
+                try connection.publish(envelope, durable: true, replacesContext: false)
+            }
+        } catch { errorMessage = error.localizedDescription }
+    }
+
+    private func trainingExercise(_ exercise: WorkoutExercise, usesPounds: Bool) throws -> TrainingExercise {
+        guard let id = exercise.stableID, !exercise.isDeleted else { throw TrainingFailure.invalidExercise }
+        let payload = TrainingExercise(id: id, name: String(exercise.title.prefix(160)),
+                                       weightKilograms: exercise.weight, repetitions: exercise.reps,
+                                       sets: exercise.numberOfSets, usesPounds: usesPounds,
+                                       historySnapshot: ExerciseCompletionSnapshot(exercise: exercise))
+        guard payload.isValid else { throw TrainingFailure.invalidExercise }
+        return payload
     }
 
     func advance() { perform(.advance) }
@@ -212,7 +237,7 @@ final class PhoneTrainingController {
             if try context.fetchCount(FetchDescriptor<ExerciseCompletion>(predicate: #Predicate { $0.id == id })) == 0,
                let exercise = exercises.first(where: { $0.stableID == result.exercise.id }),
                let completedAt = result.completedAt {
-                // The watch run retains the values selected for this block, even if the catalog changes.
+                // The watch supplies the final exercise snapshot for the completed block.
                 context.insert(ExerciseCompletion(id: id, completedAt: completedAt, exercise: exercise,
                                                   snapshot: result.exercise.historySnapshot))
                 // A delayed watch completion must not stop a newer standalone

@@ -14,6 +14,7 @@ struct ExerciseCardView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingWeightSheet = false
     @State private var selectedCountMetric: ExerciseCountMetric?
+    @State private var exerciseBeforeEditing: ExerciseCompletionSnapshot?
 
     private var accentColor: Color {
         ThemeColor.resolve(accentColorRawValue).color
@@ -75,7 +76,10 @@ struct ExerciseCardView: View {
             Divider()
 
             HStack(spacing: 0) {
-                Button { showingWeightSheet = true } label: {
+                Button {
+                    beginExerciseEdit()
+                    showingWeightSheet = true
+                } label: {
                     ExerciseMetricView(
                         systemImage: "dumbbell.fill",
                         value: weightUnit.label(for: exercise.weight),
@@ -93,7 +97,10 @@ struct ExerciseCardView: View {
 
                 metricDivider
 
-                Button { selectedCountMetric = .sets } label: {
+                Button {
+                    beginExerciseEdit()
+                    selectedCountMetric = .sets
+                } label: {
                     ExerciseMetricView(
                         systemImage: "square.stack.3d.up.fill",
                         value: "\(exercise.numberOfSets) sets",
@@ -111,7 +118,10 @@ struct ExerciseCardView: View {
 
                 metricDivider
 
-                Button { selectedCountMetric = .repetitions } label: {
+                Button {
+                    beginExerciseEdit()
+                    selectedCountMetric = .repetitions
+                } label: {
                     ExerciseMetricView(
                         systemImage: "repeat",
                         value: "\(exercise.reps) reps",
@@ -139,6 +149,7 @@ struct ExerciseCardView: View {
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
         .contextMenu {
             Button {
+                beginExerciseEdit()
                 showingEditSheet = true
             } label: {
                 Label(String(localized: "Edit Exercise"), systemImage: "pencil")
@@ -164,22 +175,23 @@ struct ExerciseCardView: View {
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button {
                 exercise.increaseLoadNextTime.toggle()
+                exerciseActivity.training?.synchronizeExerciseEdit(exercise)
             } label: {
                 Label(String(localized: "Bump"), systemImage: "arrow.up.right.circle")
             }
             .tint(accentColor)
             .accessibilityHint(exercise.increaseLoadNextTime ? String(localized: "Disables bump") : String(localized: "Enables bump"))
         }
-        .sheet(isPresented: $showingEditSheet) {
+        .sheet(isPresented: $showingEditSheet, onDismiss: finishExerciseEdit) {
             EditExerciseSheet(exercise: exercise)
         }
-        .sheet(isPresented: $showingWeightSheet) {
+        .sheet(isPresented: $showingWeightSheet, onDismiss: finishExerciseEdit) {
             ExerciseWeightSheet(exercise: exercise, unit: weightUnit)
                 .tint(accentColor)
                 .presentationDetents([.height(330)])
                 .presentationDragIndicator(.visible)
         }
-        .sheet(item: $selectedCountMetric) { metric in
+        .sheet(item: $selectedCountMetric, onDismiss: finishExerciseEdit) { metric in
             ExerciseCountSheet(exercise: exercise, metric: metric)
                 .tint(accentColor)
                 .presentationDetents([.height(330)])
@@ -195,6 +207,17 @@ struct ExerciseCardView: View {
             }
             Button(String(localized: "Cancel"), role: .cancel) {}
         }
+    }
+
+    private func beginExerciseEdit() {
+        exerciseBeforeEditing = ExerciseCompletionSnapshot(exercise: exercise)
+    }
+
+    private func finishExerciseEdit() {
+        defer { exerciseBeforeEditing = nil }
+        guard let exerciseBeforeEditing, !exercise.isDeleted,
+              exerciseBeforeEditing != ExerciseCompletionSnapshot(exercise: exercise) else { return }
+        exerciseActivity.training?.synchronizeExerciseEdit(exercise)
     }
 
     private var metricDivider: some View {

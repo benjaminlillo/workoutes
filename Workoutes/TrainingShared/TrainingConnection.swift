@@ -63,7 +63,10 @@ final class TrainingConnection: NSObject, WCSessionDelegate {
             }
             if durable { session.transferUserInfo(payload) }
         } else if !isReachable { throw TrainingFailure.notConnected }
-        if isReachable { deliver(data, reportsErrors: contextError != nil || envelope.kind == .command) }
+        if isReachable {
+            let queuedForBackground = durable && session?.activationState == .activated
+            deliver(data, reportsErrors: contextError != nil || (envelope.kind == .command && !queuedForBackground))
+        }
         else if let contextError { throw contextError }
     }
     private func deliver(_ data: Data, allowsWorkoutChannel: Bool = true, reportsErrors: Bool = true) {

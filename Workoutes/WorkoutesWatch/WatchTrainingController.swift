@@ -232,6 +232,10 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             guard abs(command.createdAt.timeIntervalSinceNow) < 120, let plan = command.plan else { return }
             await start(plan: plan, commandID: command.id); return
         }
+        if command.action == .updateExercise {
+            applyExerciseEdit(command)
+            return
+        }
         guard !isBusy else { fail(String(localized: "Please wait while the workout is being saved.")); return }
         guard var run = archive.current, command.runID == run.id,
               command.revision == run.revision, abs(command.createdAt.timeIntervalSinceNow) < 30 else {
@@ -263,7 +267,7 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
             case .keepLocalRecord:
                 guard !run.isActive, run.healthSaveError != nil else { throw TrainingFailure.wrongPhase }
                 run.healthSaveSkipped = true; run.revision += 1
-            case .start: return
+            case .start, .updateExercise: return
             }
             archive.current = run
             archive.handledCommands.append(command.id)
@@ -286,6 +290,27 @@ final class WatchTrainingController: NSObject, HKWorkoutSessionDelegate, HKLiveW
         } catch {
             // Preserve automatic timer transitions even when rejecting an outdated command.
             if !committedAutomaticTransition { archive = previous }
+            fail(error.localizedDescription)
+        }
+    }
+
+    private func applyExerciseEdit(_ command: TrainingCommand) {
+        guard !isBusy, var run = archive.current, command.runID == run.id,
+              let exercise = command.exercise, let blocks = command.exerciseBlockIDs else { return }
+        let previous = archive
+        do {
+            // A queued block may have started since the edit was sent. The block ID
+            // still identifies it even when the workout revision has moved on.
+            let advanced = run.tick(at: .now)
+            let edited = try run.updateExercise(exercise, blocks: blocks, editedAt: command.createdAt)
+            guard advanced || edited else { return }
+            archive.current = run
+            archive.handledCommands.append(command.id)
+            try persist()
+            if advanced { playFeedback(.notification) }
+            publish(durable: true)
+        } catch {
+            archive = previous
             fail(error.localizedDescription)
         }
     }

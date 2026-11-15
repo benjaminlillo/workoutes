@@ -1,7 +1,7 @@
 import Foundation
 
 struct TrainingCommand: Codable, Sendable {
-    enum Action: String, Codable, Sendable { case start, selectExercise, clearQueuedExercise, advance, previousBlock, pause, undo, finish, retrySave, keepLocalRecord }
+    enum Action: String, Codable, Sendable { case start, selectExercise, updateExercise, clearQueuedExercise, advance, previousBlock, pause, undo, finish, retrySave, keepLocalRecord }
     var id = UUID()
     var createdAt = Date()
     var action: Action
@@ -10,6 +10,7 @@ struct TrainingCommand: Codable, Sendable {
     var plan: TrainingPlan?
     var exercise: TrainingExercise?
     var effort: Int?
+    var exerciseBlockIDs: [UUID]?
 }
 
 struct TrainingEnvelope: Codable, Sendable {
