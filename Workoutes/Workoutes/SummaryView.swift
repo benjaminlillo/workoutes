@@ -60,9 +60,8 @@ struct SummaryView: View {
                 let currentWeek = WeeklySummary.interval(containing: today).start
                 let week = min(WeeklySummary.interval(containing: selectedWeek ?? today).start, currentWeek)
                 GeometryReader { geometry in
-                    MotivationalScrollView(pull: pull ?? $localPull) {
-                        SummaryWeekContent(week: week, today: today, availableHeight: geometry.size.height)
-                    }
+                    SummaryWeekContent(week: week, today: today, availableHeight: geometry.size.height,
+                                       pull: pull ?? $localPull)
                 }
                 .defaultScreenBackground()
                 .navigationBarTitleDisplayMode(.inline)
@@ -217,12 +216,14 @@ private struct SummaryWeekContent: View {
     let week: Date
     let today: Date
     let availableHeight: CGFloat
+    let pull: Binding<MotivationalPullState>
     @Query private var completions: [ExerciseCompletion]
 
-    init(week: Date, today: Date, availableHeight: CGFloat) {
+    init(week: Date, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>) {
         self.week = week
         self.today = today
         self.availableHeight = availableHeight
+        self.pull = pull
         let interval = WeeklySummary.interval(containing: week)
         let start = interval.start
         let end = interval.end
@@ -232,7 +233,7 @@ private struct SummaryWeekContent: View {
 
     var body: some View {
         SummaryStatisticsPager(summary: WeeklySummary(completions: completions, date: week),
-                               today: today, availableHeight: availableHeight)
+                               today: today, availableHeight: availableHeight, pull: pull)
     }
 }
 

@@ -99,30 +99,32 @@ struct EmojiParticle: Identifiable {
     }
 }
 
-struct MotivationalScrollView<Content: View>: View {
+struct MotivationalPullGesture: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
     @Binding var pull: MotivationalPullState
-    @ViewBuilder let content: () -> Content
+    @GestureState private var isDragging = false
+    @State private var isPullingDown: Bool?
 
-    var body: some View {
-        ScrollView {
-            content()
-        }
-        .scrollBounceBehavior(.always)
-        .onScrollPhaseChange { oldPhase, newPhase in
-            let wasTouching = oldPhase == .tracking || oldPhase == .interacting
-            let isTouching = newPhase == .tracking || newPhase == .interacting
-            if isTouching && !wasTouching {
-                pull.beginGesture()
-            } else if !isTouching {
+    func body(content: Content) -> some View {
+        content
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 12)
+                .updating($isDragging) { _, dragging, _ in dragging = true }
+                .onChanged { drag in
+                    if isPullingDown == nil {
+                        isPullingDown = drag.translation.height > abs(drag.translation.width)
+                        if isPullingDown == true { pull.beginGesture() }
+                    }
+                    if isPullingDown == true { pull.updateDistance(drag.translation.height) }
+                }
+        )
+        .onChange(of: isDragging) { _, dragging in
+            guard !dragging else { return }
+            if isPullingDown == true {
                 pull.endGesture()
+                pull.updateDistance(0)
             }
-        }
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            // The resting offset includes the navigation bar's top inset.
-            max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
-        } action: { _, distance in
-            pull.updateDistance(distance)
+            isPullingDown = nil
         }
         .sensoryFeedback(.impact(weight: .heavy, intensity: 1), trigger: pull.hapticTrigger)
         .task(id: pull.celebration?.id) {
@@ -165,7 +167,7 @@ struct MotivationalPullOverlay: View {
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
-                        // Reveal the phrase once dragging has moved the title out of its way.
+                        // Reveal the phrase once the user has pulled far enough.
                         .opacity(min(max((pull.distance - 35) / 45, 0), 1))
                         .accessibilityIdentifier("motivationalPullPhrase")
                 }

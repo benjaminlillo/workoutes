@@ -245,16 +245,6 @@ final class SummaryTests: XCTestCase {
             window.overrideUserInterfaceStyle = .light
             window.makeKeyAndVisible()
             defer { window.isHidden = true }
-            try await Task.sleep(for: .milliseconds(100))
-
-            func findScroll(_ view: UIView) -> UIScrollView? {
-                if let scroll = view as? UIScrollView { return scroll }
-                return view.subviews.compactMap { findScroll($0) }.first
-            }
-            let scroll = try XCTUnwrap(findScroll(root.view))
-            if name == "pull" {
-                scroll.setContentOffset(CGPoint(x: 0, y: -scroll.adjustedContentInset.top - distance), animated: false)
-            }
             try await Task.sleep(for: .seconds(delay))
             window.layoutIfNeeded()
             let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in

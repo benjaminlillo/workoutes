@@ -19,12 +19,14 @@ struct SummaryStatisticsPager: View {
     let summary: WeeklySummary
     let today: Date
     let availableHeight: CGFloat
+    let pull: Binding<MotivationalPullState>
     private let distribution: WeeklyTagDistribution
     private let activity: WeeklyMuscleActivity
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.layoutDirection) private var layoutDirection
     @ScaledMetric(relativeTo: .body) private var detailHeight: CGFloat = 158
+    @ScaledMetric(relativeTo: .caption) private var weekdayLabelHeight: CGFloat = 24
     @State private var position = ScrollPosition(idType: SummaryStatistic.self)
     @State private var settledPage = SummaryStatistic.muscle
     @State private var detailPage = SummaryStatistic.muscle
@@ -32,18 +34,22 @@ struct SummaryStatisticsPager: View {
     @State private var detailsVisible = true
     @State private var fadeOutFinished = true
 
-    init(summary: WeeklySummary, today: Date, availableHeight: CGFloat) {
+    init(summary: WeeklySummary, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>) {
         self.summary = summary
         self.today = today
         self.availableHeight = availableHeight
+        self.pull = pull
         let distribution = WeeklyTagDistribution(summary: summary)
         self.distribution = distribution
         activity = WeeklyMuscleActivity(distribution: distribution)
     }
 
     var body: some View {
-        let height = max(availableHeight, detailHeight + 320)
-        let visualHeight = height - detailHeight - 52
+        let contentHeight = max(0, availableHeight - 52)
+        let minimumVisualHeight = min(160, contentHeight * 0.3)
+        let cardHeight = min(detailHeight, contentHeight - minimumVisualHeight)
+        let visualHeight = contentHeight - cardHeight
+        let isHeightConstrained = cardHeight < detailHeight
         ZStack(alignment: .bottom) {
             ScrollView(.horizontal) {
                 // There are four pages. Lay them out up front so beginning a swipe
@@ -55,7 +61,7 @@ struct SummaryStatisticsPager: View {
                             .padding(.horizontal, 24)
                             .frame(height: visualHeight)
                             .containerRelativeFrame(.horizontal)
-                            .frame(height: height, alignment: .top)
+                            .frame(height: availableHeight, alignment: .top)
                             .contentShape(Rectangle())
                             .accessibilityHidden(page != settledPage)
                             .id(page)
@@ -79,9 +85,11 @@ struct SummaryStatisticsPager: View {
                 }
             }
             .accessibilityIdentifier("summaryStatisticsPager")
+            .modifier(MotivationalPullGesture(pull: pull))
 
-            SummaryStatisticDetails(page: detailPage, summary: summary, distribution: distribution, activity: activity)
-                .frame(height: detailHeight)
+            SummaryStatisticDetails(page: detailPage, summary: summary, distribution: distribution, activity: activity,
+                                    scrollsWhenConstrained: isHeightConstrained)
+                .frame(height: cardHeight)
                 .frame(maxWidth: 520)
                 .padding(.horizontal, 18)
                 .compositingGroup()
@@ -89,12 +97,12 @@ struct SummaryStatisticsPager: View {
                 .offset(y: detailsVisible || reduceMotion ? 0 : 6)
                 // Keep the card in the same place while the charts move.
                 .padding(.bottom, 46)
-                .allowsHitTesting(detailsVisible && detailPage == .tags)
+                .allowsHitTesting(detailsVisible && (detailPage == .tags || isHeightConstrained))
                 .accessibilityHidden(!detailsVisible)
 
             pageControls
         }
-        .frame(height: height)
+        .frame(height: availableHeight)
     }
 
     @ViewBuilder
@@ -104,7 +112,8 @@ struct SummaryStatisticsPager: View {
             WeeklyMuscleDiagram(activity: activity, maximumHeight: 384)
                 .padding(.vertical, 18)
         case .week:
-            WeeklyExerciseChart(summary: summary, today: today, chartHeight: min(350, height * 0.77))
+            WeeklyExerciseChart(summary: summary, today: today,
+                                chartHeight: min(350, height * 0.77, max(0, height - weekdayLabelHeight)))
         case .tags:
             GeometryReader { geometry in
                 let diameter = min(geometry.size.width * 0.83, geometry.size.height * 0.76, 324)
@@ -113,7 +122,7 @@ struct SummaryStatisticsPager: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         case .totals:
-            SummaryActiveDays(summary: summary, today: today)
+            SummaryActiveDays(summary: summary, today: today, availableHeight: height)
         }
     }
 
@@ -182,9 +191,26 @@ struct SummaryStatisticDetails: View {
     let summary: WeeklySummary
     let distribution: WeeklyTagDistribution
     let activity: WeeklyMuscleActivity
+    var scrollsWhenConstrained = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        Group {
+            if scrollsWhenConstrained && page != .tags {
+                ScrollView { details }
+                    .scrollBounceBehavior(.basedOnSize)
+            } else {
+                details
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .statisticCardBackground(cornerRadius: 28)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("summaryStatisticDetails.\(page)")
+    }
+
+    private var details: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(page.title)
                 .font(.title3.bold())
@@ -221,11 +247,6 @@ struct SummaryStatisticDetails: View {
                 }
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .statisticCardBackground(cornerRadius: 28)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("summaryStatisticDetails.\(page)")
     }
 
     private func emptyLabel(_ title: LocalizedStringResource) -> some View {
@@ -255,11 +276,13 @@ struct SummaryStatisticDetails: View {
 private struct SummaryActiveDays: View {
     let summary: WeeklySummary
     let today: Date
+    let availableHeight: CGFloat
 
     var body: some View {
-        VStack(spacing: 30) {
+        let symbolSize = min(34, availableHeight * 0.25)
+        VStack(spacing: min(30, availableHeight * 0.1)) {
             Text("\(summary.activeDays) / \(summary.days.count)")
-                .font(.system(size: 76, weight: .bold, design: .rounded))
+                .font(.system(size: min(76, availableHeight * 0.35), weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .contentTransition(.numericText())
                 .accessibilityLabel("Active Days")
@@ -271,7 +294,7 @@ private struct SummaryActiveDays: View {
                     VStack(spacing: 9) {
                         Image(systemName: active ? "checkmark" : "minus")
                             .font(.subheadline.bold())
-                            .frame(width: 34, height: 34)
+                            .frame(width: symbolSize, height: symbolSize)
                             .foregroundStyle(active ? Color.accentColor : Color.secondary.opacity(0.55))
                             .background(active ? Color.accentColor.opacity(0.13) : .primary.opacity(0.045), in: Circle())
                         SummaryDayLabel(date: day.date, today: today)

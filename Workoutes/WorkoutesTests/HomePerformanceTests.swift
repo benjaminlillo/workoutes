@@ -33,15 +33,17 @@ final class HomePerformanceTests: XCTestCase {
         window.makeKeyAndVisible()
         try await Task.sleep(for: .milliseconds(900))
         window.layoutIfNeeded()
-        func verticalScroll(_ view: UIView) -> UIScrollView? {
-            if let scroll = view as? UIScrollView, scroll.contentSize.height > scroll.bounds.height { return scroll }
-            return view.subviews.compactMap { verticalScroll($0) }.first
+        func horizontalPager(_ view: UIView) -> UIScrollView? {
+            if let scroll = view as? UIScrollView, scroll.contentSize.width > scroll.bounds.width * 2 { return scroll }
+            return view.subviews.compactMap { horizontalPager($0) }.first
         }
-        let scroll = try XCTUnwrap(verticalScroll(try XCTUnwrap(window.rootViewController?.view)))
-        return (window, scroll)
+        let pager = try XCTUnwrap(horizontalPager(try XCTUnwrap(window.rootViewController?.view)))
+        XCTAssertTrue(sequence(first: pager as UIView, next: { $0.superview }).dropFirst().allSatisfy { !($0 is UIScrollView) },
+                      "The horizontal pager should not be nested in a vertical scroll view")
+        return (window, pager)
     }
 
-    func testPopulatedHomeScrollRenderingPerformance() async throws {
+    func testPopulatedHomePagingRenderingPerformance() async throws {
         let (window, scroll) = try await home()
         defer { window.isHidden = true }
         measureScroll(window: window, scroll: scroll, entering: false)
@@ -59,9 +61,11 @@ final class HomePerformanceTests: XCTestCase {
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         let renderer = UIGraphicsImageRenderer(bounds: window.bounds, format: format)
+        let restingY = scroll.contentOffset.y
         measure(metrics: [XCTClockMetric()], options: options) {
             for step in 0..<16 {
-                scroll.setContentOffset(CGPoint(x: 0, y: CGFloat(entering ? 15 - step : step) * 35), animated: false)
+                let fraction = CGFloat(entering ? 15 - step : step) / 15
+                scroll.setContentOffset(CGPoint(x: fraction * scroll.bounds.width, y: restingY), animated: false)
                 window.layoutIfNeeded()
                 _ = renderer.image { _ in window.drawHierarchy(in: window.bounds, afterScreenUpdates: true) }
             }
