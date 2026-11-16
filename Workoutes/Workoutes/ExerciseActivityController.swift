@@ -126,6 +126,7 @@ final class ExerciseActivityController {
         } else if queuedActivityExercise?.id == exercise.activityID {
             state.status = .empty
             state.isQueued = true
+            state.queuedExerciseNumber = training?.run?.queuedExerciseNumber
         }
         return state
     }

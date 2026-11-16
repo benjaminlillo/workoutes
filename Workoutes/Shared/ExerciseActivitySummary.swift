@@ -9,19 +9,21 @@ struct ExerciseActivitySummary: View {
     private var accentColor: Color { Color(hex: state.accentColorHex ?? "B784E8") }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        ExerciseCardSurface {
             ExerciseCardHeader(
                 title: state.title, subtitle: state.subtitle, details: state.details ?? "",
                 increaseLoadNextTime: state.increaseLoadNextTime, accentColor: accentColor,
-                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? [],
-                tagIconHeight: 24
+                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? []
             ) {
                 statusControl
+            }
+            if state.isQueued == true {
+                ExerciseQueuedLabel(number: state.queuedExerciseNumber, accentColor: accentColor)
             }
 
             Divider()
 
-            HStack(spacing: 0) {
+            ExerciseCardMetrics {
                 ExerciseMetricView(
                     systemImage: "dumbbell.fill",
                     value: "\((state.displayedWeight ?? state.weight).formatted(.number.precision(.fractionLength(0...2)))) \(state.weightUnitSymbol ?? "kg")",
@@ -29,8 +31,7 @@ struct ExerciseActivitySummary: View {
                 )
                 .frame(maxWidth: .infinity, minHeight: 44)
 
-                metricDivider
-
+            } sets: {
                 ExerciseMetricView(
                     systemImage: "square.stack.3d.up.fill",
                     value: String(localized: "\(state.numberOfSets) sets"),
@@ -38,8 +39,7 @@ struct ExerciseActivitySummary: View {
                 )
                 .frame(maxWidth: .infinity, minHeight: 44)
 
-                metricDivider
-
+            } repetitions: {
                 ExerciseMetricView(
                     systemImage: "repeat",
                     value: String(localized: "\(state.reps) reps"),
@@ -49,22 +49,17 @@ struct ExerciseActivitySummary: View {
             }
 
         }
+        .foregroundStyle(.primary)
         .environment(\.colorScheme, .dark)
-        .foregroundStyle(.white)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
     private var statusControl: some View {
         if state.isQueued == true {
-            VStack(spacing: 3) {
-                Image(systemName: "clock").font(.title3)
-                Text("Up Next").font(.caption2)
-            }
-            .foregroundStyle(accentColor)
-            .frame(minWidth: 44, minHeight: 44)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Exercise queued")
+            ExerciseQueuedSymbol(accentColor: accentColor)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Exercise queued")
         } else if status == .playing {
             Button(intent: ExerciseLiveActivityIntent(exerciseID: state.exerciseID, sessionID: state.sessionID, complete: true)) {
                 ExerciseStatusSymbol(status: status, accentColor: accentColor)
@@ -77,11 +72,5 @@ struct ExerciseActivitySummary: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(status == .done ? "Exercise completed" : "Exercise not started")
         }
-    }
-
-    private var metricDivider: some View {
-        Rectangle()
-            .fill(Color.secondary.opacity(0.2))
-            .frame(width: 1, height: 42)
     }
 }

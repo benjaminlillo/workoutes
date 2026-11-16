@@ -13,16 +13,15 @@ struct ExerciseLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ExerciseActivityAttributes.self) { context in
             ExerciseActivitySummary(state: context.state)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 7)
-                // Use a matching, explicit foreground/background pair: the Lock Screen
-                // can supply a different color scheme from the app's UIKit colors.
-                .activityBackgroundTint(.black)
+                .activityBackgroundTint(Color(uiColor: UIColor.secondarySystemGroupedBackground
+                    .resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))))
                 .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.bottom) {
                     ExerciseActivitySummary(state: context.state)
+                        .padding(.horizontal, 4)
+                        .padding(.bottom, 6)
                 }
             } compactLeading: {
                 Image(systemName: context.state.isQueued == true ? "clock" : "dumbbell.fill")

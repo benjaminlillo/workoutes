@@ -38,7 +38,7 @@ struct ExerciseCardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        ExerciseCardSurface {
             ExerciseCardHeader(
                 title: exercise.title, subtitle: exercise.subtitle, details: exercise.details,
                 increaseLoadNextTime: exercise.increaseLoadNextTime, accentColor: accentColor,
@@ -49,9 +49,7 @@ struct ExerciseCardView: View {
                     exerciseActivity.advanceState(exercise, context: modelContext)
                 } label: {
                     if isQueued {
-                        Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 28, weight: .semibold)).foregroundStyle(accentColor)
-                            .frame(width: 44, height: 44)
+                        ExerciseQueuedSymbol(accentColor: accentColor)
                     } else {
                         ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
                                              accentColor: accentColor)
@@ -68,14 +66,14 @@ struct ExerciseCardView: View {
             }
 
             if isQueued {
-                Label("Queued · Exercise \(exerciseActivity.training?.run?.queuedExerciseNumber ?? 0)", systemImage: "text.line.first.and.arrowtriangle.forward")
-                    .font(.caption.weight(.medium)).foregroundStyle(accentColor)
+                ExerciseQueuedLabel(number: exerciseActivity.training?.run?.queuedExerciseNumber,
+                                    accentColor: accentColor)
                     .accessibilityIdentifier("queuedExercise.\(exercise.title)")
             }
 
             Divider()
 
-            HStack(spacing: 0) {
+            ExerciseCardMetrics {
                 Button {
                     beginExerciseEdit()
                     showingWeightSheet = true
@@ -95,15 +93,14 @@ struct ExerciseCardView: View {
                 .accessibilityHint(String(localized: "Opens the weight selector"))
                 .accessibilityIdentifier("exerciseWeight.\(exercise.title)")
 
-                metricDivider
-
+            } sets: {
                 Button {
                     beginExerciseEdit()
                     selectedCountMetric = .sets
                 } label: {
                     ExerciseMetricView(
                         systemImage: "square.stack.3d.up.fill",
-                        value: "\(exercise.numberOfSets) sets",
+                        value: String(localized: "\(exercise.numberOfSets) sets"),
                         label: String(localized: "Sets")
                     )
                 }
@@ -116,15 +113,14 @@ struct ExerciseCardView: View {
                 .accessibilityHint(String(localized: "Opens the sets selector"))
                 .accessibilityIdentifier("exerciseSets.\(exercise.title)")
 
-                metricDivider
-
+            } repetitions: {
                 Button {
                     beginExerciseEdit()
                     selectedCountMetric = .repetitions
                 } label: {
                     ExerciseMetricView(
                         systemImage: "repeat",
-                        value: "\(exercise.reps) reps",
+                        value: String(localized: "\(exercise.reps) reps"),
                         label: String(localized: "Repetitions")
                     )
                 }
@@ -137,16 +133,11 @@ struct ExerciseCardView: View {
                 .accessibilityHint(String(localized: "Opens the repetitions selector"))
                 .accessibilityIdentifier("exerciseRepetitions.\(exercise.title)")
             }
-
         }
-        .padding()
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .subtleCardShadow()
         .overlay {
             ExerciseRevealHighlight(color: accentColor, trigger: revealHighlight)
         }
-        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .contentShape(.contextMenuPreview, ExerciseCardStyle.shape)
         .contextMenu {
             Button {
                 beginExerciseEdit()
@@ -218,11 +209,5 @@ struct ExerciseCardView: View {
         guard let exerciseBeforeEditing, !exercise.isDeleted,
               exerciseBeforeEditing != ExerciseCompletionSnapshot(exercise: exercise) else { return }
         exerciseActivity.training?.synchronizeExerciseEdit(exercise)
-    }
-
-    private var metricDivider: some View {
-        Rectangle()
-            .fill(Color.secondary.opacity(0.2))
-            .frame(width: 1, height: 42)
     }
 }

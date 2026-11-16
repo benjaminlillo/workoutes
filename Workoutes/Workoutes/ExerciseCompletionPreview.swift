@@ -43,7 +43,7 @@ struct ExerciseCompletionCard: View {
     private var accentColor: Color { ThemeColor.resolve(accentColorRawValue).color }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        ExerciseCardSurface {
             ExerciseCardHeader(
                 title: snapshot.title, subtitle: snapshot.subtitle, details: snapshot.details,
                 increaseLoadNextTime: snapshot.increaseLoadNextTime, accentColor: accentColor,
@@ -67,10 +67,6 @@ struct ExerciseCompletionCard: View {
                 metric(String(localized: "Repetitions"), systemImage: "repeat", value: String(localized: "\(snapshot.reps) reps"))
             }
         }
-        .padding()
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .subtleCardShadow()
     }
 
     @ViewBuilder

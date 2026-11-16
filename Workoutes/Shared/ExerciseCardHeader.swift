@@ -10,19 +10,26 @@ struct ExerciseCardHeader<StatusControl: View>: View {
     let tagColors: [String]
     var tagIconNames: [String?] = []
     var tagNames: [String] = []
-    var tagIconHeight: CGFloat = 44
     @ViewBuilder var statusControl: () -> StatusControl
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(title)
-                    .font(.title3.weight(.bold))
+                HStack(alignment: .top, spacing: 10) {
+                    if !tagColors.isEmpty {
+                        tagIcons
+                    }
 
-                if !subtitle.isEmpty {
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(title)
+                            .font(.title3.weight(.bold))
+
+                        if !subtitle.isEmpty {
+                            Text(subtitle)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
 
                 if !details.isEmpty {
@@ -44,12 +51,7 @@ struct ExerciseCardHeader<StatusControl: View>: View {
                         .frame(minHeight: 44)
                 }
 
-                VStack(spacing: 5) {
-                    statusControl()
-                    if !tagColors.isEmpty {
-                        tagIcons
-                    }
-                }
+                statusControl()
             }
             .frame(minWidth: 44)
         }
@@ -67,7 +69,8 @@ struct ExerciseCardHeader<StatusControl: View>: View {
             dotColors: tags.filter { $0.icon == nil }.map(\.color)
         )
         return ComposedMuscleIcon(composition: composition,
-                                  size: CGSize(width: 44, height: composition.highlights.isEmpty ? 12 : tagIconHeight))
+                                  size: CGSize(width: 44, height: composition.highlights.isEmpty ? 12 : 44))
+            .padding(.top, composition.highlights.isEmpty ? 6 : 0)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(tags.map(\.name).joined(separator: ", "))
     }

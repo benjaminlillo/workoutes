@@ -191,6 +191,7 @@ final class TrainingLiveActivityTests: XCTestCase {
         XCTAssertEqual(try liveActivity().id, firstActivity.id)
         XCTAssertEqual(firstActivity.content.state.exerciseID, f.second.activityID)
         XCTAssertEqual(firstActivity.content.state.isQueued, true)
+        XCTAssertEqual(firstActivity.content.state.queuedExerciseNumber, 2)
         XCTAssertEqual(firstActivity.content.state.status, .empty)
         XCTAssertNil(firstActivity.content.state.startedAt)
         XCTAssertNil(firstActivity.content.state.sessionID)
@@ -288,8 +289,10 @@ final class TrainingLiveActivityTests: XCTestCase {
         let state = ExerciseActivityAttributes.ContentState(
             exerciseID: "preview", title: "Press de banca con mancuernas", subtitle: "Pecho",
             numberOfSets: 3, reps: 10, weight: 24, increaseLoadNextTime: false,
-            accentColorHex: "B784E8", status: .empty, isQueued: true)
-        let renderer = ImageRenderer(content: ExerciseActivitySummary(state: state).padding(16).frame(width: 400).background(.black))
+            tagColors: ["FF8800", "5599FF"], tagIconNames: [MuscleIcon.chest.rawValue, MuscleIcon.triceps.rawValue],
+            accentColorHex: "B784E8", status: .empty, isQueued: true, queuedExerciseNumber: 2)
+        let renderer = ImageRenderer(content: ExerciseActivitySummary(state: state)
+            .padding(.horizontal, 4).padding(.bottom, 6).frame(width: 360).background(.black))
         renderer.scale = 2
         let image = try XCTUnwrap(renderer.uiImage)
         try XCTUnwrap(image.pngData()).write(to: URL(fileURLWithPath: "/tmp/workoutes-queued-live-activity.png"))

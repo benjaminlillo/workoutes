@@ -6,7 +6,7 @@ struct ExerciseRevealHighlight: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 18, style: .continuous)
+        ExerciseCardStyle.shape
             .fill(color.opacity(0.1))
             .keyframeAnimator(initialValue: 0.0, trigger: trigger) { highlight, opacity in
                 highlight.opacity(trigger == nil ? 0 : opacity)
