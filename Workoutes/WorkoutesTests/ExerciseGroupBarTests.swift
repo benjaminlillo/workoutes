@@ -46,13 +46,7 @@ final class ExerciseGroupBarTests: XCTestCase {
 
         let transition = try XCTUnwrap(findTransition(in: try XCTUnwrap(window.rootViewController).view))
         let list = try XCTUnwrap(findList(in: try XCTUnwrap(window.rootViewController).view))
-        let horizontal = try XCTUnwrap(findHorizontalScroll(in: window))
-        XCTAssertGreaterThan(horizontal.contentSize.width, horizontal.bounds.width)
-        let originalOffset = horizontal.contentOffset.x
-        // Move independently of filtering, like a swipe across the row of icons.
-        horizontal.setContentOffset(CGPoint(x: 0, y: horizontal.contentOffset.y), animated: false)
-        XCTAssertGreaterThan(originalOffset, horizontal.contentOffset.x)
-        XCTAssertEqual(navigation.selectedGroup, filterGroups[4])
+        XCTAssertNotNil(findHorizontalScroll(in: window), "Keep scroll content mounted while the glass is compact")
         // Intermediate filter selections must share one bounded exit.
         transition.duration = 0.3
         navigation.selectedGroup = filterGroups[0]
@@ -135,6 +129,96 @@ final class ExerciseGroupBarTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(450))
         XCTAssertNil(navigation.selectedGroup)
         try snapshot(window, name: "empty")
+    }
+
+    func testExpansionScrollAndCollapsePreserveSelection() async throws {
+        let store = try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
+                                       configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let groups = (0..<16).map { TagGroup(name: "Group \($0)", colorHex: "3268E6", iconName: "biceps") }
+        for group in groups { store.mainContext.insert(group) }
+        try store.mainContext.save()
+        let state = FilterState()
+        state.selection = groups[12].persistentModelID
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = UIHostingController(rootView:
+            ExerciseGroupBar(groups: groups,
+                selection: Binding(get: { state.selection }, set: { state.selection = $0 }),
+                isExpanded: Binding(get: { state.expanded }, set: { state.expanded = $0 }))
+                .padding(20).frame(maxHeight: .infinity, alignment: .bottom)
+                .modelContainer(store))
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        try await Task.sleep(for: .milliseconds(300))
+        XCTAssertNotNil(findHorizontalScroll(in: window), "Collapsing must preserve the scroll view for a continuous transition")
+        state.expanded = true
+        try await Task.sleep(for: .milliseconds(500))
+        let horizontal = try XCTUnwrap(findHorizontalScroll(in: window))
+        XCTAssertGreaterThan(horizontal.contentOffset.x, 0, "Opening must reveal the selected group")
+        horizontal.setContentOffset(.zero, animated: false)
+        XCTAssertEqual(state.selection, groups[12].persistentModelID, "Scrolling must not change the filter")
+        for (name, style) in [("expanded-light", UIUserInterfaceStyle.light), ("expanded-dark", .dark)] {
+            window.overrideUserInterfaceStyle = style
+            try await Task.sleep(for: .milliseconds(300))
+            try snapshot(window, name: name)
+        }
+        state.expanded = false
+        try await Task.sleep(for: .milliseconds(300))
+        XCTAssertNotNil(findHorizontalScroll(in: window), "Collapsing must preserve the scroll view for a continuous transition")
+        XCTAssertEqual(state.selection, groups[12].persistentModelID)
+        state.selection = nil
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertFalse(state.expanded, "External filter resets must not expand the control")
+    }
+
+    func testAnimatedGlassKeepsItsScrollViewAcrossInterruptions() async throws {
+        let store = try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
+                                       configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let groups = (0..<12).map { TagGroup(name: "Group \($0)", colorHex: "3268E6", iconName: "biceps") }
+        for group in groups { store.mainContext.insert(group) }
+        try store.mainContext.save()
+        let state = FilterState()
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = UIHostingController(rootView:
+            ZStack {
+                Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
+                ExerciseGroupBar(groups: groups,
+                    selection: Binding(get: { state.selection }, set: { state.selection = $0 }),
+                    isExpanded: Binding(get: { state.expanded }, set: { state.expanded = $0 }))
+                    .padding(20).padding(.bottom, 80)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+            }.modelContainer(store))
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        try await Task.sleep(for: .seconds(1))
+        let scroll = try XCTUnwrap(findHorizontalScroll(in: window))
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            window.overrideUserInterfaceStyle = style
+            try await Task.sleep(for: .milliseconds(500))
+            state.expanded = true
+            try await Task.sleep(for: .milliseconds(800))
+            XCTAssertTrue(findHorizontalScroll(in: window) === scroll)
+            state.selection = groups[2].persistentModelID
+            state.expanded = false
+            try await Task.sleep(for: .milliseconds(800))
+            state.expanded = true
+            try await Task.sleep(for: .milliseconds(120))
+            state.expanded = false
+            try await Task.sleep(for: .milliseconds(120))
+            state.expanded = true
+            try await Task.sleep(for: .milliseconds(800))
+            XCTAssertTrue(findHorizontalScroll(in: window) === scroll,
+                          "Interruptions must animate the existing surface, not replace its contents")
+            state.expanded = false
+            try await Task.sleep(for: .milliseconds(800))
+        }
+    }
+
+    @Observable
+    final class FilterState {
+        var selection: PersistentIdentifier?
+        var expanded = false
     }
 
     private func findHorizontalScroll(in view: UIView) -> UIScrollView? {

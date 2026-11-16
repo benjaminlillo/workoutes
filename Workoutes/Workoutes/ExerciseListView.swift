@@ -10,6 +10,7 @@ struct ExerciseListView: View {
     @Namespace private var toolbarGlass
     @State private var showingAddExerciseSheet = false
     @State private var showingTagManagement = false
+    @State private var isGroupFilterExpanded = false
     
     @State var navigation = ExerciseNavigation()
     @State private var highlightedRequest: ExerciseRevealRequest?
@@ -157,9 +158,10 @@ struct ExerciseListView: View {
                         showsEmptyMessage: filteredExercises.isEmpty && displayedFilter != nil)
                         .allowsHitTesting(false)
                 }
-                .safeAreaBar(edge: .bottom, spacing: 6) {
+                .safeAreaInset(edge: .bottom, spacing: 6) {
                     if !groups.isEmpty {
-                        ExerciseGroupBar(groups: groups, selection: groupSelection)
+                        ExerciseGroupBar(groups: groups, selection: groupSelection,
+                                         isExpanded: $isGroupFilterExpanded)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 6)
                     }
