@@ -18,60 +18,77 @@ struct ExerciseGroupBar: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let group = selectedGroup
             let availableWidth = min(geometry.size.width, 440)
-            let triggerWidth = selectedGroup == nil ? 52 : min(180, availableWidth * 0.45)
-            let optionsWidth = max(52, availableWidth - triggerWidth - 12)
+            let namedWidth = min(180, availableWidth * 0.45)
+            let showsName = group != nil && !isExpanded
+            let triggerWidth = showsName ? namedWidth : 52
+            let optionsWidth = max(52, availableWidth - 64)
+            let expansionMotion = motion?.delay(isExpanded && group != nil ? 0.09 : 0)
             // The glass resizes inside a stable full-width coordinate space. The
-            // trigger must not inherit the changing proposal or it jumps during layout.
-            ZStack(alignment: .trailing) {
-                Color.clear
-                    .frame(width: isExpanded ? optionsWidth : 52, height: 52)
-                    .glassEffect(.regular, in: .capsule)
-                    .opacity(isExpanded ? 1 : 0)
-                    .padding(.trailing, triggerWidth + 12)
-                    .animation(motion, value: isExpanded)
+            // scroll view keeps its expanded width while the two surfaces resize.
+            Color.clear
+                .overlay(alignment: .trailing) {
+                    ZStack(alignment: .trailing) {
+                        Color.clear
+                            .frame(width: isExpanded ? optionsWidth : 52, height: 52)
+                            .glassEffect(.regular, in: .capsule)
+                            .opacity(isExpanded ? 1 : 0)
 
-                expandedBar
-                    .frame(width: optionsWidth, height: 52)
-                    .opacity(isExpanded ? 1 : 0)
-                    .mask(alignment: .trailing) {
-                        Capsule().frame(width: isExpanded ? optionsWidth : 52, height: 52)
+                        expandedBar
+                            .frame(width: optionsWidth, height: 52)
+                            .opacity(isExpanded ? 1 : 0)
+                            .mask(alignment: .trailing) {
+                                Capsule().frame(width: isExpanded ? optionsWidth : 52, height: 52)
+                            }
                     }
                     .padding(.trailing, triggerWidth + 12)
-                    .animation(motion, value: isExpanded)
                     .allowsHitTesting(isExpanded)
                     .accessibilityHidden(!isExpanded)
-
-                Button {
-                    setExpanded(!isExpanded)
-                } label: {
-                    HStack(spacing: 8) {
-                        groupIcon(selectedGroup)
-                            .frame(width: 34, height: 34)
-                        if let selectedGroup {
-                            Text(selectedGroup.name)
-                                .font(.subheadline.weight(.medium))
-                                .lineLimit(1)
-                                .transition(.opacity)
-                        }
-                    }
-                    .padding(.horizontal, selectedGroup == nil ? 9 : 12)
-                    .frame(width: triggerWidth, height: 52)
-                    .clipShape(.capsule)
-                    .contentShape(.capsule)
                 }
-                .buttonStyle(.plain)
-                .glassEffect(.regular.interactive(), in: .capsule)
-                .accessibilityLabel(isExpanded ? Text("Close") : Text("Filter by Group"))
-                .accessibilityValue(selectedGroup?.name ?? String(localized: "All Exercises"))
-                .accessibilityIdentifier(isExpanded ? "close-group-filter" : "exercise-group-filter")
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .animation(motion, value: selection)
+
+                .overlay(alignment: .trailing) {
+                    Button {
+                        setExpanded(!isExpanded)
+                    } label: {
+                        groupIcon(group)
+                            .frame(width: 34, height: 34)
+                            .padding(.leading, showsName ? 12 : 9)
+                            .frame(width: triggerWidth, height: 52, alignment: .leading)
+                            .contentShape(.capsule)
+                    }
+                    .buttonStyle(.plain)
+                    .glassEffect(.regular.interactive(), in: .capsule)
+                    .accessibilityLabel(isExpanded ? Text("Close") : Text("Filter by Group"))
+                    .accessibilityValue(group?.name ?? String(localized: "All Exercises"))
+                    .accessibilityIdentifier(isExpanded ? "close-group-filter" : "exercise-group-filter")
+                }
+                .overlay(alignment: .trailing) {
+                    // Use the closed button's bounds throughout the fade so the name stays still.
+                    let nameLeading: CGFloat = 54
+                    Text(group?.name ?? "")
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                        .frame(width: max(0, namedWidth - nameLeading - 12), alignment: .leading)
+                        .padding(.leading, nameLeading)
+                        .frame(width: namedWidth, height: 52, alignment: .leading)
+                        .opacity(showsName ? 1 : 0)
+                        .animation(nameAnimation(showing: showsName), value: showsName)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+                .animation(motion, value: selection)
+                .animation(expansionMotion, value: isExpanded)
         }
         .frame(height: 52)
         .sensoryFeedback(.selection, trigger: selection)
         .onDisappear { isExpanded = false }
+    }
+
+    private func nameAnimation(showing: Bool) -> Animation? {
+        guard !reduceMotion else { return nil }
+        // Fade out before the capsule crops the name, and fade back in once it has room.
+        return showing ? .easeOut(duration: 0.17).delay(0.29) : .easeOut(duration: 0.08)
     }
 
     private var expandedBar: some View {
