@@ -18,22 +18,24 @@ struct ExerciseGroupBar: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let expandedWidth = min(geometry.size.width, 440)
+            let optionsWidth = max(52, min(geometry.size.width, 440) - 64)
             // The glass resizes inside a stable full-width coordinate space. The
             // trigger must not inherit the changing proposal or it jumps during layout.
             ZStack(alignment: .trailing) {
                 Color.clear
-                    .frame(width: isExpanded ? expandedWidth : 52, height: 52)
+                    .frame(width: isExpanded ? optionsWidth : 52, height: 52)
                     .glassEffect(.regular, in: .capsule)
+                    .opacity(isExpanded ? 1 : 0)
+                    .padding(.trailing, 64)
                     .animation(motion, value: isExpanded)
 
                 expandedBar
-                    .frame(width: expandedWidth - 52, height: 52)
-                    .padding(.trailing, 52)
+                    .frame(width: optionsWidth, height: 52)
                     .opacity(isExpanded ? 1 : 0)
                     .mask(alignment: .trailing) {
-                        Capsule().frame(width: isExpanded ? expandedWidth : 52, height: 52)
+                        Capsule().frame(width: isExpanded ? optionsWidth : 52, height: 52)
                     }
+                    .padding(.trailing, 64)
                     .animation(motion, value: isExpanded)
                     .allowsHitTesting(isExpanded)
                     .accessibilityHidden(!isExpanded)
@@ -47,6 +49,7 @@ struct ExerciseGroupBar: View {
                         .transaction { $0.animation = nil }
                 }
                 .buttonStyle(.plain)
+                .glassEffect(.regular.interactive(), in: .circle)
                 .accessibilityLabel(isExpanded ? Text("Close") : Text("Filter by Group"))
                 .accessibilityValue(selectedGroup?.name ?? String(localized: "All Exercises"))
                 .accessibilityIdentifier(isExpanded ? "close-group-filter" : "exercise-group-filter")
@@ -97,8 +100,16 @@ struct ExerciseGroupBar: View {
             selection = group?.persistentModelID
             setExpanded(false)
         } label: {
-            groupIcon(group)
-                .frame(width: 48, height: 44)
+            HStack(spacing: 8) {
+                groupIcon(group)
+                    .frame(width: 34, height: 34)
+                Text(group?.name ?? String(localized: "All Exercises"))
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+                .padding(.horizontal, 12)
+                .frame(minHeight: 44)
                 .background {
                     if isSelected {
                         Capsule().fill(.primary.opacity(0.10))
