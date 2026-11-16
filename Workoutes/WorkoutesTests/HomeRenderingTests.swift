@@ -5,42 +5,6 @@ import XCTest
 
 @MainActor
 final class HomeRenderingTests: XCTestCase {
-    func testSkeletonWindowIsBoundedAndNeverIncludesFutureWeeks() throws {
-        let calendar = Calendar.current
-        let current = WeeklySummary.interval(containing: .now).start
-        func week(_ offset: Int) -> Date { calendar.date(byAdding: .day, value: offset * 7, to: current)! }
-        XCTAssertEqual(SummaryWeekLoadingState.skeletonWeeks(around: current, through: current),
-                       Set([week(-2), week(-1), current]))
-        XCTAssertEqual(SummaryWeekLoadingState.skeletonWeeks(around: week(-5), through: current),
-                       Set((-7 ... -3).map(week)))
-        XCTAssertEqual(SummaryWeekLoadingState.skeletonWeeks(around: week(-1), through: current),
-                       Set((-3...0).map(week)))
-    }
-
-    func testWeekLoadingWaitsForSettlingAndCancelsSupersededRequests() async throws {
-        let loader = SummaryWeekLoadingState()
-        let first = WeeklySummary.interval(containing: .now).start
-        let second = Calendar.current.date(byAdding: .day, value: -7, to: first)!
-        let third = Calendar.current.date(byAdding: .day, value: -14, to: first)!
-        await loader.load(SummaryWeekLoadRequest(week: first, isScrolling: true))
-        XCTAssertNil(loader.loadedWeek)
-        let canceled = Task { await loader.load(SummaryWeekLoadRequest(week: first, isScrolling: false)) }
-        try await Task.sleep(for: .milliseconds(20))
-        canceled.cancel()
-        await canceled.value
-        XCTAssertNil(loader.loadedWeek)
-        await loader.load(SummaryWeekLoadRequest(week: first, isScrolling: false))
-        XCTAssertEqual(loader.loadedWeek, first)
-        let superseded = Task { await loader.load(SummaryWeekLoadRequest(week: second, isScrolling: false)) }
-        try await Task.sleep(for: .milliseconds(20))
-        superseded.cancel()
-        await loader.load(SummaryWeekLoadRequest(week: third, isScrolling: false))
-        await superseded.value
-        XCTAssertEqual(loader.loadedWeek, third)
-        await loader.load(SummaryWeekLoadRequest(week: second, isScrolling: true))
-        XCTAssertEqual(loader.loadedWeek, third, "Dragging alone must not create another statistics page")
-    }
-
     func testBodyTextureIsReusedButUpdatesForPaletteAnatomySizeScaleAndAppearance() throws {
         let store = try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
                                        configurations: ModelConfiguration(isStoredInMemoryOnly: true))
@@ -75,7 +39,7 @@ final class HomeRenderingTests: XCTestCase {
         XCTAssertNotEqual(blue.pngData(), image().pngData())
     }
 
-    func testMuscleActivityCardShowsTrainedAreasWithoutVisibleCounts() throws {
+    func testMuscleDiagramShowsTrainedAreasWithoutVisibleCounts() throws {
         let store = try ModelContainer(for: Workout.self, Tag.self, WorkoutExercise.self, ExerciseSession.self, ExerciseCompletion.self,
                                        configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         let tag = Tag(name: "Pecho", colorHex: "FF0000", iconName: "chest")
@@ -91,8 +55,8 @@ final class HomeRenderingTests: XCTestCase {
 
         func snapshot(_ history: [ExerciseCompletion]) throws -> Data {
             let summary = WeeklySummary(completions: history, date: now)
-            let renderer = ImageRenderer(content: WeeklyMuscleActivityCard(summary: summary)
-                .frame(width: 350).environment(\.colorScheme, .light))
+            let renderer = ImageRenderer(content: WeeklyMuscleDiagram(activity: WeeklyMuscleActivity(summary: summary))
+                .frame(width: 350, height: 280).environment(\.colorScheme, .light))
             return try XCTUnwrap(renderer.uiImage?.pngData())
         }
 

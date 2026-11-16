@@ -109,7 +109,11 @@ final class WeeklyTagDistributionTests: XCTestCase {
             ("dark", records, .dark, .large),
             ("accessible", records, .light, .accessibility3)
         ] {
-            let content = WeeklyTagDistributionChart(summary: WeeklySummary(completions: history, date: today))
+            let distribution = WeeklyTagDistribution(summary: WeeklySummary(completions: history, date: today))
+            let content = HStack {
+                WeeklyTagDistributionChart(distribution: distribution).frame(width: 140, height: 140)
+                WeeklyTagDistributionLegend(distribution: distribution)
+            }
                 .padding(16).frame(width: 398).background(DefaultScreenBackground())
                 .environment(\.colorScheme, scheme).environment(\.dynamicTypeSize, size)
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)

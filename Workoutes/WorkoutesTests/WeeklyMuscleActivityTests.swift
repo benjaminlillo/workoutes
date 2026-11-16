@@ -87,8 +87,8 @@ final class WeeklyMuscleActivityTests: XCTestCase {
             ("empty", [], .light, .large),
             ("accessible", records, .light, .accessibility3)
         ] {
-            let renderer = ImageRenderer(content: WeeklyMuscleActivityCard(summary: WeeklySummary(completions: history, date: .now))
-                .padding(16).frame(width: 398).background(DefaultScreenBackground())
+            let renderer = ImageRenderer(content: WeeklyMuscleDiagram(activity: WeeklyMuscleActivity(summary: WeeklySummary(completions: history, date: .now)), maximumHeight: 384)
+                .frame(height: 384).padding(16).frame(width: 398).background(DefaultScreenBackground())
                 .environment(\.colorScheme, scheme).environment(\.dynamicTypeSize, size))
             renderer.scale = 2
             let image = try XCTUnwrap(renderer.uiImage)

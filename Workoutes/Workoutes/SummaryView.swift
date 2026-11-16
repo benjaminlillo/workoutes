@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct WeeklyDay: Identifiable {
     var id: Date { date }
@@ -54,158 +55,174 @@ struct SummaryView: View {
 
     var body: some View {
         NavigationStack {
-            // Refreshes after midnight/time-zone changes, including when this tab stays open.
             TimelineView(.periodic(from: .now, by: 60)) { timeline in
-                let summary = WeeklySummary(completions: [], date: selectedWeek ?? timeline.date)
-                let isCurrentWeek = summary.interval.start == WeeklySummary.interval(containing: timeline.date).start
-                MotivationalScrollView(pull: pull ?? $localPull) {
-                    WeeklySummaryPager(today: timeline.date, selectedWeek: $selectedWeek)
-                        .padding(.bottom, 16)
+                let today = timeline.date
+                let currentWeek = WeeklySummary.interval(containing: today).start
+                let week = min(WeeklySummary.interval(containing: selectedWeek ?? today).start, currentWeek)
+                GeometryReader { geometry in
+                    MotivationalScrollView(pull: pull ?? $localPull) {
+                        SummaryWeekContent(week: week, today: today, availableHeight: geometry.size.height)
+                    }
                 }
-                .scrollClipDisabled()
-                .scrollEdgeEffectStyle(.soft, for: .top)
                 .defaultScreenBackground()
-                .navigationTitle(summary.dateRange(relativeTo: timeline.date))
-                .navigationSubtitle(Text(isCurrentWeek ? "This Week" : "Week Summary"))
-                .navigationBarTitleDisplayMode(.large)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        SummaryWeekSelector(week: week, today: today) { newWeek in
+                            selectedWeek = newWeek == currentWeek ? nil : newWeek
+                        }
+                    }
+                }
             }
         }
         .overlay {
-            if pull == nil {
-                MotivationalPullOverlay(pull: localPull)
-            }
+            if pull == nil { MotivationalPullOverlay(pull: localPull) }
         }
     }
 }
 
-/// Date targets are lightweight. Only the settled week creates a query and real statistics.
-struct WeeklySummaryPager: View {
-    let today: Date
-    @Binding var selectedWeek: Date?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var centeredWeek: Date?
-    @State private var oldestWeek: Date
-    @State private var pageHeights: [Date: CGFloat] = [:]
-    @State private var cardHeights: [SummaryCardKind: CGFloat] = [:]
-    @State private var loading = SummaryWeekLoadingState()
-    @State private var isPaging = false
-    @ScaledMetric(relativeTo: .body) private var initialPageHeight: CGFloat = 1200
-
-    init(today: Date, selectedWeek: Binding<Date?>) {
-        self.today = today
-        _selectedWeek = selectedWeek
-        let selected = WeeklySummary.interval(containing: selectedWeek.wrappedValue ?? today).start
-        _centeredWeek = State(initialValue: selected)
-        _oldestWeek = State(initialValue: Calendar.current.date(byAdding: .day, value: -12 * 7, to: selected)!)
-    }
-
-    private var currentWeek: Date { WeeklySummary.interval(containing: today).start }
-    private var weeks: [Date] {
-        let calendar = Calendar.current
-        let first = WeeklySummary.interval(containing: oldestWeek).start
-        let count = (calendar.dateComponents([.day], from: first, to: currentWeek).day ?? 0) / 7
-        return (0...max(0, count)).compactMap { calendar.date(byAdding: .day, value: $0 * 7, to: first) }
-    }
-
-    var body: some View {
-        let dates = weeks
-        let requestedWeek = selectedWeek ?? currentWeek
-        let request = SummaryWeekLoadRequest(week: requestedWeek, isScrolling: isPaging)
-        let skeletonWeeks = SummaryWeekLoadingState.skeletonWeeks(around: requestedWeek, through: currentWeek)
-        let pageHeight = loading.loadedWeek.flatMap { pageHeights[$0] }
-            ?? pageHeights.values.max() ?? initialPageHeight
-        ScrollView(.horizontal) {
-            LazyHStack(alignment: .top, spacing: 0) {
-                ForEach(dates, id: \.self) { week in
-                    Group {
-                        if loading.loadedWeek == week {
-                            WeeklySummaryPage(week: week, today: today)
-                                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
-                                    guard height > 0, abs((pageHeights[week] ?? 0) - height) > 0.5 else { return }
-                                    pageHeights[week] = height
-                                }
-                        } else if skeletonWeeks.contains(week) {
-                            SummaryWeekSkeleton(week: week, today: today, heights: cardHeights)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .frame(height: pageHeight, alignment: .top)
-                        } else {
-                            Color.clear.frame(height: pageHeight)
-                        }
-                    }
-                    .containerRelativeFrame(.horizontal)
-                    .id(week)
-                }
-            }
-            .frame(height: pageHeight, alignment: .top)
-            .scrollTargetLayout()
-        }
-        .scrollTargetBehavior(.paging)
-        .scrollPosition(id: $centeredWeek)
-        .defaultScrollAnchor(.trailing, for: .initialOffset)
-        .scrollIndicators(.hidden)
-        .frame(height: pageHeight)
-        .onPreferenceChange(SummaryCardHeightsKey.self) { heights in
-            if !heights.isEmpty, heights != cardHeights { cardHeights = heights }
-        }
-        .onScrollPhaseChange { _, phase in
-            isPaging = phase.isScrolling
-        }
-        .task(id: request) {
-            await loading.load(request)
-            guard !Task.isCancelled, !isPaging, loading.loadedWeek == request.week,
-                  (selectedWeek ?? currentWeek) == request.week else { return }
-            // Preserve the settled date when a loading target is replaced by real content.
-            // Updating both states in this transaction also covers accessibility/programmatic scrolling.
-            if centeredWeek != request.week {
-                var transaction = Transaction(animation: nil)
-                transaction.disablesAnimations = true
-                withTransaction(transaction) { centeredWeek = request.week }
-            }
-        }
-        .onScrollGeometryChange(for: Int.self) { scroll in
-            guard scroll.containerSize.width > 0 else { return -1 }
-            return Int(((scroll.contentOffset.x + scroll.contentInsets.leading) / scroll.containerSize.width).rounded())
-        } action: { _, index in
-            guard weeks.indices.contains(index) else { return }
-            let week = weeks[index]
-            selectedWeek = week == currentWeek ? nil : week
-        }
-        .accessibilityIdentifier("weeklySummaryPager")
-        .accessibilityAction(named: "Previous Week") { moveWeek(by: -1) }
-        .accessibilityAction(named: "Next Week") { moveWeek(by: 1) }
-        .onChange(of: centeredWeek) { _, week in
-            guard let week, week <= currentWeek else { return }
-            // The current week follows the clock; historical weeks stay on their dates.
-            selectedWeek = week == currentWeek ? nil : week
-            if let threshold = Calendar.current.date(byAdding: .day, value: 4 * 7, to: oldestWeek), week <= threshold {
-                oldestWeek = Calendar.current.date(byAdding: .day, value: -12 * 7, to: oldestWeek)!
-            }
-        }
-        .onChange(of: currentWeek) { _, week in
-            if selectedWeek == nil { centeredWeek = week }
-        }
-    }
-
-    private func moveWeek(by offset: Int) {
-        guard let target = Calendar.current.date(byAdding: .day, value: offset * 7, to: centeredWeek ?? currentWeek),
-              target <= currentWeek else { return }
-        withAnimation(reduceMotion ? nil : .snappy(duration: 0.32)) {
-            centeredWeek = target
-        }
-    }
-}
-
-private struct WeeklySummaryPage: View {
+private struct SummaryWeekSelector: View {
     let week: Date
     let today: Date
-    @Query private var completions: [ExerciseCompletion]
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let select: (Date) -> Void
     @State private var isPresented = false
-    @State private var isFinished = false
+    @State private var draftWeek = Date.now
 
-    init(week: Date, today: Date) {
+    var body: some View {
+        let range = WeeklySummary(completions: [], date: week).dateRange(relativeTo: today)
+        Button {
+            draftWeek = week
+            isPresented = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                Text(range).lineLimit(1)
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.semibold))
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 4)
+        }
+        .accessibilityLabel("Select Week")
+        .accessibilityValue(range)
+        .accessibilityIdentifier("summaryWeekSelector")
+        .sheet(isPresented: $isPresented) {
+            NavigationStack {
+                ScrollView {
+                    SummaryWeekCalendar(week: $draftWeek, today: today)
+                        .frame(maxWidth: 440)
+                        .padding(.horizontal, 16)
+                    Button("This Week") { choose(today) }
+                        .padding(.vertical, 8)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+                .navigationTitle("Select Week")
+                .navigationSubtitle(WeeklySummary(completions: [], date: draftWeek).dateRange(relativeTo: today))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { isPresented = false }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { choose(draftWeek) }
+                    }
+                }
+            }
+        }
+    }
+
+    private func choose(_ date: Date) {
+        select(WeeklySummary.interval(containing: date).start)
+        isPresented = false
+    }
+}
+
+private struct SummaryWeekCalendar: UIViewRepresentable {
+    @Binding var week: Date
+    let today: Date
+    @Environment(\.locale) private var locale
+
+    private var calendar: Calendar {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2
+        return calendar
+    }
+
+    private var currentWeek: DateInterval {
+        WeeklySummary.interval(containing: today, calendar: calendar)
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UICalendarView {
+        let view = UICalendarView()
+        view.locale = locale
+        view.calendar = calendar
+        updateRange(of: view)
+        view.visibleDateComponents = calendar.dateComponents([.era, .year, .month, .day], from: week)
+        view.selectionBehavior = UICalendarSelectionWeekOfYear(delegate: context.coordinator)
+        return view
+    }
+
+    func updateUIView(_ view: UICalendarView, context: Context) {
+        context.coordinator.parent = self
+        updateRange(of: view)
+        guard let selection = view.selectionBehavior as? UICalendarSelectionWeekOfYear else { return }
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: week)
+        let selected = selection.selectedWeekOfYear
+        if selected?.weekOfYear != components.weekOfYear || selected?.yearForWeekOfYear != components.yearForWeekOfYear {
+            selection.setSelected(components, animated: false)
+        }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UICalendarView, context: Context) -> CGSize? {
+        guard let width = proposal.width else { return nil }
+        return uiView.systemLayoutSizeFitting(CGSize(width: width, height: 0),
+                                             withHorizontalFittingPriority: .required,
+                                             verticalFittingPriority: .fittingSizeLevel)
+    }
+
+    private func updateRange(of view: UICalendarView) {
+        // All seven days of the current week belong to the same selectable period.
+        let end = currentWeek.end.addingTimeInterval(-1)
+        if view.availableDateRange.end != end {
+            view.availableDateRange = DateInterval(start: view.availableDateRange.start, end: end)
+        }
+    }
+
+    final class Coordinator: NSObject, UICalendarSelectionWeekOfYearDelegate {
+        var parent: SummaryWeekCalendar
+
+        init(_ parent: SummaryWeekCalendar) { self.parent = parent }
+
+        func week(ofYearSelection selection: UICalendarSelectionWeekOfYear, didSelectWeekOfYear components: DateComponents?) {
+            if let week = weekStart(from: components) { parent.week = week }
+        }
+
+        func week(ofYearSelection selection: UICalendarSelectionWeekOfYear, canSelectWeekOfYear components: DateComponents?) -> Bool {
+            guard let week = weekStart(from: components) else { return false }
+            return week <= parent.currentWeek.start
+        }
+
+        private func weekStart(from components: DateComponents?) -> Date? {
+            guard let year = components?.yearForWeekOfYear, let week = components?.weekOfYear else { return nil }
+            let calendar = parent.calendar
+            let monday = DateComponents(weekday: calendar.firstWeekday, weekOfYear: week, yearForWeekOfYear: year)
+            return calendar.date(from: monday).map { calendar.startOfDay(for: $0) }
+        }
+    }
+}
+
+private struct SummaryWeekContent: View {
+    let week: Date
+    let today: Date
+    let availableHeight: CGFloat
+    @Query private var completions: [ExerciseCompletion]
+
+    init(week: Date, today: Date, availableHeight: CGFloat) {
         self.week = week
         self.today = today
+        self.availableHeight = availableHeight
         let interval = WeeklySummary.interval(containing: week)
         let start = interval.start
         let end = interval.end
@@ -214,85 +231,46 @@ private struct WeeklySummaryPage: View {
     }
 
     var body: some View {
-        let summary = WeeklySummary(completions: completions, date: week)
-        let distribution = WeeklyTagDistribution(summary: summary)
-        VStack(spacing: 16) {
-            WeeklyMuscleActivityCard(summary: summary, distribution: distribution)
-                .modifier(SummaryCardReveal(kind: .muscle, week: week, today: today, isPresented: isPresented, isFinished: isFinished))
-            WeeklyExerciseChart(summary: summary, today: today)
-                .modifier(SummaryCardReveal(kind: .week, week: week, today: today, isPresented: isPresented, isFinished: isFinished))
-            WeeklyTagDistributionChart(summary: summary, distribution: distribution)
-                .modifier(SummaryCardReveal(kind: .tags, week: week, today: today, isPresented: isPresented, isFinished: isFinished))
-            SummaryStatistics(summary: summary)
-                .modifier(SummaryCardReveal(kind: .totals, week: week, today: today, isPresented: isPresented, isFinished: isFinished))
-        }
-        .padding(16)
-        .fixedSize(horizontal: false, vertical: true)
-        .allowsHitTesting(isPresented)
-        .accessibilityHidden(!isPresented)
-        .task {
-            guard !isPresented else { return }
-            do {
-                // Lay out the fetched statistics and prepare their images before fading them in.
-                try await Task.sleep(for: .milliseconds(32))
-                try Task.checkCancellation()
-                withAnimation(.easeOut(duration: reduceMotion ? 0.12 : 0.28)) {
-                    isPresented = true
-                } completion: {
-                    isFinished = true
-                }
-            } catch is CancellationError {
-                // The user moved to another week before this page was ready.
-            } catch {
-                assertionFailure("Unexpected week presentation cancellation: \(error)")
-            }
-        }
-        .accessibilityIdentifier("summaryWeekPage")
+        SummaryStatisticsPager(summary: WeeklySummary(completions: completions, date: week),
+                               today: today, availableHeight: availableHeight)
     }
 }
 
 struct WeeklyExerciseChart: View {
     let summary: WeeklySummary
     let today: Date
-    @ScaledMetric(relativeTo: .caption) private var chartHeight = 190
+    let chartHeight: CGFloat
 
     private var maximum: Int { max(1, summary.days.map { $0.completions.count }.max() ?? 0) }
-    private var blockSpacing: CGFloat { min(2, chartHeight / CGFloat(maximum) * 0.12) }
+    private var blockSpacing: CGFloat { min(3, chartHeight / CGFloat(maximum) * 0.12) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Week Summary").font(.title3.bold())
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack(alignment: .bottom, spacing: 8) {
-                ForEach(summary.days) { day in
-                    VStack(spacing: 8) {
-                        VStack(spacing: 0) {
-                            Spacer(minLength: 0)
-                            VStack(spacing: blockSpacing) {
-                                ForEach(day.completions.reversed()) { completion in
-                                    WeeklyExerciseBlock(completion: completion,
-                                                        height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
-                                }
-                                if day.completions.isEmpty {
-                                    RoundedRectangle(cornerRadius: 2)
-                                        .fill(.quaternary).frame(height: 3)
-                                }
+        HStack(alignment: .bottom, spacing: 8) {
+            ForEach(summary.days) { day in
+                VStack(spacing: 8) {
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        VStack(spacing: blockSpacing) {
+                            ForEach(day.completions.reversed()) { completion in
+                                WeeklyExerciseBlock(completion: completion,
+                                                    height: (chartHeight - CGFloat(maximum - 1) * blockSpacing) / CGFloat(maximum))
+                            }
+                            if day.completions.isEmpty {
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(.quaternary).frame(height: 3)
                             }
                         }
-                        .frame(height: chartHeight)
-                        SummaryDayLabel(date: day.date, today: today)
                     }
-                    .frame(maxWidth: .infinity)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityLabel(day.date.formatted(.dateTime.weekday(.wide).month().day()))
-                    .accessibilityValue("\(day.completions.count) completed exercises")
+                    .frame(height: chartHeight)
+                    SummaryDayLabel(date: day.date, today: today)
                 }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(day.date.formatted(.dateTime.weekday(.wide).month().day()))
+                .accessibilityValue("\(day.completions.count) completed exercises")
             }
-            .accessibilityIdentifier("weeklyExerciseChart")
         }
-        .padding(20)
-        .statisticCardBackground()
+        .accessibilityIdentifier("weeklyExerciseChart")
     }
 }
 
@@ -305,44 +283,5 @@ struct SummaryDayLabel: View {
         Text(date, format: .dateTime.weekday(.narrow))
             .font(.caption.weight(isToday ? .bold : .regular))
             .foregroundStyle(isToday ? Color.accentColor : .secondary)
-    }
-}
-
-struct SummaryStatistics: View {
-    let summary: WeeklySummary
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    var body: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
-        layout {
-            SummaryStatisticCard(title: String(localized: "Completed Exercises"), value: summary.total, symbol: "checkmark.circle")
-            SummaryStatisticCard(title: String(localized: "Active Days"), value: summary.activeDays, symbol: "calendar")
-        }
-    }
-}
-
-struct SummaryStatisticCard: View {
-    let title: String
-    let value: Int?
-    let symbol: String
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-            .fill(Color(uiColor: .secondarySystemGroupedBackground))
-            .aspectRatio(1, contentMode: .fit)
-            .subtleCardShadow()
-            .overlay(alignment: .topLeading) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Image(systemName: symbol).foregroundStyle(.secondary)
-                    Text("\(value ?? 0)").font(.largeTitle.bold()).monospacedDigit()
-                        .redacted(reason: value == nil ? .placeholder : [])
-                    Text(title).font(.subheadline).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(20)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
-            .accessibilityElement(children: .combine)
     }
 }

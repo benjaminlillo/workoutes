@@ -408,6 +408,23 @@
         }
       }
     },
+    "%lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de %lld"
+          }
+        }
+      }
+    },
     "%lld reps": {
       "extractionState": "manual",
       "localizations": {
@@ -3774,6 +3791,23 @@
       },
       "generatesSymbol": false
     },
+    "Inactive": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inactive"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inactivo"
+          }
+        }
+      }
+    },
     "Include exercise history?": {
       "extractionState": "manual",
       "localizations": {
@@ -4313,6 +4347,23 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Muscle Tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muscle Tags"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiquetas musculares"
+          }
+        }
+      }
     },
     "Name": {
       "extractionState": "manual",
@@ -5825,6 +5876,23 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Select Week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select Week"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionar semana"
+          }
+        }
+      }
     },
     "Selected": {
       "extractionState": "manual",
@@ -7462,6 +7530,23 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Weekly Totals": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly Totals"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totales semanales"
+          }
+        }
+      }
     },
     "Weight": {
       "extractionState": "manual",

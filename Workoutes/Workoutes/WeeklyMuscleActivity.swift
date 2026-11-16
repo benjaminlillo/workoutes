@@ -20,12 +20,11 @@ enum MuscleBodySide: String, CaseIterable {
     var columnCenter: CGFloat { self == .front ? 0.25 : 0.75 }
 }
 
-/// Shares the same layout between the chart and its loading placeholder.
 enum MuscleBodyLayout {
     static let height: CGFloat = 280
 
-    static func frame(for side: MuscleBodySide, in size: CGSize) -> CGRect {
-        let height = min(Self.height, size.width, size.height)
+    static func frame(for side: MuscleBodySide, in size: CGSize, maximumHeight: CGFloat = height) -> CGRect {
+        let height = min(maximumHeight, size.width, size.height)
         let center = size.width * side.columnCenter
         return CGRect(x: center - height / 4, y: (size.height - height) / 2,
                       width: height / 2, height: height)
