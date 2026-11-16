@@ -1,9 +1,11 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ExerciseActivityController.self) private var exerciseActivity
+    @AppStorage("appAccentColor") private var accentColorRawValue: String = ThemeColor.indigo.rawValue
     @Query(sort: \WorkoutExercise.title) private var allExercises: [WorkoutExercise]
     @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     
@@ -88,37 +90,26 @@ struct ExerciseListView: View {
     }
     
     var body: some View {
+        let exercises = filteredExercises
+        let sections = ExerciseAlphabeticalSection.make(from: exercises)
         NavigationStack {
             ScrollViewReader { proxy in
                 List {
-                    ForEach(filteredExercises) { exercise in
-                        ExerciseCardView(
-                            exercise: exercise,
-                            revealHighlight: highlightedRequest?.exerciseID == exercise.persistentModelID
-                                ? highlightedRequest?.id : nil
-                        )
-                            .id(exercise.persistentModelID)
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .padding(.vertical, 10)
-                            .background {
-                                if let request = navigation.revealRequest,
-                                   request.exerciseID == exercise.persistentModelID {
-                                    GeometryReader { geometry in
-                                        Color.clear.preference(
-                                            key: ExerciseRevealPositionKey.self,
-                                            value: ExerciseRevealPosition(
-                                                request: request,
-                                                frame: geometry.frame(in: .named("exerciseList"))
-                                            )
-                                        )
-                                    }
-                                }
+                    ForEach(sections) { section in
+                        Section {
+                            ForEach(section.exercises, content: exerciseRow)
+                                .onDelete { offsets in deleteExercises(offsets, from: section.exercises) }
+                        } header: {
+                            if !section.exercises.isEmpty {
+                                Text(verbatim: section.title)
                             }
+                        }
+                        .listSectionSeparator(.hidden)
+                        .sectionIndexLabel(Text(verbatim: section.title))
                     }
-                    .onDelete(perform: deleteExercises)
                 }
+                .listSectionIndexVisibility(.visible)
+                .tint(Color(uiColor: .secondaryLabel))
                 .coordinateSpace(name: "exerciseList")
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { viewportSize = $0 }
                 .onPreferenceChange(ExerciseRevealPositionKey.self) { revealPosition = $0 }
@@ -127,7 +118,7 @@ struct ExerciseListView: View {
                                        reveal: navigation.revealRequest)) {
                     guard let request = navigation.revealRequest,
                           navigation.selectedTab == .exercises,
-                          filteredExercises.contains(where: { $0.persistentModelID == request.exerciseID }) else { return }
+                          exercises.contains(where: { $0.persistentModelID == request.exerciseID }) else { return }
                     highlightedRequest = nil
                     // Let the selected tab and the newly unfiltered rows finish their layout.
                     await Task.yield()
@@ -207,6 +198,34 @@ struct ExerciseListView: View {
         }
     }
 
+    private func exerciseRow(_ exercise: WorkoutExercise) -> some View {
+        ExerciseCardView(
+            exercise: exercise,
+            revealHighlight: highlightedRequest?.exerciseID == exercise.persistentModelID
+                ? highlightedRequest?.id : nil
+        )
+        .tint(ThemeColor.resolve(accentColorRawValue).color)
+        .id(exercise.persistentModelID)
+        .listRowInsets(EdgeInsets())
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+        .padding(.vertical, 10)
+        .background {
+            if let request = navigation.revealRequest,
+               request.exerciseID == exercise.persistentModelID {
+                GeometryReader { geometry in
+                    Color.clear.preference(
+                        key: ExerciseRevealPositionKey.self,
+                        value: ExerciseRevealPosition(
+                            request: request,
+                            frame: geometry.frame(in: .named("exerciseList"))
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private func transitionFilter() {
         let change = filterChange
         guard displayedFilterChange != nil, !reduceMotion, change.reveal == nil else {
@@ -234,12 +253,45 @@ struct ExerciseListView: View {
         let reveal: ExerciseRevealRequest?
     }
 
-    private func deleteExercises(offsets: IndexSet) {
+    private func deleteExercises(_ offsets: IndexSet, from exercises: [WorkoutExercise]) {
         withAnimation {
             for index in offsets {
-                let exercise = filteredExercises[index]
+                let exercise = exercises[index]
                 modelContext.delete(exercise)
             }
+        }
+    }
+}
+
+
+@MainActor
+private struct ExerciseAlphabeticalSection: Identifiable {
+    let id: Int
+    let title: String
+    let exercises: [WorkoutExercise]
+
+    static func make(from exercises: [WorkoutExercise]) -> [Self] {
+        guard !exercises.isEmpty else { return [] }
+
+        let collation = UILocalizedIndexedCollation.current()
+        let selector = #selector(getter: Entry.title)
+        let grouped = Dictionary(grouping: exercises.map(Entry.init)) {
+            collation.section(for: $0, collationStringSelector: selector)
+        }
+        return collation.sectionTitles.enumerated().map { index, title in
+            let sorted = collation.sortedArray(from: grouped[index] ?? [], collationStringSelector: selector)
+                .compactMap { ($0 as? Entry)?.exercise }
+            return Self(id: index, title: title, exercises: sorted)
+        }
+    }
+
+    private final class Entry: NSObject {
+        let exercise: WorkoutExercise
+        @objc let title: String
+
+        init(_ exercise: WorkoutExercise) {
+            self.exercise = exercise
+            title = exercise.title.trimmingCharacters(in: .whitespacesAndNewlines)
         }
     }
 }
