@@ -18,7 +18,9 @@ struct ExerciseGroupBar: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let optionsWidth = max(52, min(geometry.size.width, 440) - 64)
+            let availableWidth = min(geometry.size.width, 440)
+            let triggerWidth = selectedGroup == nil ? 52 : min(180, availableWidth * 0.45)
+            let optionsWidth = max(52, availableWidth - triggerWidth - 12)
             // The glass resizes inside a stable full-width coordinate space. The
             // trigger must not inherit the changing proposal or it jumps during layout.
             ZStack(alignment: .trailing) {
@@ -26,7 +28,7 @@ struct ExerciseGroupBar: View {
                     .frame(width: isExpanded ? optionsWidth : 52, height: 52)
                     .glassEffect(.regular, in: .capsule)
                     .opacity(isExpanded ? 1 : 0)
-                    .padding(.trailing, 64)
+                    .padding(.trailing, triggerWidth + 12)
                     .animation(motion, value: isExpanded)
 
                 expandedBar
@@ -35,7 +37,7 @@ struct ExerciseGroupBar: View {
                     .mask(alignment: .trailing) {
                         Capsule().frame(width: isExpanded ? optionsWidth : 52, height: 52)
                     }
-                    .padding(.trailing, 64)
+                    .padding(.trailing, triggerWidth + 12)
                     .animation(motion, value: isExpanded)
                     .allowsHitTesting(isExpanded)
                     .accessibilityHidden(!isExpanded)
@@ -43,18 +45,29 @@ struct ExerciseGroupBar: View {
                 Button {
                     setExpanded(!isExpanded)
                 } label: {
-                    groupIcon(selectedGroup)
-                        .frame(width: 52, height: 52)
-                        .contentShape(.circle)
-                        .transaction { $0.animation = nil }
+                    HStack(spacing: 8) {
+                        groupIcon(selectedGroup)
+                            .frame(width: 34, height: 34)
+                        if let selectedGroup {
+                            Text(selectedGroup.name)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(1)
+                                .transition(.opacity)
+                        }
+                    }
+                    .padding(.horizontal, selectedGroup == nil ? 9 : 12)
+                    .frame(width: triggerWidth, height: 52)
+                    .clipShape(.capsule)
+                    .contentShape(.capsule)
                 }
                 .buttonStyle(.plain)
-                .glassEffect(.regular.interactive(), in: .circle)
+                .glassEffect(.regular.interactive(), in: .capsule)
                 .accessibilityLabel(isExpanded ? Text("Close") : Text("Filter by Group"))
                 .accessibilityValue(selectedGroup?.name ?? String(localized: "All Exercises"))
                 .accessibilityIdentifier(isExpanded ? "close-group-filter" : "exercise-group-filter")
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
+            .animation(motion, value: selection)
         }
         .frame(height: 52)
         .sensoryFeedback(.selection, trigger: selection)
