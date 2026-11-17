@@ -10,6 +10,7 @@ struct ExerciseListView: View {
     @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     
     @Namespace private var toolbarGlass
+    @Namespace private var addExerciseTransition
     @State private var showingAddExerciseSheet = false
     @State private var showingTagManagement = false
     @State private var isGroupFilterExpanded = false
@@ -181,6 +182,7 @@ struct ExerciseListView: View {
                         }
                         .tint(.primary)
                     }
+                    .matchedTransitionSource(id: "add-exercise", in: addExerciseTransition)
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
                         Button("Done") {
@@ -190,6 +192,7 @@ struct ExerciseListView: View {
                 }
                 .sheet(isPresented: $showingAddExerciseSheet) {
                     CreateGlobalExerciseSheet()
+                        .navigationTransition(.zoom(sourceID: "add-exercise", in: addExerciseTransition))
                 }
                 .navigationDestination(isPresented: $showingTagManagement) {
                     TagManagementView()
