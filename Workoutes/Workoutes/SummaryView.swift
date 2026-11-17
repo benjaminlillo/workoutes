@@ -71,6 +71,9 @@ struct SummaryView: View {
                             selectedWeek = newWeek == currentWeek ? nil : newWeek
                         }
                     }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NextWorkoutNoteButton()
+                    }
                 }
             }
         }

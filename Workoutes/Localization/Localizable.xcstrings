@@ -4491,6 +4491,23 @@
       },
       "generatesSymbol": false
     },
+    "Next Workout Note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Workout Note"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nota para el próximo entrenamiento"
+          }
+        }
+      }
+    },
     "Next · %lld / %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -4796,6 +4813,23 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Note saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nota guardada"
+          }
+        }
+      }
     },
     "OK": {
       "extractionState": "manual",
