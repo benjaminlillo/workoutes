@@ -7,6 +7,11 @@ struct ExerciseGroupBar: View {
     @Binding var isExpanded: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var idealNameWidth: CGFloat = 0
+
+    private let iconSize: CGFloat = 34
+    private let horizontalPadding: CGFloat = 12
+    private let iconNameSpacing: CGFloat = 8
 
     private var motion: Animation? {
         reduceMotion ? nil : .smooth(duration: 0.42)
@@ -19,8 +24,10 @@ struct ExerciseGroupBar: View {
     var body: some View {
         GeometryReader { geometry in
             let group = selectedGroup
+            let name = group?.name ?? ""
             let availableWidth = min(geometry.size.width, 440)
-            let namedWidth = min(180, availableWidth * 0.45)
+            let nameLeading = horizontalPadding + iconSize + iconNameSpacing
+            let namedWidth = min(idealNameWidth + nameLeading + horizontalPadding, min(180, availableWidth * 0.45))
             let showsName = group != nil && !isExpanded
             let triggerWidth = showsName ? namedWidth : 52
             let optionsWidth = max(52, availableWidth - 64)
@@ -51,9 +58,9 @@ struct ExerciseGroupBar: View {
                     Button {
                         setExpanded(!isExpanded)
                     } label: {
-                        groupIcon(group)
-                            .frame(width: 34, height: 34)
-                            .padding(.leading, showsName ? 12 : 9)
+                        triggerIcon(group)
+                            .frame(width: iconSize, height: iconSize)
+                            .padding(.leading, showsName ? horizontalPadding : 9)
                             .frame(width: triggerWidth, height: 52, alignment: .leading)
                             .contentShape(.capsule)
                     }
@@ -64,12 +71,17 @@ struct ExerciseGroupBar: View {
                     .accessibilityIdentifier(isExpanded ? "close-group-filter" : "exercise-group-filter")
                 }
                 .overlay(alignment: .trailing) {
+                    filterIcon
+                        .opacity(group == nil ? 1 : 0)
+                        .animation(nil, value: group == nil)
+                        .frame(width: 52, height: 52)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+                .overlay(alignment: .trailing) {
                     // Use the closed button's bounds throughout the fade so the name stays still.
-                    let nameLeading: CGFloat = 54
-                    Text(group?.name ?? "")
-                        .font(.subheadline.weight(.medium))
-                        .lineLimit(1)
-                        .frame(width: max(0, namedWidth - nameLeading - 12), alignment: .leading)
+                    groupName(name)
+                        .frame(width: max(0, namedWidth - nameLeading - horizontalPadding), alignment: .leading)
                         .padding(.leading, nameLeading)
                         .frame(width: namedWidth, height: 52, alignment: .leading)
                         .opacity(showsName ? 1 : 0)
@@ -77,7 +89,14 @@ struct ExerciseGroupBar: View {
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                 }
+                .background {
+                    groupName(name)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .hidden()
+                        .onGeometryChange(for: CGFloat.self) { $0.size.width.rounded(.up) } action: { idealNameWidth = $0 }
+                }
                 .animation(motion, value: selection)
+                .animation(motion, value: namedWidth)
                 .animation(expansionMotion, value: isExpanded)
         }
         .frame(height: 52)
@@ -89,6 +108,28 @@ struct ExerciseGroupBar: View {
         guard !reduceMotion else { return nil }
         // Fade out before the capsule crops the name, and fade back in once it has room.
         return showing ? .easeOut(duration: 0.17).delay(0.29) : .easeOut(duration: 0.08)
+    }
+
+    private func groupName(_ name: String) -> some View {
+        Text(verbatim: name)
+            .font(.subheadline.weight(.medium))
+            .lineLimit(1)
+    }
+
+    private func triggerIcon(_ group: TagGroup?) -> some View {
+        ZStack {
+            Color.clear
+            if let group {
+                ExerciseGroupIcon(group: group)
+                    .id(group.persistentModelID)
+                    .transition(.identity)
+            }
+        }
+        // Update the icon immediately and let its surrounding frame animate with the glass.
+        .transaction {
+            $0.animation = nil
+            $0.disablesAnimations = true
+        }
     }
 
     private var expandedBar: some View {
@@ -130,15 +171,13 @@ struct ExerciseGroupBar: View {
             selection = group?.persistentModelID
             setExpanded(false)
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: iconNameSpacing) {
                 groupIcon(group)
-                    .frame(width: 34, height: 34)
-                Text(group?.name ?? String(localized: "All Exercises"))
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
+                    .frame(width: iconSize, height: iconSize)
+                groupName(group?.name ?? String(localized: "All Exercises"))
                     .fixedSize(horizontal: true, vertical: false)
             }
-                .padding(.horizontal, 12)
+            .padding(.horizontal, horizontalPadding)
                 .frame(minHeight: 44)
                 .background {
                     if isSelected {
@@ -157,9 +196,13 @@ struct ExerciseGroupBar: View {
         if let group {
             ExerciseGroupIcon(group: group)
         } else {
-            Image(systemName: "line.3.horizontal.decrease")
-                .font(.system(size: ExerciseToolbarStyle.symbolSize, weight: .medium))
+            filterIcon
         }
+    }
+
+    private var filterIcon: some View {
+        Image(systemName: "line.3.horizontal.decrease")
+            .font(.system(size: ExerciseToolbarStyle.symbolSize, weight: .medium))
     }
 
     private func setExpanded(_ expanded: Bool) {
