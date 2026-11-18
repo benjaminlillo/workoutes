@@ -28,12 +28,21 @@ struct ExerciseRevealPositionKey: PreferenceKey {
 final class ExerciseNavigation {
     var selectedTab: AppTab = .summary
     var selectedGroup: TagGroup?
+    var isManagingTags = false
 
     var selectedGroupTagIDs: Set<PersistentIdentifier>? {
         guard let selectedGroup, !selectedGroup.isDeleted else { return nil }
         return selectedGroup.tagIDs
     }
     var revealRequest: ExerciseRevealRequest?
+
+    func showExercises(in group: TagGroup) {
+        guard !group.isDeleted else { return }
+        selectedGroup = group
+        revealRequest = nil
+        isManagingTags = false
+        selectedTab = .exercises
+    }
 
     func reveal(_ exercise: WorkoutExercise) {
         guard !exercise.isDeleted else { return }

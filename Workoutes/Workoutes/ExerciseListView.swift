@@ -12,7 +12,6 @@ struct ExerciseListView: View {
     @Namespace private var toolbarGlass
     @Namespace private var addExerciseTransition
     @State private var showingAddExerciseSheet = false
-    @State private var showingTagManagement = false
     @State private var isGroupFilterExpanded = false
     
     @State var navigation = ExerciseNavigation()
@@ -65,7 +64,7 @@ struct ExerciseListView: View {
                     .buttonStyle(.plain)
                     .tint(.primary)
                 Button {
-                    showingTagManagement = true
+                    navigation.isManagingTags = true
                 } label: {
                     ExerciseToolbarLabel(title: "Manage Tags", systemImage: "tag")
                 }
@@ -91,6 +90,7 @@ struct ExerciseListView: View {
     }
     
     var body: some View {
+        @Bindable var navigation = navigation
         let exercises = filteredExercises
         let sections = ExerciseAlphabeticalSection.make(from: exercises)
         NavigationStack {
@@ -194,7 +194,7 @@ struct ExerciseListView: View {
                     CreateGlobalExerciseSheet()
                         .navigationTransition(.zoom(sourceID: "add-exercise", in: addExerciseTransition))
                 }
-                .navigationDestination(isPresented: $showingTagManagement) {
+                .navigationDestination(isPresented: $navigation.isManagingTags) {
                     TagManagementView()
                 }
             }

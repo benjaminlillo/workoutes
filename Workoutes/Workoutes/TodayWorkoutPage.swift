@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import UIKit
 
 struct TodayWorkoutPage: View {
     let completions: [ExerciseCompletion]
@@ -10,6 +11,7 @@ struct TodayWorkoutPage: View {
     @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     @AppStorage(NextWorkoutNoteButton.storageKey) private var note = ""
     @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
+    @Environment(ExerciseNavigation.self) private var navigation: ExerciseNavigation?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -104,7 +106,11 @@ struct TodayWorkoutPage: View {
             NavigationStack {
                 List(groups) { group in
                     let isTrained = trained.contains(group.stableID)
-                    groupLabel(group, tint: groupColor(group, isTrained: isTrained))
+                    groupButton(group, isTrained: isTrained) {
+                        groupLabel(group, tint: groupColor(group, isTrained: isTrained))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(.rect)
+                    }
                 }
                 .navigationTitle("Groups")
                 .navigationBarTitleDisplayMode(.inline)
@@ -120,12 +126,15 @@ struct TodayWorkoutPage: View {
     private func pill(_ group: TagGroup, isTrained: Bool) -> some View {
         let tint = groupColor(group, isTrained: isTrained)
         let intensity = colorScheme == .dark ? 0.48 : 0.36
-        return groupLabel(group, tint: tint)
-            .font(.subheadline.weight(.medium))
-            .lineLimit(2)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .frame(minHeight: 52)
+        return groupButton(group, isTrained: isTrained) {
+            groupLabel(group, tint: tint)
+                .font(.subheadline.weight(.medium))
+                .lineLimit(2)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .frame(minHeight: 52)
+                .contentShape(.capsule)
+        }
             .glassEffect(.regular, in: .capsule)
             .background {
                 if let tint {
@@ -144,6 +153,19 @@ struct TodayWorkoutPage: View {
             }
     }
 
+    private func groupButton<Label: View>(_ group: TagGroup, isTrained: Bool,
+                                         @ViewBuilder label: () -> Label) -> some View {
+        Button {
+            showsGroups = false
+            navigation?.showExercises(in: group)
+        } label: {
+            label()
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: group.name))
+        .accessibilityValue(isTrained ? Text("Trained This Week") : Text("Pending This Week"))
+    }
+
     private func groupLabel(_ group: TagGroup, tint: Color?) -> some View {
         HStack(spacing: 8) {
             ExerciseGroupIcon(group: group, color: tint ?? .primary)
@@ -153,9 +175,6 @@ struct TodayWorkoutPage: View {
                     .font(.caption.weight(.semibold))
             }
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: group.name))
-        .accessibilityValue(tint == nil ? Text("Pending This Week") : Text("Trained This Week"))
     }
 
     private func groupColor(_ group: TagGroup, isTrained: Bool) -> Color? {
@@ -163,28 +182,30 @@ struct TodayWorkoutPage: View {
     }
 }
 
-private struct WorkoutGroupCloud<Capsule: View>: View {
+private struct WorkoutGroupCloud<PillContent: View>: View {
     let groups: [TagGroup]
     let theme: ThemeColor
     let isInteractive: Bool
     let revealed: Bool
     @Binding var isDragging: Bool
-    @ViewBuilder let capsule: (TagGroup) -> Capsule
+    @ViewBuilder let capsule: (TagGroup) -> PillContent
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @GestureState private var pull: WorkoutGroupCloudPull?
+    @State private var pulls: [WorkoutGroupCloudPull] = []
     @State private var capsuleFrames: [String: CGRect] = [:]
+    @State private var cloudFrame = CGRect.zero
 
     var body: some View {
         let space = "workoutGroupCloud"
-        let sample = pull
+        let samples = pulls
         let returnDuration = 0.62
         WorkoutGroupCloudLayout {
             WorkoutGroupCloudTexture(theme: theme)
-                .offset(sample?.cloudOffset ?? .zero)
-                .animation(reduceMotion ? nil : .smooth(duration: sample == nil ? returnDuration : 0.32), value: sample)
+                .offset(WorkoutGroupCloudPull.cloudOffset(for: samples))
+                .animation(reduceMotion ? nil : .smooth(duration: samples.isEmpty ? returnDuration : 0.32), value: samples)
 
             ForEach(Array(groups.enumerated()), id: \.element.stableID) { index, group in
                 let id = group.stableID
+                let ownPull = samples.first { $0.groupID == id }
                 Group {
                     let content = capsule(group).compositingGroup()
                     if isInteractive && !reduceMotion {
@@ -197,41 +218,188 @@ private struct WorkoutGroupCloud<Capsule: View>: View {
                 .offset(y: revealed || reduceMotion ? 0 : 8)
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.28).delay(Double(min(index, 12)) * 0.035),
                            value: revealed)
-                .onGeometryChange(for: CGRect.self) { geometry in
-                    geometry.frame(in: .named(space))
-                } action: { frame in
-                    capsuleFrames[id] = frame
-                }
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(space)) } action: { capsuleFrames[id] = $0 }
                 .contentShape(.capsule)
-                .highPriorityGesture(
-                    DragGesture(minimumDistance: 6, coordinateSpace: .named(space))
-                        .updating($pull) { drag, state, transaction in
-                            guard let sourceFrame = state?.sourceFrame ?? capsuleFrames[id] else { return }
-                            transaction.animation = nil
-                            state = WorkoutGroupCloudPull(groupID: id, sourceFrame: sourceFrame,
-                                                          translation: drag.translation)
-                        }
-                        .onChanged { _ in
-                            if !isDragging { isDragging = true }
-                        },
-                    isEnabled: isInteractive && (revealed || reduceMotion)
-                )
                 .visualEffect { content, geometry in
-                    guard let sample else { return content.offset(.zero) }
+                    guard !samples.isEmpty else { return content.offset(.zero) }
                     let frame = geometry.frame(in: .named(space))
                     let bounds = geometry.bounds(of: .named(space))?.size
-                    return content.offset(sample.offset(for: id, frame: frame, in: bounds))
+                    let offset = ownPull?.offset(for: id, frame: frame, in: bounds)
+                        ?? WorkoutGroupCloudPull.neighborOffset(from: samples, for: id, frame: frame, in: bounds)
+                    return content.offset(offset)
                 }
-                .animation(reduceMotion || sample?.groupID == id ? nil : .smooth(duration: sample == nil ? returnDuration : 0.54),
-                           value: sample)
-                .zIndex(sample?.groupID == id ? 1 : 0)
+                .animation(reduceMotion || ownPull != nil ? nil : .smooth(duration: samples.isEmpty ? returnDuration : 0.54),
+                           value: samples)
+                .zIndex(ownPull == nil ? 0 : 1)
             }
         }
         .coordinateSpace(name: space)
-        .onChange(of: sample != nil) { _, isPulling in
-            if !isPulling { isDragging = false }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { cloudFrame = $0 }
+        .background {
+            WorkoutGroupDrag(isEnabled: isInteractive && (revealed || reduceMotion),
+                             targetAt: dragTarget, update: updatePulls)
         }
-        .onDisappear { isDragging = false }
+        .onChange(of: isInteractive) { _, isInteractive in
+            if !isInteractive { updatePulls([]) }
+        }
+        .onDisappear { updatePulls([]) }
+    }
+
+    private func dragTarget(at point: CGPoint, excluding occupiedGroups: Set<String>) -> WorkoutGroupDragTarget? {
+        let localPoint = CGPoint(x: point.x - cloudFrame.minX, y: point.y - cloudFrame.minY)
+        return groups.lazy.compactMap { group -> WorkoutGroupDragTarget? in
+            let id = group.stableID
+            guard !occupiedGroups.contains(id), let frame = capsuleFrames[id] else { return nil }
+            let offset = WorkoutGroupCloudPull.neighborOffset(from: pulls, for: id, frame: frame, in: cloudFrame.size)
+            let presentedFrame = frame.offsetBy(dx: offset.width, dy: offset.height)
+            // Include the few points used by the capsule's idle floating motion.
+            let hitArea = Capsule().path(in: presentedFrame.insetBy(dx: -5, dy: -4))
+            guard hitArea.contains(localPoint) else { return nil }
+            return WorkoutGroupDragTarget(groupID: id, frame: frame, offset: offset)
+        }.first
+    }
+
+    private func updatePulls(_ samples: [WorkoutGroupCloudPull]) {
+        if pulls != samples { pulls = samples }
+        let dragging = !samples.isEmpty
+        if isDragging != dragging { isDragging = dragging }
+    }
+}
+
+private struct WorkoutGroupDrag: UIViewRepresentable {
+    let isEnabled: Bool
+    let targetAt: (CGPoint, Set<String>) -> WorkoutGroupDragTarget?
+    let update: ([WorkoutGroupCloudPull]) -> Void
+
+    func makeUIView(context: Context) -> WorkoutGroupDragHost {
+        WorkoutGroupDragHost()
+    }
+
+    func updateUIView(_ view: WorkoutGroupDragHost, context: Context) {
+        view.update = isEnabled ? update : nil
+        view.recognizer.targetAt = targetAt
+        view.recognizer.isEnabled = isEnabled
+    }
+
+    static func dismantleUIView(_ view: WorkoutGroupDragHost, coordinator: ()) {
+        view.recognizer.view?.removeGestureRecognizer(view.recognizer)
+    }
+}
+
+private final class WorkoutGroupDragHost: UIView {
+    let recognizer = WorkoutGroupDragRecognizer()
+    var update: (([WorkoutGroupCloudPull]) -> Void)?
+
+    init() {
+        super.init(frame: .zero)
+        isUserInteractionEnabled = false
+        recognizer.isEnabled = false
+        recognizer.addTarget(self, action: #selector(dragChanged))
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        recognizer.view?.removeGestureRecognizer(recognizer)
+        // The window receives all contacts, including those on different SwiftUI buttons.
+        window?.addGestureRecognizer(recognizer)
+    }
+
+    @objc private func dragChanged() {
+        switch recognizer.state {
+        case .began, .changed: update?(recognizer.pulls)
+        case .ended, .cancelled: update?([])
+        default: break
+        }
+    }
+}
+
+private struct WorkoutGroupDragTarget {
+    let groupID: String
+    let frame: CGRect
+    let offset: CGSize
+}
+
+/// Batch every touch in a UIKit event before publishing positions to SwiftUI.
+private final class WorkoutGroupDragRecognizer: UIGestureRecognizer {
+    private struct Contact {
+        let touch: UITouch
+        let target: WorkoutGroupDragTarget
+        let start: CGPoint
+        var pull: WorkoutGroupCloudPull?
+    }
+
+    var targetAt: ((CGPoint, Set<String>) -> WorkoutGroupDragTarget?)?
+    private var contacts: [Contact] = []
+    var pulls: [WorkoutGroupCloudPull] { contacts.compactMap(\.pull) }
+
+    override func canBePrevented(by preventingGestureRecognizer: UIGestureRecognizer) -> Bool { false }
+
+    override func shouldBeRequiredToFail(by otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // A touch on the background fails immediately, so horizontal paging can still start there.
+        guard let scrollView = otherGestureRecognizer.view as? UIScrollView else { return false }
+        return scrollView.panGestureRecognizer == otherGestureRecognizer
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesBegan(touches, with: event)
+        var occupiedGroups = Set(contacts.map(\.target.groupID))
+        for touch in touches {
+            let start = touch.location(in: touch.window)
+            guard let target = targetAt?(start, occupiedGroups) else {
+                ignore(touch, for: event)
+                continue
+            }
+            occupiedGroups.insert(target.groupID)
+            contacts.append(Contact(touch: touch, target: target, start: start))
+        }
+        if contacts.isEmpty { state = .failed }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesMoved(touches, with: event)
+        var changed = false
+        for index in contacts.indices where touches.contains(contacts[index].touch) {
+            let contact = contacts[index]
+            let point = contact.touch.location(in: contact.touch.window)
+            let dx = point.x - contact.start.x
+            let dy = point.y - contact.start.y
+            guard contact.pull != nil || hypot(dx, dy) >= 6 else { continue }
+            let target = contact.target
+            contacts[index].pull = WorkoutGroupCloudPull(
+                groupID: target.groupID, sourceFrame: target.frame,
+                translation: CGSize(width: target.offset.width + dx, height: target.offset.height + dy)
+            )
+            changed = true
+        }
+        if changed { state = state == .possible ? .began : .changed }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesEnded(touches, with: event)
+        remove(touches, cancelled: false)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesCancelled(touches, with: event)
+        remove(touches, cancelled: true)
+    }
+
+    override func reset() {
+        super.reset()
+        contacts.removeAll()
+    }
+
+    private func remove(_ touches: Set<UITouch>, cancelled: Bool) {
+        contacts.removeAll { touches.contains($0.touch) }
+        switch state {
+        case .possible:
+            if contacts.isEmpty { state = .failed }
+        case .began, .changed:
+            state = contacts.isEmpty ? (cancelled ? .cancelled : .ended) : .changed
+        default: break
+        }
     }
 }
 
@@ -242,6 +410,28 @@ private nonisolated struct WorkoutGroupCloudPull: Equatable, Sendable {
 
     var cloudOffset: CGSize {
         CGSize(width: 36 * tanh(translation.width / 108), height: 30 * tanh(translation.height / 96))
+    }
+
+    static func cloudOffset(for pulls: [Self]) -> CGSize {
+        guard !pulls.isEmpty else { return .zero }
+        let sum = pulls.reduce(into: CGSize.zero) { offset, pull in
+            let shift = pull.cloudOffset
+            offset.width += shift.width
+            offset.height += shift.height
+        }
+        return CGSize(width: sum.width / CGFloat(pulls.count), height: sum.height / CGFloat(pulls.count))
+    }
+
+    static func neighborOffset(from pulls: [Self], for id: String, frame: CGRect, in bounds: CGSize?) -> CGSize {
+        guard !pulls.isEmpty else { return .zero }
+        if pulls.count == 1 { return pulls[0].offset(for: id, frame: frame, in: bounds) }
+        let sum = pulls.reduce(into: CGSize.zero) { offset, pull in
+            let influence = pull.offset(for: id, frame: frame, in: bounds)
+            offset.width += influence.width
+            offset.height += influence.height
+        }
+        let falloff = sqrt(CGFloat(pulls.count))
+        return confined(CGSize(width: sum.width / falloff, height: sum.height / falloff), for: frame, in: bounds)
     }
 
     func offset(for id: String, frame: CGRect, in bounds: CGSize?) -> CGSize {

@@ -15,6 +15,30 @@ final class ExerciseNavigationTests: XCTestCase {
                         increaseLoadNextTime: false, weight: 30)
     }
 
+    func testShowingExercisesForGroupOpensTheListAndReplacesPreviousNavigation() throws {
+        let store = try container()
+        let tag = Tag(name: "Chest", colorHex: "FF8800")
+        let group = TagGroup(name: "Push", colorHex: "FF8800", tags: [tag])
+        let target = exercise("Unrelated exercise")
+        store.mainContext.insert(tag)
+        store.mainContext.insert(group)
+        store.mainContext.insert(target)
+        try store.mainContext.save()
+
+        let navigation = ExerciseNavigation()
+        navigation.reveal(target)
+        navigation.isManagingTags = true
+        navigation.selectedTab = .summary
+
+        navigation.showExercises(in: group)
+
+        XCTAssertEqual(navigation.selectedTab, .exercises)
+        XCTAssertEqual(navigation.selectedGroup, group)
+        XCTAssertEqual(navigation.selectedGroupTagIDs, [tag.persistentModelID])
+        XCTAssertFalse(navigation.isManagingTags)
+        XCTAssertNil(navigation.revealRequest)
+    }
+
     func testRevealPreservesFiltersWhenAnySelectedTagMatches() throws {
         let store = try container()
         let item = exercise("Bench Press")
