@@ -62,6 +62,7 @@ final class ExerciseActivityController {
     var showingLiveActivityPermissionAlert = false
     var errorMessage: String?
 
+    private static let cancellationDuration: TimeInterval = 10
     private static let logger = Logger(subsystem: "benjaminlillo.Workoutes", category: "LiveActivity")
     @ObservationIgnored private var activity: Activity<ExerciseActivityAttributes>?
     @ObservationIgnored private var pendingOperation: Task<Void, Never>?
@@ -106,6 +107,12 @@ final class ExerciseActivityController {
 
     func isQueued(_ exercise: WorkoutExercise) -> Bool {
         training?.run?.queuedExercise?.id == exercise.activityID
+    }
+
+    func cancellationWindow(for exercise: WorkoutExercise) -> DateInterval? {
+        guard let localExerciseID, localExerciseID == exercise.activityID,
+              currentTrainingResult == nil, let localStartedAt else { return nil }
+        return DateInterval(start: localStartedAt, duration: Self.cancellationDuration)
     }
 
     func content(for exercise: WorkoutExercise) -> ExerciseActivityAttributes.ContentState {
@@ -352,7 +359,7 @@ final class ExerciseActivityController {
         guard let session else { return nil }
         let finishedAt = now()
         let duration = finishedAt.timeIntervalSince(session.startedAt)
-        let completed = duration > 10
+        let completed = duration > Self.cancellationDuration
         if completed {
             let id = session.id
             let existing = try context.fetch(FetchDescriptor<ExerciseCompletion>(predicate: #Predicate { $0.id == id }))

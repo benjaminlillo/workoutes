@@ -52,7 +52,8 @@ struct ExerciseCardView: View {
                         ExerciseQueuedSymbol(accentColor: accentColor)
                     } else {
                         ExerciseStatusSymbol(status: exercise.isDone ? .done : (isPlaying ? .playing : .empty),
-                                             accentColor: accentColor)
+                                             accentColor: accentColor,
+                                             cancellationWindow: isPlaying ? exerciseActivity.cancellationWindow(for: exercise) : nil)
                     }
                 }
                 .buttonStyle(.borderless)
