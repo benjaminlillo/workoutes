@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum SummaryStatistic: Int, CaseIterable, Identifiable {
+nonisolated enum SummaryStatistic: Int, CaseIterable, Identifiable, Sendable {
     case muscle, week, tags, totals
 
     var id: Self { self }
@@ -15,6 +15,19 @@ enum SummaryStatistic: Int, CaseIterable, Identifiable {
     }
 }
 
+nonisolated enum SummaryPage: Hashable, Identifiable, Sendable {
+    case today
+    case statistic(SummaryStatistic)
+
+    static let all: [Self] = [.today] + SummaryStatistic.allCases.map(Self.statistic)
+    var id: Self { self }
+
+    var statistic: SummaryStatistic? {
+        if case .statistic(let statistic) = self { return statistic }
+        return nil
+    }
+}
+
 struct SummaryStatisticsPager: View {
     let summary: WeeklySummary
     let today: Date
@@ -22,23 +35,29 @@ struct SummaryStatisticsPager: View {
     let pull: Binding<MotivationalPullState>
     private let distribution: WeeklyTagDistribution
     private let activity: WeeklyMuscleActivity
+    private let cover: TodayWorkoutPage
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.layoutDirection) private var layoutDirection
     @ScaledMetric(relativeTo: .body) private var detailHeight: CGFloat = 158
     @ScaledMetric(relativeTo: .caption) private var weekdayLabelHeight: CGFloat = 24
-    @State private var position = ScrollPosition(idType: SummaryStatistic.self)
-    @State private var settledPage = SummaryStatistic.muscle
-    @State private var detailPage = SummaryStatistic.muscle
+    @Binding private var settledPage: SummaryPage
+    @State private var position = ScrollPosition(idType: SummaryPage.self)
+    @State private var detailPage: SummaryStatistic
     @State private var phase = ScrollPhase.idle
-    @State private var detailsVisible = true
+    @State private var detailsVisible = false
     @State private var fadeOutFinished = true
 
-    init(summary: WeeklySummary, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>) {
+    init(summary: WeeklySummary, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>,
+         settledPage: Binding<SummaryPage>, cover: TodayWorkoutPage) {
         self.summary = summary
         self.today = today
         self.availableHeight = availableHeight
         self.pull = pull
+        self.cover = cover
+        _settledPage = settledPage
+        _detailPage = State(initialValue: settledPage.wrappedValue.statistic ?? .muscle)
+        _detailsVisible = State(initialValue: settledPage.wrappedValue.statistic != nil)
         let distribution = WeeklyTagDistribution(summary: summary)
         self.distribution = distribution
         activity = WeeklyMuscleActivity(distribution: distribution)
@@ -52,14 +71,11 @@ struct SummaryStatisticsPager: View {
         let isHeightConstrained = cardHeight < detailHeight
         ZStack(alignment: .bottom) {
             ScrollView(.horizontal) {
-                // There are four pages. Lay them out up front so beginning a swipe
+                // Lay the pages out up front so beginning a swipe
                 // never coincides with building the next chart or compositing the bodies.
                 HStack(spacing: 0) {
-                    ForEach(SummaryStatistic.allCases) { page in
-                        visual(page, height: visualHeight)
-                            .frame(maxWidth: 520)
-                            .padding(.horizontal, 24)
-                            .frame(height: visualHeight)
+                    ForEach(SummaryPage.all) { page in
+                        pageContent(page, contentHeight: contentHeight, visualHeight: visualHeight)
                             .containerRelativeFrame(.horizontal)
                             .frame(height: availableHeight, alignment: .top)
                             .contentShape(Rectangle())
@@ -106,6 +122,21 @@ struct SummaryStatisticsPager: View {
     }
 
     @ViewBuilder
+    private func pageContent(_ page: SummaryPage, contentHeight: CGFloat, visualHeight: CGFloat) -> some View {
+        if let statistic = page.statistic {
+            visual(statistic, height: visualHeight)
+                .frame(maxWidth: 520)
+                .padding(.horizontal, 24)
+                .frame(height: visualHeight)
+        } else {
+            cover
+                .frame(maxWidth: 520)
+                .padding(.horizontal, 22)
+                .frame(height: contentHeight)
+        }
+    }
+
+    @ViewBuilder
     private func visual(_ page: SummaryStatistic, height: CGFloat) -> some View {
         switch page {
         case .muscle:
@@ -128,7 +159,7 @@ struct SummaryStatisticsPager: View {
 
     private var pageControls: some View {
         HStack(spacing: 0) {
-            ForEach(SummaryStatistic.allCases) { page in
+            ForEach(SummaryPage.all) { page in
                 Button { move(to: page) } label: {
                     Capsule()
                         .fill(page == settledPage ? Color.primary : Color.secondary.opacity(0.35))
@@ -137,28 +168,30 @@ struct SummaryStatisticsPager: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text(page.title))
+                .accessibilityLabel(page.statistic.map { Text($0.title) } ?? Text(verbatim: "Workouts"))
                 .accessibilityAddTraits(page == settledPage ? .isSelected : [])
-                .accessibilityIdentifier("summaryStatistic.\(page)")
+                .accessibilityIdentifier(page.statistic.map { "summaryStatistic.\($0)" } ?? "summaryPage.today")
             }
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: settledPage)
     }
 
-    private func page(at geometry: ScrollGeometry) -> SummaryStatistic? {
+    private func page(at geometry: ScrollGeometry) -> SummaryPage? {
         let width = geometry.containerSize.width
         guard width > 0 else { return nil }
         let physicalIndex = Int(((geometry.contentOffset.x + geometry.contentInsets.leading) / width).rounded())
-        let index = layoutDirection == .rightToLeft ? SummaryStatistic.allCases.count - 1 - physicalIndex : physicalIndex
-        return SummaryStatistic(rawValue: min(max(0, index), SummaryStatistic.allCases.count - 1))
+        let lastIndex = SummaryPage.all.count - 1
+        let index = layoutDirection == .rightToLeft ? lastIndex - physicalIndex : physicalIndex
+        return SummaryPage.all[min(max(0, index), lastIndex)]
     }
 
-    private func move(to page: SummaryStatistic) {
+    private func move(to page: SummaryPage) {
         guard page != settledPage || phase != .idle else { return }
         if reduceMotion {
             position.scrollTo(id: page)
             settledPage = page
-            detailPage = page
+            if let statistic = page.statistic { detailPage = statistic }
+            detailsVisible = page.statistic != nil
         } else {
             withAnimation(.smooth(duration: 0.34)) { position.scrollTo(id: page) }
         }
@@ -180,8 +213,8 @@ struct SummaryStatisticsPager: View {
     }
 
     private func showDetailsIfSettled() {
-        guard phase == .idle, fadeOutFinished, !detailsVisible else { return }
-        detailPage = settledPage
+        guard phase == .idle, fadeOutFinished, !detailsVisible, let statistic = settledPage.statistic else { return }
+        detailPage = statistic
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.24)) { detailsVisible = true }
     }
 }

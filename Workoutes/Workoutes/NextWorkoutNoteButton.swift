@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct NextWorkoutNoteButton: View {
-    @AppStorage("nextWorkoutNote") private var note = ""
+    static let storageKey = "nextWorkoutNote"
+    @AppStorage(NextWorkoutNoteButton.storageKey) private var note = ""
     @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
     @State private var isPresented = false
 

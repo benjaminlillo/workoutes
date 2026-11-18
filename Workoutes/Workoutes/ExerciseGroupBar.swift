@@ -155,13 +155,7 @@ struct ExerciseGroupBar: View {
     @ViewBuilder
     private func groupIcon(_ group: TagGroup?) -> some View {
         if let group {
-            if group.compositionIcons.isEmpty {
-                Image(systemName: "tag")
-                    .font(.system(size: ExerciseToolbarStyle.symbolSize, weight: .medium))
-            } else {
-                TintedMuscleComposition(icons: group.compositionIcons, color: .primary)
-                    .frame(width: 34, height: 34)
-            }
+            ExerciseGroupIcon(group: group)
         } else {
             Image(systemName: "line.3.horizontal.decrease")
                 .font(.system(size: ExerciseToolbarStyle.symbolSize, weight: .medium))
@@ -170,5 +164,23 @@ struct ExerciseGroupBar: View {
 
     private func setExpanded(_ expanded: Bool) {
         isExpanded = expanded
+    }
+}
+
+struct ExerciseGroupIcon: View {
+    let group: TagGroup
+
+    var body: some View {
+        let icons = group.compositionIcons
+        Group {
+            if icons.isEmpty {
+                Image(systemName: "tag")
+                    .font(.system(size: ExerciseToolbarStyle.symbolSize, weight: .medium))
+            } else {
+                TintedMuscleComposition(icons: icons, color: .primary)
+            }
+        }
+        .frame(width: 34, height: 34)
+        .accessibilityHidden(true)
     }
 }

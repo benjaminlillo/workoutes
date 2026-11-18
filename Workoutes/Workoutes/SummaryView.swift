@@ -52,6 +52,7 @@ struct SummaryView: View {
     var pull: Binding<MotivationalPullState>? = nil
     @State private var localPull = MotivationalPullState()
     @State private var selectedWeek: Date?
+    @State private var page = SummaryPage.today
 
     var body: some View {
         NavigationStack {
@@ -61,16 +62,18 @@ struct SummaryView: View {
                 let week = min(WeeklySummary.interval(containing: selectedWeek ?? today).start, currentWeek)
                 GeometryReader { geometry in
                     SummaryWeekContent(week: week, today: today, availableHeight: geometry.size.height,
-                                       pull: pull ?? $localPull)
+                                       pull: pull ?? $localPull, page: $page)
                 }
                 .defaultScreenBackground()
                 .navigationBarTitleDisplayMode(.inline)
+                .transparentNavigationChrome()
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        SummaryWeekSelector(week: week, today: today) { newWeek in
+                        SummaryWeekSelector(week: week, today: today, isVisible: page != .today) { newWeek in
                             selectedWeek = newWeek == currentWeek ? nil : newWeek
                         }
                     }
+                    .sharedBackgroundVisibility(.hidden)
                     ToolbarItem(placement: .topBarTrailing) {
                         NextWorkoutNoteButton()
                     }
@@ -86,51 +89,77 @@ struct SummaryView: View {
 private struct SummaryWeekSelector: View {
     let week: Date
     let today: Date
+    let isVisible: Bool
     let select: (Date) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isPresented = false
     @State private var draftWeek = Date.now
 
     var body: some View {
         let range = WeeklySummary(completions: [], date: week).dateRange(relativeTo: today)
-        Button {
-            draftWeek = week
-            isPresented = true
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "calendar")
-                Text(range).lineLimit(1)
-                Image(systemName: "chevron.down")
-                    .font(.caption2.weight(.semibold))
-            }
-            .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 4)
-        }
-        .accessibilityLabel("Select Week")
-        .accessibilityValue(range)
-        .accessibilityIdentifier("summaryWeekSelector")
-        .sheet(isPresented: $isPresented) {
-            NavigationStack {
-                ScrollView {
-                    SummaryWeekCalendar(week: $draftWeek, today: today)
-                        .frame(maxWidth: 440)
-                        .padding(.horizontal, 16)
-                    Button("This Week") { choose(today) }
-                        .padding(.vertical, 8)
-                }
-                .scrollBounceBehavior(.basedOnSize)
-                .navigationTitle("Select Week")
-                .navigationSubtitle(WeeklySummary(completions: [], date: draftWeek).dateRange(relativeTo: today))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { isPresented = false }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { choose(draftWeek) }
+        // Keep the navigation bar item mounted and animate its glass inside a stable frame.
+        label(range)
+            .fixedSize(horizontal: true, vertical: false)
+            .hidden()
+            .accessibilityHidden(true)
+            .overlay(alignment: .leading) {
+                GlassEffectContainer {
+                    if isVisible {
+                        Button {
+                            draftWeek = week
+                            isPresented = true
+                        } label: {
+                            label(range)
+                                .foregroundStyle(.tint)
+                                .contentShape(.capsule)
+                        }
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.interactive(), in: .capsule)
+                        .glassEffectTransition(.materialize)
+                        .accessibilityLabel("Select Week")
+                        .accessibilityValue(range)
+                        .accessibilityIdentifier("summaryWeekSelector")
                     }
                 }
+                .animation(reduceMotion ? nil : .smooth(duration: 0.35), value: isVisible)
+                .allowsHitTesting(isVisible)
+                .accessibilityHidden(!isVisible)
             }
+            .sheet(isPresented: $isPresented) {
+                NavigationStack {
+                    ScrollView {
+                        SummaryWeekCalendar(week: $draftWeek, today: today)
+                            .frame(maxWidth: 440)
+                            .padding(.horizontal, 16)
+                        Button("This Week") { choose(today) }
+                            .padding(.vertical, 8)
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                    .navigationTitle("Select Week")
+                    .navigationSubtitle(WeeklySummary(completions: [], date: draftWeek).dateRange(relativeTo: today))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { isPresented = false }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { choose(draftWeek) }
+                        }
+                    }
+                }
+            }
+    }
+
+    private func label(_ range: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "calendar")
+            Text(range).lineLimit(1)
+            Image(systemName: "chevron.down")
+                .font(.caption2.weight(.semibold))
         }
+        .font(.subheadline.weight(.semibold))
+        .padding(.horizontal, 12)
+        .frame(minHeight: 44)
     }
 
     private func choose(_ date: Date) {
@@ -220,23 +249,40 @@ private struct SummaryWeekContent: View {
     let today: Date
     let availableHeight: CGFloat
     let pull: Binding<MotivationalPullState>
+    let page: Binding<SummaryPage>
+    let currentWeek: DateInterval
     @Query private var completions: [ExerciseCompletion]
 
-    init(week: Date, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>) {
+    init(week: Date, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>,
+         page: Binding<SummaryPage>) {
         self.week = week
         self.today = today
         self.availableHeight = availableHeight
         self.pull = pull
+        self.page = page
         let interval = WeeklySummary.interval(containing: week)
+        let currentWeek = WeeklySummary.interval(containing: today)
+        self.currentWeek = currentWeek
         let start = interval.start
         let end = interval.end
-        _completions = Query(filter: #Predicate<ExerciseCompletion> { $0.completedAt >= start && $0.completedAt < end },
-                             sort: \ExerciseCompletion.completedAt)
+        let currentStart = currentWeek.start
+        let currentEnd = currentWeek.end
+        if start == currentStart {
+            _completions = Query(filter: #Predicate<ExerciseCompletion> { $0.completedAt >= start && $0.completedAt < end },
+                                 sort: \ExerciseCompletion.completedAt)
+        } else {
+            // Home still needs this week's completions while browsing historical statistics.
+            _completions = Query(filter: #Predicate<ExerciseCompletion> {
+                ($0.completedAt >= start && $0.completedAt < end)
+                    || ($0.completedAt >= currentStart && $0.completedAt < currentEnd)
+            }, sort: \ExerciseCompletion.completedAt)
+        }
     }
 
     var body: some View {
+        let cover = TodayWorkoutPage(completions: completions, week: currentWeek, isVisible: page.wrappedValue == .today)
         SummaryStatisticsPager(summary: WeeklySummary(completions: completions, date: week),
-                               today: today, availableHeight: availableHeight, pull: pull)
+                               today: today, availableHeight: availableHeight, pull: pull, settledPage: page, cover: cover)
     }
 }
 

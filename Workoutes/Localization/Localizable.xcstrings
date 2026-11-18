@@ -929,6 +929,16 @@
       },
       "generatesSymbol": false
     },
+    "All Groups Trained": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los grupos entrenados"
+          }
+        }
+      }
+    },
     "All Tags": {
       "extractionState": "manual",
       "localizations": {
@@ -4598,6 +4608,16 @@
       },
       "generatesSymbol": false
     },
+    "No Groups": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin grupos"
+          }
+        }
+      }
+    },
     "No Historical Snapshot": {
       "extractionState": "manual",
       "localizations": {
@@ -5046,6 +5066,16 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Pending Groups": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupos pendientes"
+          }
+        }
+      }
     },
     "Paused": {
       "extractionState": "manual",
@@ -6916,6 +6946,16 @@
         }
       },
       "generatesSymbol": false
+    },
+    "To Train This Week": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por entrenar esta semana"
+          }
+        }
+      }
     },
     "To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs.": {
       "extractionState": "manual",
