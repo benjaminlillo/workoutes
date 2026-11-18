@@ -7971,6 +7971,56 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Matching IDs update the catalog. History is imported when included.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los IDs existentes actualizan el catálogo. Si el archivo incluye historial, también se importa."
+          }
+        }
+      }
+    },
+    "Copy Formatting Prompt": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar prompt de formato"
+          }
+        }
+      }
+    },
+    "Paste the prompt and your routines into your AI assistant.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pégalo junto a tus rutinas en tu asistente de IA."
+          }
+        }
+      }
+    },
+    "Applies to new sessions. When provided, your rating is saved in Workoutes and Apple Health.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para sesiones nuevas. Si registras el esfuerzo, se guarda en Workoutes y Salud."
+          }
+        }
+      }
+    },
+    "Choose exercises during training. Double-tap the watch to finish a set. Rest advances automatically.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige los ejercicios durante la sesión. Toca dos veces el reloj para terminar una serie. Los descansos avanzan automáticamente."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

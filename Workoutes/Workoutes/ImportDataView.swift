@@ -38,29 +38,20 @@ struct ImportDataView: View {
     
     var body: some View {
         Form {
-            Section(header: Text("JSON Format Requirements")) {
-                Text("To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs.")
+            Section {
+                Text("Matching IDs update the catalog. History is imported when included.")
                     .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .subtleFormRowShadow(.first)
-                Text("Reimporting a file updates catalog items by ID without creating duplicates. Exercise history is imported automatically when included.")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .subtleFormRowShadow(.last)
+                    .foregroundStyle(.secondary)
+                    .subtleFormRowShadow()
             }
-            
-            Section(header: Text("AI Assistant Prompt")) {
-                Text("Copy this prompt and send it to ChatGPT, Claude, or Gemini along with your text-based routines. The AI will format your routines into the exact JSON format required by Workoutes.")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .subtleFormRowShadow(.first)
-                
+
+            Section {
                 Button(action: {
                     UIPasteboard.general.string = aiPrompt
                     showCopiedAlert = true
                 }) {
                     HStack {
-                        Text("Copy AI Prompt")
+                        Text("Copy Formatting Prompt")
                         Spacer()
                         Image(systemName: "doc.on.doc")
                     }
@@ -68,9 +59,11 @@ struct ImportDataView: View {
                 .alert("Prompt Copied!", isPresented: $showCopiedAlert) {
                     Button("OK", role: .cancel) { }
                 }
-                .subtleFormRowShadow(.last)
+                .subtleFormRowShadow()
+            } footer: {
+                Text("Paste the prompt and your routines into your AI assistant.")
             }
-            
+
             Section {
                 Button(action: { showingFileImporter = true }) {
                     HStack {

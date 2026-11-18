@@ -227,7 +227,6 @@ struct SummaryStatisticDetails: View {
     let distribution: WeeklyTagDistribution
     let activity: WeeklyMuscleActivity
     var scrollsWhenConstrained = false
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         Group {
@@ -273,13 +272,7 @@ struct SummaryStatisticDetails: View {
                     WeeklyTagDistributionLegend(distribution: distribution)
                 }
             case .totals:
-                let layout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
-                    : AnyLayout(HStackLayout(alignment: .top, spacing: 20))
-                layout {
-                    metric(summary.total, label: "Completed Exercises", symbol: "checkmark.circle")
-                    metric(summary.activeDays, label: "Active Days", symbol: "calendar")
-                }
+                metric(summary.total, label: "Completed Exercises")
             }
         }
     }
@@ -288,15 +281,20 @@ struct SummaryStatisticDetails: View {
         Text(title).font(.subheadline).foregroundStyle(.secondary)
     }
 
-    private func metric(_ value: Int, label: LocalizedStringResource, symbol: String) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Label {
-                Text(value, format: .number)
-                    .font(.title2.bold().monospacedDigit())
-            } icon: {
-                Image(systemName: symbol)
-                    .foregroundStyle(Color.accentColor)
-                    .accessibilityHidden(true)
+    private func metric(_ value: Int, label: LocalizedStringResource, symbol: String? = nil) -> some View {
+        let number = Text(value, format: .number)
+            .font(.title2.bold().monospacedDigit())
+        return VStack(alignment: .leading, spacing: 5) {
+            if let symbol {
+                Label {
+                    number
+                } icon: {
+                    Image(systemName: symbol)
+                        .foregroundStyle(Color.accentColor)
+                        .accessibilityHidden(true)
+                }
+            } else {
+                number
             }
             Text(label)
                 .font(.subheadline)
@@ -316,12 +314,18 @@ private struct SummaryActiveDays: View {
     var body: some View {
         let symbolSize = min(34, availableHeight * 0.25)
         VStack(spacing: min(30, availableHeight * 0.1)) {
-            Text("\(summary.activeDays) / \(summary.days.count)")
-                .font(.system(size: min(76, availableHeight * 0.35), weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .contentTransition(.numericText())
-                .accessibilityLabel("Active Days")
-                .accessibilityValue(Text("\(summary.activeDays) of \(summary.days.count)"))
+            VStack(spacing: 4) {
+                Text("\(summary.activeDays) / \(summary.days.count)")
+                    .font(.system(size: min(76, availableHeight * 0.35), weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                Text("Active Days")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Active Days")
+            .accessibilityValue(Text("\(summary.activeDays) of \(summary.days.count)"))
 
             HStack(spacing: 0) {
                 ForEach(summary.days) { day in

@@ -274,7 +274,7 @@ struct TrainingPlanEditor: View {
                 } header: {
                     Text("End of Training")
                 } footer: {
-                    Text("When disabled, finishing training skips the effort question and saves no effort rating in Workoutes or Apple Health. Applies to new sessions.")
+                    Text("Applies to new sessions. When provided, your rating is saved in Workoutes and Apple Health.")
                 }
                 Section {
                     ForEach($plan.blocks) { $block in
@@ -284,16 +284,13 @@ struct TrainingPlanEditor: View {
                             Stepper(value: $block.seconds, in: (block.kind == .exercise ? 0 : 15)...3_600, step: 15) {
                                 Text("\(block.kind == .exercise ? String(localized: "Rest between series") : String(localized: "Duration")): \(TrainingClock.label(TimeInterval(block.seconds)))")
                             }
-                            Text(block.kind == .exercise ? "Choose the exercise during training. Its series, repetitions and weight come from your catalog."
-                                 : "Automatically moves to the next block when the timer ends.")
-                                .font(.caption).foregroundStyle(.secondary)
                         }
                         .subtleFormRowShadow(.row(at: plan.blocks.firstIndex(where: { $0.id == block.id }) ?? 0,
                                                   count: plan.blocks.count))
                     }
                     .onDelete { plan.blocks.remove(atOffsets: $0) }
                     .onMove { plan.blocks.move(fromOffsets: $0, toOffset: $1) }
-                } header: { Text("Blocks") } footer: { Text("An exercise runs for as long as you need. Double-tap the watch display to finish each series.") }
+                } header: { Text("Blocks") } footer: { Text("Choose exercises during training. Double-tap the watch to finish a set. Rest advances automatically.") }
                 Section {
                     Button("Add Exercise Block") { plan.blocks.append(.init(kind: .exercise, seconds: 120)) }
                         .subtleFormRowShadow(.first)
