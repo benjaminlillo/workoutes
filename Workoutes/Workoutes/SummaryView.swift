@@ -50,6 +50,7 @@ struct WeeklySummary {
 
 struct SummaryView: View {
     var pull: Binding<MotivationalPullState>? = nil
+    var isTabSelected = true
     @State private var localPull = MotivationalPullState()
     @State private var selectedWeek: Date?
     @State private var page = SummaryPage.today
@@ -62,7 +63,7 @@ struct SummaryView: View {
                 let week = min(WeeklySummary.interval(containing: selectedWeek ?? today).start, currentWeek)
                 GeometryReader { geometry in
                     SummaryWeekContent(week: week, today: today, availableHeight: geometry.size.height,
-                                       pull: pull ?? $localPull, page: $page)
+                                       pull: pull ?? $localPull, page: $page, isTabSelected: isTabSelected)
                 }
                 .defaultScreenBackground()
                 .navigationBarTitleDisplayMode(.inline)
@@ -250,16 +251,18 @@ private struct SummaryWeekContent: View {
     let availableHeight: CGFloat
     let pull: Binding<MotivationalPullState>
     let page: Binding<SummaryPage>
+    let isTabSelected: Bool
     let currentWeek: DateInterval
     @Query private var completions: [ExerciseCompletion]
 
     init(week: Date, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>,
-         page: Binding<SummaryPage>) {
+         page: Binding<SummaryPage>, isTabSelected: Bool) {
         self.week = week
         self.today = today
         self.availableHeight = availableHeight
         self.pull = pull
         self.page = page
+        self.isTabSelected = isTabSelected
         let interval = WeeklySummary.interval(containing: week)
         let currentWeek = WeeklySummary.interval(containing: today)
         self.currentWeek = currentWeek
@@ -280,7 +283,8 @@ private struct SummaryWeekContent: View {
     }
 
     var body: some View {
-        let cover = TodayWorkoutPage(completions: completions, week: currentWeek, isVisible: page.wrappedValue == .today)
+        let cover = TodayWorkoutPage(completions: completions, week: currentWeek,
+                                     isVisible: isTabSelected && page.wrappedValue == .today)
         SummaryStatisticsPager(summary: WeeklySummary(completions: completions, date: week),
                                today: today, availableHeight: availableHeight, pull: pull, settledPage: page, cover: cover)
     }

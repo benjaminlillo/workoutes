@@ -162,7 +162,7 @@ final class SummaryTests: XCTestCase {
         XCTAssertEqual(nextWeek.days.first?.completions.count, 1)
     }
 
-    func testPendingGroupsUseOnlyThisWeeksCompletions() throws {
+    func testTrainedGroupsUseOnlyThisWeeksCompletions() throws {
         let store = try container()
         let context = store.mainContext
         let chest = Tag(name: "Chest", colorHex: "FF8800")
@@ -184,8 +184,8 @@ final class SummaryTests: XCTestCase {
             ExerciseCompletion(id: "this-week", completedAt: week.start, exercise: bench),
             ExerciseCompletion(id: "next", completedAt: week.end, exercise: row)
         ]
-        let pending = TodayWorkoutPage.pendingGroups([push, pull, upper], completions: records, week: week)
-        XCTAssertEqual(pending.map(\.stableID), [pull.stableID])
+        let trained = TodayWorkoutPage.trainedGroupIDs([push, pull, upper], completions: records, week: week)
+        XCTAssertEqual(trained, [push.stableID, upper.stableID])
     }
 
     func testBackupUpsertsCatalogAndPreservesExistingHistory() throws {

@@ -929,16 +929,6 @@
       },
       "generatesSymbol": false
     },
-    "All Groups Trained": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todos los grupos entrenados"
-          }
-        }
-      }
-    },
     "All Tags": {
       "extractionState": "manual",
       "localizations": {
@@ -5067,12 +5057,12 @@
       },
       "generatesSymbol": false
     },
-    "Pending Groups": {
+    "Pending This Week": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Grupos pendientes"
+            "value": "Pendiente esta semana"
           }
         }
       }
@@ -6947,16 +6937,6 @@
       },
       "generatesSymbol": false
     },
-    "To Train This Week": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Por entrenar esta semana"
-          }
-        }
-      }
-    },
     "To import workouts, your JSON file must follow a strict relational structure linking workouts, tags, and exercises by unique IDs.": {
       "extractionState": "manual",
       "localizations": {
@@ -7028,6 +7008,16 @@
         }
       },
       "generatesSymbol": false
+    },
+    "Trained This Week": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenado esta semana"
+          }
+        }
+      }
     },
     "Training": {
       "extractionState": "manual",

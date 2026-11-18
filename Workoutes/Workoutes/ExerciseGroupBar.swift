@@ -169,6 +169,7 @@ struct ExerciseGroupBar: View {
 
 struct ExerciseGroupIcon: View {
     let group: TagGroup
+    var color: Color = .primary
 
     var body: some View {
         let icons = group.compositionIcons
@@ -176,8 +177,9 @@ struct ExerciseGroupIcon: View {
             if icons.isEmpty {
                 Image(systemName: "tag")
                     .font(.system(size: ExerciseToolbarStyle.symbolSize, weight: .medium))
+                    .foregroundStyle(color)
             } else {
-                TintedMuscleComposition(icons: icons, color: .primary)
+                TintedMuscleComposition(icons: icons, color: color)
             }
         }
         .frame(width: 34, height: 34)

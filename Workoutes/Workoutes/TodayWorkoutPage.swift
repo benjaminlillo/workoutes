@@ -8,14 +8,20 @@ struct TodayWorkoutPage: View {
 
     @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     @AppStorage(NextWorkoutNoteButton.storageKey) private var note = ""
+    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 44
     @State private var revealed = false
     @State private var showsGroups = false
 
+    private var theme: ThemeColor { ThemeColor.resolve(accentColorRawValue) }
+    private var groupsCanFloat: Bool { isVisible && scenePhase == .active && !reduceMotion && !showsGroups }
+
     var body: some View {
-        let pending = Self.pendingGroups(groups, completions: completions, week: week)
+        let trained = Self.trainedGroupIDs(groups, completions: completions, week: week)
         let noteText = note.trimmingCharacters(in: .whitespacesAndNewlines)
 
         VStack(alignment: .leading, spacing: 12) {
@@ -23,20 +29,20 @@ struct TodayWorkoutPage: View {
                 Text(verbatim: "Workouts")
                     .font(.system(size: titleSize, weight: .bold))
                     .accessibilityAddTraits(.isHeader)
-                if !pending.isEmpty {
-                    Text("To Train This Week")
+                if !groups.isEmpty {
+                    Text("This Week")
                         .font(.body.weight(.medium))
                         .foregroundStyle(.secondary)
                 }
             }
 
-            if pending.isEmpty {
-                Text(groups.isEmpty ? LocalizedStringResource("No Groups") : "All Groups Trained")
+            if groups.isEmpty {
+                Text("No Groups")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                cloud(pending)
+                cloud(trained: trained)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
@@ -68,31 +74,37 @@ struct TodayWorkoutPage: View {
         }
     }
 
-    static func pendingGroups(_ groups: [TagGroup], completions: [ExerciseCompletion], week: DateInterval) -> [TagGroup] {
+    static func trainedGroupIDs(_ groups: [TagGroup], completions: [ExerciseCompletion], week: DateInterval) -> Set<String> {
         let trainedTagIDs = Set(completions.lazy
             .filter { $0.completedAt >= week.start && $0.completedAt < week.end }
             .flatMap { $0.exercise?.tags ?? [] }
             .map(\.persistentModelID))
-        return groups.filter { $0.tagIDs.isDisjoint(with: trainedTagIDs) }
+        return Set(groups.lazy.filter { !$0.tagIDs.isDisjoint(with: trainedTagIDs) }.map(\.stableID))
     }
 
-    private func cloud(_ groups: [TagGroup]) -> some View {
+    private func cloud(trained: Set<String>) -> some View {
         ViewThatFits(in: .vertical) {
-            PendingGroupCloudLayout {
-                PendingGroupCloudTexture()
+            WorkoutGroupCloudLayout {
+                WorkoutGroupCloudTexture(theme: theme)
                 ForEach(Array(groups.enumerated()), id: \.element.stableID) { index, group in
-                    pill(group)
-                        .compositingGroup()
-                        .opacity(revealed || reduceMotion ? 1 : 0)
-                        .offset(y: revealed || reduceMotion ? 0 : 8)
-                        .animation(reduceMotion ? nil : .easeOut(duration: 0.28).delay(Double(min(index, 12)) * 0.035),
-                                   value: revealed)
+                    Group {
+                        let capsule = pill(group, isTrained: trained.contains(group.stableID)).compositingGroup()
+                        if groupsCanFloat {
+                            capsule.modifier(WorkoutGroupDrift(index: index))
+                        } else {
+                            capsule
+                        }
+                    }
+                    .opacity(revealed || reduceMotion ? 1 : 0)
+                    .offset(y: revealed || reduceMotion ? 0 : 8)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.28).delay(Double(min(index, 12)) * 0.035),
+                               value: revealed)
                 }
             }
 
             // Keep names readable on compact screens or with a large custom catalog.
             Button { showsGroups = true } label: {
-                Text("Pending Groups")
+                Text("Groups")
                     .font(.subheadline.weight(.medium))
                     .padding(.horizontal, 14)
                     .frame(minHeight: 44)
@@ -103,12 +115,10 @@ struct TodayWorkoutPage: View {
         .sheet(isPresented: $showsGroups) {
             NavigationStack {
                 List(groups) { group in
-                    HStack(spacing: 8) {
-                        ExerciseGroupIcon(group: group)
-                        Text(group.name)
-                    }
+                    let isTrained = trained.contains(group.stableID)
+                    groupLabel(group, tint: groupColor(group, isTrained: isTrained))
                 }
-                .navigationTitle("To Train This Week")
+                .navigationTitle("Groups")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
@@ -119,27 +129,80 @@ struct TodayWorkoutPage: View {
         }
     }
 
-    private func pill(_ group: TagGroup) -> some View {
+    private func pill(_ group: TagGroup, isTrained: Bool) -> some View {
+        let tint = groupColor(group, isTrained: isTrained)
+        let intensity = colorScheme == .dark ? 0.48 : 0.36
+        return groupLabel(group, tint: tint)
+            .font(.subheadline.weight(.medium))
+            .lineLimit(2)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .frame(minHeight: 52)
+            .glassEffect(.regular, in: .capsule)
+            .background {
+                if let tint {
+                    EllipticalGradient(stops: [
+                        .init(color: tint.opacity(intensity), location: 0),
+                        .init(color: tint.opacity(intensity * 0.5), location: 0.42),
+                        .init(color: tint.opacity(intensity * 0.1), location: 0.76),
+                        .init(color: tint.opacity(0), location: 1)
+                    ])
+                    .frame(maxWidth: 180)
+                    .padding(.horizontal, -12)
+                    .padding(.vertical, -16)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
+            }
+    }
+
+    private func groupLabel(_ group: TagGroup, tint: Color?) -> some View {
         HStack(spacing: 8) {
-            ExerciseGroupIcon(group: group)
+            ExerciseGroupIcon(group: group, color: tint ?? .primary)
             Text(group.name)
-                .font(.subheadline.weight(.medium))
-                .lineLimit(2)
+            if tint != nil && differentiateWithoutColor {
+                Image(systemName: "checkmark")
+                    .font(.caption.weight(.semibold))
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .frame(minHeight: 52)
-        .glassEffect(.regular, in: .capsule)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: group.name))
+        .accessibilityValue(tint == nil ? Text("Pending This Week") : Text("Trained This Week"))
+    }
+
+    private func groupColor(_ group: TagGroup, isTrained: Bool) -> Color? {
+        isTrained ? Color(hex: group.resolvedColorHex(for: theme)) : nil
     }
 }
 
-private struct PendingGroupCloudTexture: View {
-    @AppStorage("appAccentColor") private var accentColorRawValue = ThemeColor.indigo.rawValue
+private struct WorkoutGroupDrift: ViewModifier {
+    let index: Int
+    @State private var isDrifting = false
+
+    func body(content: Content) -> some View {
+        // Keep each excursion smaller than the gap between neighboring capsules.
+        let horizontal: CGFloat = index.isMultiple(of: 2) ? 4.5 : -4.5
+        let vertical: CGFloat = index % 4 < 2 ? -3.5 : 3.5
+        return content
+            .offset(x: isDrifting ? horizontal : 0)
+            .animation(.easeInOut(duration: 4.6 + Double(index % 5) * 0.47).repeatForever(), value: isDrifting)
+            .offset(y: isDrifting ? vertical : 0)
+            .animation(.easeInOut(duration: 3.8 + Double((index + 2) % 4) * 0.63).repeatForever(), value: isDrifting)
+            .task {
+                // Start after the capsule has rendered and its entrance has begun.
+                try? await Task.sleep(for: .milliseconds(760))
+                guard !Task.isCancelled else { return }
+                isDrifting = true
+            }
+    }
+}
+
+private struct WorkoutGroupCloudTexture: View {
+    let theme: ThemeColor
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        let tint = Color(hex: ThemeColor.resolve(accentColorRawValue).hex(for: colorScheme))
+        let tint = Color(hex: theme.hex(for: colorScheme))
         let strength = colorScheme == .dark ? 0.32 : 0.22
         Canvas { context, size in
             let spacing: CGFloat = 9
@@ -168,7 +231,7 @@ private struct PendingGroupCloudTexture: View {
     }
 }
 
-private struct PendingGroupCloudLayout: Layout {
+private struct WorkoutGroupCloudLayout: Layout {
     private let spacing: CGFloat = 10
     private let anchors: [CGFloat] = [0.63, 0.17, 0.85, 0.40, 0.13, 0.74, 0.30, 0.81]
 

@@ -17,7 +17,7 @@ struct ContentView: View {
         @Bindable var exerciseActivity = exerciseActivity
         TabView(selection: $navigation.selectedTab) {
             Tab(value: AppTab.summary) {
-                SummaryView(pull: $motivationalPull)
+                SummaryView(pull: $motivationalPull, isTabSelected: navigation.selectedTab == .summary)
             } label: {
                 Image(systemName: "house.fill").accessibilityLabel("Summary")
             }
