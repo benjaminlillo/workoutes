@@ -33,6 +33,7 @@ struct SummaryStatisticsPager: View {
     let today: Date
     let availableHeight: CGFloat
     let pull: Binding<MotivationalPullState>
+    private let isCloudDragging: Binding<Bool>
     private let distribution: WeeklyTagDistribution
     private let activity: WeeklyMuscleActivity
     private let cover: TodayWorkoutPage
@@ -49,11 +50,12 @@ struct SummaryStatisticsPager: View {
     @State private var fadeOutFinished = true
 
     init(summary: WeeklySummary, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>,
-         settledPage: Binding<SummaryPage>, cover: TodayWorkoutPage) {
+         settledPage: Binding<SummaryPage>, isCloudDragging: Binding<Bool>, cover: TodayWorkoutPage) {
         self.summary = summary
         self.today = today
         self.availableHeight = availableHeight
         self.pull = pull
+        self.isCloudDragging = isCloudDragging
         self.cover = cover
         _settledPage = settledPage
         _detailPage = State(initialValue: settledPage.wrappedValue.statistic ?? .muscle)
@@ -101,7 +103,7 @@ struct SummaryStatisticsPager: View {
                 }
             }
             .accessibilityIdentifier("summaryStatisticsPager")
-            .modifier(MotivationalPullGesture(pull: pull))
+            .modifier(MotivationalPullGesture(pull: pull, isCloudDragging: isCloudDragging))
 
             SummaryStatisticDetails(page: detailPage, summary: summary, distribution: distribution, activity: activity,
                                     scrollsWhenConstrained: isHeightConstrained)

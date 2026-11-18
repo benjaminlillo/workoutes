@@ -254,6 +254,7 @@ private struct SummaryWeekContent: View {
     let isTabSelected: Bool
     let currentWeek: DateInterval
     @Query private var completions: [ExerciseCompletion]
+    @State private var isCloudDragging = false
 
     init(week: Date, today: Date, availableHeight: CGFloat, pull: Binding<MotivationalPullState>,
          page: Binding<SummaryPage>, isTabSelected: Bool) {
@@ -284,9 +285,11 @@ private struct SummaryWeekContent: View {
 
     var body: some View {
         let cover = TodayWorkoutPage(completions: completions, week: currentWeek,
-                                     isVisible: isTabSelected && page.wrappedValue == .today)
+                                     isVisible: isTabSelected && page.wrappedValue == .today,
+                                     isCloudDragging: $isCloudDragging)
         SummaryStatisticsPager(summary: WeeklySummary(completions: completions, date: week),
-                               today: today, availableHeight: availableHeight, pull: pull, settledPage: page, cover: cover)
+                               today: today, availableHeight: availableHeight, pull: pull, settledPage: page,
+                               isCloudDragging: $isCloudDragging, cover: cover)
     }
 }
 

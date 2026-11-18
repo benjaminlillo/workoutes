@@ -102,6 +102,7 @@ struct EmojiParticle: Identifiable {
 struct MotivationalPullGesture: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
     @Binding var pull: MotivationalPullState
+    let isCloudDragging: Binding<Bool>
     @GestureState private var isDragging = false
     @State private var isPullingDown: Bool?
 
@@ -111,6 +112,11 @@ struct MotivationalPullGesture: ViewModifier {
             DragGesture(minimumDistance: 12)
                 .updating($isDragging) { _, dragging, _ in dragging = true }
                 .onChanged { drag in
+                    if isCloudDragging.wrappedValue {
+                        endPull()
+                        isPullingDown = false
+                        return
+                    }
                     if isPullingDown == nil {
                         isPullingDown = drag.translation.height > abs(drag.translation.width)
                         if isPullingDown == true { pull.beginGesture() }
@@ -120,10 +126,7 @@ struct MotivationalPullGesture: ViewModifier {
         )
         .onChange(of: isDragging) { _, dragging in
             guard !dragging else { return }
-            if isPullingDown == true {
-                pull.endGesture()
-                pull.updateDistance(0)
-            }
+            endPull()
             isPullingDown = nil
         }
         .sensoryFeedback(.impact(weight: .heavy, intensity: 1), trigger: pull.hapticTrigger)
@@ -140,6 +143,12 @@ struct MotivationalPullGesture: ViewModifier {
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { pull.reset() }
         }
+    }
+
+    private func endPull() {
+        guard isPullingDown == true else { return }
+        pull.endGesture()
+        pull.updateDistance(0)
     }
 }
 

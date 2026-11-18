@@ -5,6 +5,7 @@ struct TodayWorkoutPage: View {
     let completions: [ExerciseCompletion]
     let week: DateInterval
     let isVisible: Bool
+    @Binding var isCloudDragging: Bool
 
     @Query(sort: \TagGroup.name) private var groups: [TagGroup]
     @AppStorage(NextWorkoutNoteButton.storageKey) private var note = ""
@@ -18,7 +19,7 @@ struct TodayWorkoutPage: View {
     @State private var showsGroups = false
 
     private var theme: ThemeColor { ThemeColor.resolve(accentColorRawValue) }
-    private var groupsCanFloat: Bool { isVisible && scenePhase == .active && !reduceMotion && !showsGroups }
+    private var isCloudInteractive: Bool { isVisible && scenePhase == .active && !showsGroups }
 
     var body: some View {
         let trained = Self.trainedGroupIDs(groups, completions: completions, week: week)
@@ -84,22 +85,9 @@ struct TodayWorkoutPage: View {
 
     private func cloud(trained: Set<String>) -> some View {
         ViewThatFits(in: .vertical) {
-            WorkoutGroupCloudLayout {
-                WorkoutGroupCloudTexture(theme: theme)
-                ForEach(Array(groups.enumerated()), id: \.element.stableID) { index, group in
-                    Group {
-                        let capsule = pill(group, isTrained: trained.contains(group.stableID)).compositingGroup()
-                        if groupsCanFloat {
-                            capsule.modifier(WorkoutGroupDrift(index: index))
-                        } else {
-                            capsule
-                        }
-                    }
-                    .opacity(revealed || reduceMotion ? 1 : 0)
-                    .offset(y: revealed || reduceMotion ? 0 : 8)
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.28).delay(Double(min(index, 12)) * 0.035),
-                               value: revealed)
-                }
+            WorkoutGroupCloud(groups: groups, theme: theme, isInteractive: isCloudInteractive,
+                              revealed: revealed, isDragging: $isCloudDragging) { group in
+                pill(group, isTrained: trained.contains(group.stableID))
             }
 
             // Keep names readable on compact screens or with a large custom catalog.
@@ -172,6 +160,123 @@ struct TodayWorkoutPage: View {
 
     private func groupColor(_ group: TagGroup, isTrained: Bool) -> Color? {
         isTrained ? Color(hex: group.resolvedColorHex(for: theme)) : nil
+    }
+}
+
+private struct WorkoutGroupCloud<Capsule: View>: View {
+    let groups: [TagGroup]
+    let theme: ThemeColor
+    let isInteractive: Bool
+    let revealed: Bool
+    @Binding var isDragging: Bool
+    @ViewBuilder let capsule: (TagGroup) -> Capsule
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @GestureState private var pull: WorkoutGroupCloudPull?
+    @State private var capsuleFrames: [String: CGRect] = [:]
+
+    var body: some View {
+        let space = "workoutGroupCloud"
+        let sample = pull
+        let returnDuration = 0.62
+        WorkoutGroupCloudLayout {
+            WorkoutGroupCloudTexture(theme: theme)
+                .offset(sample?.cloudOffset ?? .zero)
+                .animation(reduceMotion ? nil : .smooth(duration: sample == nil ? returnDuration : 0.32), value: sample)
+
+            ForEach(Array(groups.enumerated()), id: \.element.stableID) { index, group in
+                let id = group.stableID
+                Group {
+                    let content = capsule(group).compositingGroup()
+                    if isInteractive && !reduceMotion {
+                        content.modifier(WorkoutGroupDrift(index: index))
+                    } else {
+                        content
+                    }
+                }
+                .opacity(revealed || reduceMotion ? 1 : 0)
+                .offset(y: revealed || reduceMotion ? 0 : 8)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.28).delay(Double(min(index, 12)) * 0.035),
+                           value: revealed)
+                .onGeometryChange(for: CGRect.self) { geometry in
+                    geometry.frame(in: .named(space))
+                } action: { frame in
+                    capsuleFrames[id] = frame
+                }
+                .contentShape(.capsule)
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 6, coordinateSpace: .named(space))
+                        .updating($pull) { drag, state, transaction in
+                            guard let sourceFrame = state?.sourceFrame ?? capsuleFrames[id] else { return }
+                            transaction.animation = nil
+                            state = WorkoutGroupCloudPull(groupID: id, sourceFrame: sourceFrame,
+                                                          translation: drag.translation)
+                        }
+                        .onChanged { _ in
+                            if !isDragging { isDragging = true }
+                        },
+                    isEnabled: isInteractive && (revealed || reduceMotion)
+                )
+                .visualEffect { content, geometry in
+                    guard let sample else { return content.offset(.zero) }
+                    let frame = geometry.frame(in: .named(space))
+                    let bounds = geometry.bounds(of: .named(space))?.size
+                    return content.offset(sample.offset(for: id, frame: frame, in: bounds))
+                }
+                .animation(reduceMotion || sample?.groupID == id ? nil : .smooth(duration: sample == nil ? returnDuration : 0.54),
+                           value: sample)
+                .zIndex(sample?.groupID == id ? 1 : 0)
+            }
+        }
+        .coordinateSpace(name: space)
+        .onChange(of: sample != nil) { _, isPulling in
+            if !isPulling { isDragging = false }
+        }
+        .onDisappear { isDragging = false }
+    }
+}
+
+private nonisolated struct WorkoutGroupCloudPull: Equatable, Sendable {
+    let groupID: String
+    let sourceFrame: CGRect
+    let translation: CGSize
+
+    var cloudOffset: CGSize {
+        CGSize(width: 36 * tanh(translation.width / 108), height: 30 * tanh(translation.height / 96))
+    }
+
+    func offset(for id: String, frame: CGRect, in bounds: CGSize?) -> CGSize {
+        let dragged = Self.confined(translation, for: sourceFrame, in: bounds)
+        guard id != groupID else { return dragged }
+
+        // Measure proximity in units of the two capsule sizes, including the space around them.
+        let reachX = (frame.width + sourceFrame.width) / 2 + 22
+        let reachY = (frame.height + sourceFrame.height) / 2 + 22
+        let dx = (frame.midX - sourceFrame.midX) / reachX
+        let dy = (frame.midY - sourceFrame.midY) / reachY
+        var x = dx - dragged.width / reachX
+        var y = dy - dragged.height / reachY
+        let distance = hypot(x, y)
+        let dragAmount = 1 - exp(-hypot(dragged.width, dragged.height) / 44)
+        let squaredDistance = distance * distance
+        // A wide falloff moves the surrounding capsules, with more room opening near contact.
+        let strength = dragAmount * (22 * exp(-0.45 * squaredDistance) + 36 * exp(-2.5 * squaredDistance))
+
+        // When their centers nearly coincide, favor sliding sideways into the available space.
+        let sideways = max(0, 0.29 - distance)
+        if abs(dx) > abs(dy) {
+            y += frame.midY > (bounds?.height ?? 0) / 2 ? -sideways : sideways
+        } else {
+            x += frame.midX > (bounds?.width ?? 0) / 2 ? -sideways : sideways
+        }
+        let push = strength / max(0.19, hypot(x, y))
+        let nearbyOffset = CGSize(width: x * push, height: y * push)
+        return Self.confined(nearbyOffset, for: frame, in: bounds)
+    }
+
+    private static func confined(_ offset: CGSize, for frame: CGRect, in bounds: CGSize?) -> CGSize {
+        guard let bounds else { return offset }
+        return CGSize(width: min(max(offset.width, min(0, -frame.minX)), max(0, bounds.width - frame.maxX)),
+                      height: min(max(offset.height, min(0, -frame.minY)), max(0, bounds.height - frame.maxY)))
     }
 }
 
