@@ -155,7 +155,7 @@ struct ExerciseListView: View {
                         ExerciseGroupBar(groups: groups, selection: groupSelection,
                                          isExpanded: $isGroupFilterExpanded)
                             .padding(.horizontal, 20)
-                            .padding(.bottom, 6)
+                            .padding(.bottom, 12)
                     }
                 }
                 .background { DefaultScreenBackground().ignoresSafeArea() }
