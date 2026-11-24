@@ -2,28 +2,34 @@ package com.workoutes
 
 import com.workoutes.data.AppTheme
 
-// Switching the launcher alias closes any task launched from the old alias, so it only happens while no activity is visible.
-internal class ThemeIconScheduler(private val apply: (AppTheme) -> Unit) {
+// Switching the launcher alias closes any task launched from the old alias, so it only happens once the user has left that task.
+internal class ThemeIconScheduler(
+    private val externalActivityOnTop: () -> Boolean = { false },
+    private val apply: (AppTheme) -> Unit,
+) {
     private var startedActivities = 0
+    private var recreatingActivities = 0
     private var pending: AppTheme? = null
 
-    fun request(theme: AppTheme) {
-        synchronized(this) { pending = theme }
+    @Synchronized fun request(theme: AppTheme) {
+        pending = theme
         flush()
     }
 
-    fun activityStarted() = synchronized(this) { startedActivities++ }
+    @Synchronized fun activityStarted() {
+        if (recreatingActivities > 0) recreatingActivities-- else startedActivities++
+    }
 
-    fun activityStopped(changingConfigurations: Boolean) {
-        synchronized(this) { startedActivities = maxOf(0, startedActivities - 1) }
-        if (!changingConfigurations) flush()
+    @Synchronized fun activityStopped(changingConfigurations: Boolean) {
+        if (changingConfigurations) { recreatingActivities++; return }
+        startedActivities = maxOf(0, startedActivities - 1)
+        flush()
     }
 
     private fun flush() {
-        val theme = synchronized(this) {
-            if (startedActivities > 0) return
-            pending.also { pending = null }
-        } ?: return
+        if (startedActivities > 0 || externalActivityOnTop()) return
+        val theme = pending ?: return
+        pending = null
         apply(theme)
     }
 }

@@ -6,7 +6,8 @@ import org.junit.Test
 
 class ThemeIconSchedulerTest {
     private val applied = mutableListOf<AppTheme>()
-    private val scheduler = ThemeIconScheduler { applied += it }
+    private var externalOnTop = false
+    private val scheduler = ThemeIconScheduler({ externalOnTop }) { applied += it }
 
     @Test fun appliesImmediatelyInBackground() {
         scheduler.request(AppTheme.ElectricRush)
@@ -22,16 +23,36 @@ class ThemeIconSchedulerTest {
         assertEquals(listOf(AppTheme.SunsetPop), applied)
     }
 
-    @Test fun waitsForEveryActivityAndIgnoresConfigurationChanges() {
+    @Test fun waitsForEveryActivity() {
+        scheduler.activityStarted()
         scheduler.activityStarted()
         scheduler.request(AppTheme.CherryIce)
-        scheduler.activityStopped(changingConfigurations = true)
-        assertEquals(emptyList<AppTheme>(), applied)
-        scheduler.activityStarted()
-        scheduler.activityStarted()
         scheduler.activityStopped(changingConfigurations = false)
         assertEquals(emptyList<AppTheme>(), applied)
         scheduler.activityStopped(changingConfigurations = false)
         assertEquals(listOf(AppTheme.CherryIce), applied)
+    }
+
+    @Test fun requestDuringRecreationWaitsForReplacementActivity() {
+        scheduler.activityStarted()
+        scheduler.activityStopped(changingConfigurations = true)
+        scheduler.request(AppTheme.CherryIce)
+        assertEquals(emptyList<AppTheme>(), applied)
+        scheduler.activityStarted()
+        assertEquals(emptyList<AppTheme>(), applied)
+        scheduler.activityStopped(changingConfigurations = false)
+        assertEquals(listOf(AppTheme.CherryIce), applied)
+    }
+
+    @Test fun waitsWhileExternalActivityCoversTask() {
+        scheduler.activityStarted()
+        scheduler.request(AppTheme.Ultravolt)
+        externalOnTop = true
+        scheduler.activityStopped(changingConfigurations = false)
+        assertEquals(emptyList<AppTheme>(), applied)
+        externalOnTop = false
+        scheduler.activityStarted()
+        scheduler.activityStopped(changingConfigurations = false)
+        assertEquals(listOf(AppTheme.Ultravolt), applied)
     }
 }

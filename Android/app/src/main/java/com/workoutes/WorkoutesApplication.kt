@@ -1,6 +1,7 @@
 package com.workoutes
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.Application
 import android.os.Bundle
 import com.workoutes.data.WorkoutRepository
@@ -12,9 +13,13 @@ import kotlinx.coroutines.launch
 class WorkoutesApplication : Application() {
     val repository by lazy { WorkoutRepository(this) }
     internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val themeIcon = ThemeIconScheduler { theme ->
+    private val themeIcon = ThemeIconScheduler(::externalActivityOnTop) { theme ->
         try { ThemeIconController.update(this, theme) }
         catch (error: Exception) { android.util.Log.e("Workoutes", "Could not update theme icon", error) }
+    }
+    // Pickers, camera and share sheets run on top of the app's task; switching the alias then would drop their result.
+    private fun externalActivityOnTop() = getSystemService(ActivityManager::class.java).appTasks.any { task ->
+        runCatching { task.taskInfo.topActivity?.packageName.let { it != null && it != packageName } }.getOrDefault(false)
     }
     override fun onCreate() {
         super.onCreate()

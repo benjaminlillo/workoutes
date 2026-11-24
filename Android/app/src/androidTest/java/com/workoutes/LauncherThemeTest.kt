@@ -65,4 +65,19 @@ class LauncherThemeTest {
             assertEquals(AppTheme.ElectricRush.name, repository.state.value.preferences.accent)
         }
     }
+
+    @Test fun themeChangeKeepsTaskWhilePickerIsOpen() {
+        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)!!
+        ActivityScenario.launch<MainActivity>(launch).use { scenario ->
+            runBlocking { repository.update { it.copy(preferences = it.preferences.copy(accent = AppTheme.ElectricRush.name)) } }
+            scenario.onActivity { it.startActivity(Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*")) }
+            waitFor { scenario.state == Lifecycle.State.CREATED }
+            SystemClock.sleep(1_000)
+            assertFalse(enabled(AppTheme.ElectricRush))
+            instrumentation.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+            waitFor { scenario.state == Lifecycle.State.RESUMED }
+            goHome()
+            waitFor { launcherEntries() == listOf("com.workoutes.LauncherElectricRush") }
+        }
+    }
 }
