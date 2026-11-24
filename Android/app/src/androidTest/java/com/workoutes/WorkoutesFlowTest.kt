@@ -253,11 +253,17 @@ class WorkoutesFlowTest {
         compose.onNodeWithTag("themeCarousel").performScrollToIndex(AppTheme.ElectricRush.ordinal)
         compose.onNodeWithTag("themeOption.ElectricRush").performClick()
         compose.waitUntil(10_000) { repository.state.value.preferences.accent == "ElectricRush" }
-        compose.waitUntil(10_000) {
-            compose.activity.packageManager.getComponentEnabledSetting(android.content.ComponentName(compose.activity, "com.workoutes.LauncherElectricRush")) == android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        }
         screenshot("theme-frozen-water")
-        val entries = compose.activity.packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage("com.workoutes"), 0)
+        compose.onNodeWithTag("themeCarousel").assertExists()
+        val packageManager = compose.activity.packageManager
+        val electricRush = android.content.ComponentName(compose.activity, "com.workoutes.LauncherElectricRush")
+        InstrumentationRegistry.getInstrumentation().uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+        val deadline = android.os.SystemClock.uptimeMillis() + 10_000
+        while (packageManager.getComponentEnabledSetting(electricRush) != android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            assertTrue("Launcher icon switches in the background", android.os.SystemClock.uptimeMillis() < deadline)
+            android.os.SystemClock.sleep(100)
+        }
+        val entries = packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage("com.workoutes"), 0)
         assertEquals(listOf("com.workoutes.LauncherElectricRush"), entries.map { it.activityInfo.name })
     }
     @Test fun historicalPreviewsWeekNavigationAndDeletion() {
