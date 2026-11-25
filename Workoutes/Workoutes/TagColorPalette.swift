@@ -18,6 +18,10 @@ enum TagColorPalette: String, CaseIterable, Identifiable {
         case .cobaltHeat: colors = ["5E87CC", "53A6AB", "9388C8", "DC8181", "EAA06A", "D2B56A", "CE625A"]
         case .cherryIce: colors = ["6999CF", "5FBFBA", "B08EC7", "DC7A98", "E5A28C", "D6B971", "CA5557"]
         case .midnightGold: colors = ["6B8CB5", "68A7A4", "A296BF", "D38E88", "D9A573", "D9BA69", "B96960"]
+        case .aurora: colors = ["6494D6", "55B8AC", "A58AE0", "E0849A", "E6A873", "D2BE6A", "CC5F5C"]
+        case .solarFlare: colors = ["6F86E0", "5CB0AD", "9B80E0", "E8838A", "EE9C5E", "DDB660", "D4573F"]
+        case .tropicPunch: colors = ["6394D0", "4FBDB4", "A98BD0", "F07F96", "EDA66E", "DDBB66", "D65A5C"]
+        case .mintBerry: colors = ["6E93D2", "5FC9A4", "B287CC", "DE7AA4", "E5A27E", "CFC06E", "CB5560"]
         }
         switch self {
         case .blue: return colors[0]

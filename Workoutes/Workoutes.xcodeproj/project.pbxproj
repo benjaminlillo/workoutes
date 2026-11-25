@@ -540,7 +540,7 @@
 		00290BBB3003F840004D59FD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop WorkoutesIcon-ultravolt WorkoutesIcon-cobalt-heat WorkoutesIcon-cherry-ice WorkoutesIcon-midnight-gold";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop WorkoutesIcon-ultravolt WorkoutesIcon-cobalt-heat WorkoutesIcon-cherry-ice WorkoutesIcon-midnight-gold WorkoutesIcon-aurora WorkoutesIcon-solar-flare WorkoutesIcon-tropic-punch WorkoutesIcon-mint-berry";
 				ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Workoutes/Workoutes.entitlements;
@@ -578,7 +578,7 @@
 		00290BBC3003F840004D59FD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop WorkoutesIcon-ultravolt WorkoutesIcon-cobalt-heat WorkoutesIcon-cherry-ice WorkoutesIcon-midnight-gold";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "WorkoutesIcon-electric-rush WorkoutesIcon-sunset-pop WorkoutesIcon-ultravolt WorkoutesIcon-cobalt-heat WorkoutesIcon-cherry-ice WorkoutesIcon-midnight-gold WorkoutesIcon-aurora WorkoutesIcon-solar-flare WorkoutesIcon-tropic-punch WorkoutesIcon-mint-berry";
 				ASSETCATALOG_COMPILER_APPICON_NAME = WorkoutesIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Workoutes/Workoutes.entitlements;

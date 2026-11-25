@@ -110,7 +110,7 @@ class MainSyncTests {
     }
     @Test fun `retired themes migrate and all current palettes contain three colors`() {
         listOf("Primary", "Mint", "Purple", "Orange", "Blue", "Green", "Red", "unknown", null).forEach { assertEquals(AppTheme.Indigo, AppTheme.resolve(it)) }
-        assertEquals(7, AppTheme.entries.size)
+        assertEquals(11, AppTheme.entries.size)
         AppTheme.entries.forEach {
             assertEquals(it, AppTheme.resolve(it.name)); assertEquals(3, it.gradient(false).size)
             assertEquals(it.secondaryHex, it.hex(true)); assertEquals(it.hex, it.hex(false))

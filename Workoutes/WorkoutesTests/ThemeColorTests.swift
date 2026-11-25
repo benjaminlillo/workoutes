@@ -68,18 +68,22 @@ final class ThemeColorTests: XCTestCase {
 
     func testPaletteMatchesProvidedColorsInLightAndDarkMode() {
         let light = ["6C3DD1", "3D52F5", "D12D78",
-                     "5621B6", "1745A3", "AE194F", "1C2D50"]
+                     "5621B6", "1745A3", "AE194F", "1C2D50",
+                     "1F6F6B", "C2410C", "0E7C7B", "9C1F6E"]
         let dark = ["B784E8", "32D5E5", "FF8059",
-                    "B9EE4A", "FF985C", "55D6CF", "F6C85F"]
+                    "B9EE4A", "FF985C", "55D6CF", "F6C85F",
+                    "9B7BFF", "7C5CFF", "FF6B8B", "5FE3A1"]
         XCTAssertEqual(ThemeColor.allCases.map(\.hex), light)
         XCTAssertEqual(ThemeColor.allCases.map(\.secondaryHex),
                        dark)
         XCTAssertEqual(ThemeColor.allCases.map(\.tertiaryHex),
                        ["F3DDF2", "D5F66A", "FFD65C",
-                        "F0FFD0", "FFF1CB", "D9FFF7", "FFF1C7"])
+                        "F0FFD0", "FFF1CB", "D9FFF7", "FFF1C7",
+                        "D9FFE8", "EFE6FF", "FFE8C2", "E6FFF0"])
         XCTAssertEqual(ThemeColor.allCases.map(\.name),
                        ["Violet Aura", "Electric Rush", "Sunset Pop",
-                        "Ultravolt", "Cobalt Heat", "Cherry Ice", "Midnight Gold"])
+                        "Ultravolt", "Cobalt Heat", "Cherry Ice", "Midnight Gold",
+                        "Aurora", "Solar Flare", "Tropic Punch", "Mint Berry"])
         for style in [UIUserInterfaceStyle.light, .dark] {
             let actual = ThemeColor.allCases.map { theme in
                 Color(uiColor: UIColor(theme.color).resolvedColor(with: UITraitCollection(userInterfaceStyle: style))).toHex()
@@ -114,6 +118,8 @@ final class ThemeColorTests: XCTestCase {
                                    ("purple", "B784E8"), ("orange", "B784E8"), ("electricRush", "32D5E5"),
                                    ("sunsetPop", "FF8059"), ("ultravolt", "B9EE4A"), ("cobaltHeat", "FF985C"),
                                    ("cherryIce", "55D6CF"), ("midnightGold", "F6C85F"),
+                                   ("aurora", "9B7BFF"), ("solarFlare", "7C5CFF"),
+                                   ("tropicPunch", "FF6B8B"), ("mintBerry", "5FE3A1"),
                                    ("blue", "B784E8"), ("green", "B784E8"), ("red", "B784E8")] {
             defaults.set(stored, forKey: "appAccentColor")
             XCTAssertEqual(exercise.activityContent.accentColorHex, expected)
