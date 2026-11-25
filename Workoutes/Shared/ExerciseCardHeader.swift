@@ -10,24 +10,30 @@ struct ExerciseCardHeader<StatusControl: View>: View {
     let tagColors: [String]
     var tagIconNames: [String?] = []
     var tagNames: [String] = []
+    /// Live Activities have a fixed height budget, so every text row keeps a known height.
+    var compact = false
+    var detailsLineLimit = 2
     @ViewBuilder var statusControl: () -> StatusControl
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: compact ? 4 : 6) {
                 HStack(alignment: .top, spacing: 10) {
                     if !tagColors.isEmpty {
                         tagIcons
                     }
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: compact ? 2 : 6) {
                         Text(title)
                             .font(.title3.weight(.bold))
+                            .lineLimit(compact ? 1 : nil)
+                            .minimumScaleFactor(compact ? 0.75 : 1)
 
                         if !subtitle.isEmpty {
                             Text(subtitle)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(compact ? 1 : nil)
                         }
                     }
                 }
@@ -36,11 +42,11 @@ struct ExerciseCardHeader<StatusControl: View>: View {
                     HStack(alignment: .firstTextBaseline, spacing: 7) {
                         Image(systemName: "doc.text")
                         Text(details)
-                            .lineLimit(2)
+                            .lineLimit(detailsLineLimit)
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                    .padding(.top, compact ? 0 : 4)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

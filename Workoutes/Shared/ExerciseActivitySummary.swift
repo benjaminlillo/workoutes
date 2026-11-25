@@ -7,29 +7,34 @@ struct ExerciseActivitySummary: View {
 
     private var status: ExerciseStatus { state.status ?? .playing }
     private var accentColor: Color { Color(hex: state.accentColorHex ?? "B784E8") }
+    private var details: String { state.details ?? "" }
+    private var isQueued: Bool { state.isQueued == true }
+    /// The Lock Screen clips Live Activities taller than 160 points; the queue row and the note replace the subtitle.
+    private var subtitle: String { isQueued && !details.isEmpty ? "" : state.subtitle }
 
     var body: some View {
-        ExerciseCardSurface {
+        ExerciseCardSurface(compact: true) {
             ExerciseCardHeader(
-                title: state.title, subtitle: state.subtitle, details: state.details ?? "",
+                title: state.title, subtitle: subtitle, details: details,
                 increaseLoadNextTime: state.increaseLoadNextTime, accentColor: accentColor,
-                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? []
+                tagColors: state.tagColors ?? [], tagIconNames: state.tagIconNames ?? [],
+                compact: true, detailsLineLimit: isQueued ? 1 : 2
             ) {
                 statusControl
             }
-            if state.isQueued == true {
+            if isQueued {
                 ExerciseQueuedLabel(number: state.queuedExerciseNumber, accentColor: accentColor)
             }
 
             Divider()
 
-            ExerciseCardMetrics {
+            ExerciseCardMetrics(dividerHeight: 34) {
                 ExerciseMetricView(
                     systemImage: "dumbbell.fill",
                     value: "\((state.displayedWeight ?? state.weight).formatted(.number.precision(.fractionLength(0...2)))) \(state.weightUnitSymbol ?? "kg")",
                     label: String(localized: "Weight")
                 )
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .frame(maxWidth: .infinity, minHeight: 36)
 
             } sets: {
                 ExerciseMetricView(
@@ -37,7 +42,7 @@ struct ExerciseActivitySummary: View {
                     value: String(localized: "\(state.numberOfSets) sets"),
                     label: String(localized: "Sets")
                 )
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .frame(maxWidth: .infinity, minHeight: 36)
 
             } repetitions: {
                 ExerciseMetricView(
@@ -45,11 +50,12 @@ struct ExerciseActivitySummary: View {
                     value: String(localized: "\(state.reps) reps"),
                     label: String(localized: "Repetitions")
                 )
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .frame(maxWidth: .infinity, minHeight: 36)
             }
 
         }
         .foregroundStyle(.primary)
+        .dynamicTypeSize(...DynamicTypeSize.large)
         .environment(\.colorScheme, .dark)
         .frame(maxWidth: .infinity, alignment: .leading)
     }

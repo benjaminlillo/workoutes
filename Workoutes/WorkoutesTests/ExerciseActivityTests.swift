@@ -366,6 +366,25 @@ final class ExerciseActivityTests: XCTestCase {
         }
     }
 
+    func testLiveActivityCardFitsLockScreenHeightWithEveryRow() throws {
+        let note = "Warm up very slowly and keep the elbows high through the whole pull"
+        for (subtitle, details, queued) in [("Rear deltoid", note, true), ("Rear deltoid", note, false),
+                                            ("Rear deltoid", "", true), ("", note, true)] {
+            let state = ExerciseActivityAttributes.ContentState(
+                exerciseID: "preview", title: "Face pull with a very long exercise name", subtitle: subtitle,
+                numberOfSets: 3, reps: 12, weight: 22.5, increaseLoadNextTime: true,
+                details: details, tagColors: ["FF8800"], tagIconNames: [MuscleIcon.chest.rawValue],
+                accentColorHex: "F6C85F", displayedWeight: 22.5, weightUnitSymbol: "kg", status: .empty,
+                isQueued: queued, queuedExerciseNumber: 3
+            )
+            for width in [CGFloat(320), 398] {
+                let renderer = ImageRenderer(content: ExerciseActivitySummary(state: state).frame(width: width))
+                let image = try XCTUnwrap(renderer.uiImage)
+                XCTAssertLessThanOrEqual(image.size.height, 160, "subtitle: \(subtitle), note: \(!details.isEmpty), queued: \(queued), width: \(width)")
+            }
+        }
+    }
+
     func testExerciseCardRendersReferenceLayout() throws {
         let container = try makeContainer()
         let item = WorkoutExercise(

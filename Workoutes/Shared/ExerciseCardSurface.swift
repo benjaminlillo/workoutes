@@ -6,11 +6,13 @@ enum ExerciseCardStyle {
 
 /// The same card surface is used on screen and inside expanded Live Activities.
 struct ExerciseCardSurface<Content: View>: View {
+    var compact = false
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14, content: content)
-            .padding(16)
+        VStack(alignment: .leading, spacing: compact ? 6 : 14, content: content)
+            .padding(.horizontal, 16)
+            .padding(.vertical, compact ? 10 : 16)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(ExerciseCardStyle.shape)
             .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 1)
@@ -18,6 +20,7 @@ struct ExerciseCardSurface<Content: View>: View {
 }
 
 struct ExerciseCardMetrics<Weight: View, Sets: View, Repetitions: View>: View {
+    var dividerHeight: CGFloat = 42
     @ViewBuilder var weight: () -> Weight
     @ViewBuilder var sets: () -> Sets
     @ViewBuilder var repetitions: () -> Repetitions
@@ -35,7 +38,7 @@ struct ExerciseCardMetrics<Weight: View, Sets: View, Repetitions: View>: View {
     private var metricDivider: some View {
         Rectangle()
             .fill(Color.secondary.opacity(0.2))
-            .frame(width: 1, height: 42)
+            .frame(width: 1, height: dividerHeight)
     }
 }
 
