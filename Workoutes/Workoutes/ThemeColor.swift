@@ -5,6 +5,7 @@ enum ThemeColor: String, CaseIterable, Identifiable {
     // Preserve the stored identifiers for existing selections.
     case indigo, electricRush, sunsetPop
     case ultravolt, cobaltHeat, cherryIce, midnightGold
+    case aurora, solarFlare, tropicPunch, mintBerry
     
     var id: Self { self }
     
@@ -17,6 +18,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .cobaltHeat: "1745A3"
         case .cherryIce: "AE194F"
         case .midnightGold: "1C2D50"
+        case .aurora: "1F6F6B"
+        case .solarFlare: "C2410C"
+        case .tropicPunch: "0E7C7B"
+        case .mintBerry: "9C1F6E"
         }
     }
 
@@ -34,6 +39,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .cobaltHeat: "FF985C"
         case .cherryIce: "55D6CF"
         case .midnightGold: "F6C85F"
+        case .aurora: "9B7BFF"
+        case .solarFlare: "7C5CFF"
+        case .tropicPunch: "FF6B8B"
+        case .mintBerry: "5FE3A1"
         }
     }
 
@@ -47,6 +56,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .cobaltHeat: "FFF1CB"
         case .cherryIce: "D9FFF7"
         case .midnightGold: "FFF1C7"
+        case .aurora: "D9FFE8"
+        case .solarFlare: "EFE6FF"
+        case .tropicPunch: "FFE8C2"
+        case .mintBerry: "E6FFF0"
         }
     }
 
@@ -59,6 +72,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .cobaltHeat: "WorkoutesIcon-cobalt-heat"
         case .cherryIce: "WorkoutesIcon-cherry-ice"
         case .midnightGold: "WorkoutesIcon-midnight-gold"
+        case .aurora: "WorkoutesIcon-aurora"
+        case .solarFlare: "WorkoutesIcon-solar-flare"
+        case .tropicPunch: "WorkoutesIcon-tropic-punch"
+        case .mintBerry: "WorkoutesIcon-mint-berry"
         }
     }
 
@@ -79,6 +96,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .cobaltHeat: String(localized: "Cobalt Heat")
         case .cherryIce: String(localized: "Cherry Ice")
         case .midnightGold: String(localized: "Midnight Gold")
+        case .aurora: String(localized: "Aurora")
+        case .solarFlare: String(localized: "Solar Flare")
+        case .tropicPunch: String(localized: "Tropic Punch")
+        case .mintBerry: String(localized: "Mint Berry")
         }
     }
 
@@ -97,6 +118,10 @@ enum ThemeColor: String, CaseIterable, Identifiable {
         case .cobaltHeat: scheme == .dark ? "090E18" : "F9F9F7"
         case .cherryIce: scheme == .dark ? "0B0E13" : "F7FAF9"
         case .midnightGold: scheme == .dark ? "090E18" : "FAF9F5"
+        case .aurora: scheme == .dark ? "0A0E10" : "F6FAF9"
+        case .solarFlare: scheme == .dark ? "110C0C" : "FAF8F7"
+        case .tropicPunch: scheme == .dark ? "0A0F10" : "FAF9F6"
+        case .mintBerry: scheme == .dark ? "0F0B10" : "F7FAF8"
         }
     }
 

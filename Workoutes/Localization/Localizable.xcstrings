@@ -1091,6 +1091,24 @@
       },
       "generatesSymbol": false
     },
+    "Aurora": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Auto-Populate with Tags": {
       "extractionState": "manual",
       "localizations": {
@@ -4240,6 +4258,24 @@
       },
       "generatesSymbol": false
     },
+    "Mint Berry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mint Berry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menta y frambuesa"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Move Wheel to Bottom Edge": {
       "extractionState": "manual",
       "localizations": {
@@ -6253,6 +6289,24 @@
       },
       "generatesSymbol": false
     },
+    "Solar Flare": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solar Flare"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Llamarada solar"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
     "Start Training": {
       "extractionState": "manual",
       "localizations": {
@@ -7248,6 +7302,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tríceps · cabeza medial"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Tropic Punch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tropic Punch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponche tropical"
           }
         }
       },

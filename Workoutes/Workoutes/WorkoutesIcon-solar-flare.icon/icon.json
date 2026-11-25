@@ -1,0 +1,251 @@
+{
+  "groups": [
+    {
+      "name": "W · logotipo original",
+      "layers": [
+        {
+          "name": "W · grafito / marfil",
+          "fill": "automatic",
+          "blend-mode": "normal",
+          "glass": true,
+          "image-name-specializations": [
+            {
+              "appearance": "base",
+              "value": "workoutes-w-light.png"
+            },
+            {
+              "appearance": "dark",
+              "value": "workoutes-w.png"
+            },
+            {
+              "appearance": "tinted",
+              "value": "workoutes-w.png"
+            }
+          ],
+          "position-specializations": [
+            {
+              "appearance": "base",
+              "value": {
+                "scale": 0.8165869218500797,
+                "translation-in-points": [
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "scale": 0.8165869218500797,
+                "translation-in-points": [
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "scale": 0.8165869218500797,
+                "translation-in-points": [
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.25
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      },
+      "translucency-specializations": [
+        {
+          "appearance": "tinted",
+          "value": {
+            "enabled": true,
+            "value": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "name": "Textura clara · Solar Flare",
+      "layers": [
+        {
+          "name": "Grano suave",
+          "image-name": "grain-atmosphere.png",
+          "fill": "automatic",
+          "blend-mode": "soft-light",
+          "glass": false,
+          "position": {
+            "scale": 0.8165869218500797,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          },
+          "opacity": 0.12
+        }
+      ],
+      "opacity-specializations": [
+        {
+          "appearance": "dark",
+          "value": 0
+        },
+        {
+          "appearance": "tinted",
+          "value": 0
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    },
+    {
+      "name": "Fondo oscuro · Solar Flare",
+      "layers": [
+        {
+          "name": "Colores del tema",
+          "image-name": "theme-colors.svg",
+          "fill": {
+            "linear-gradient": [
+              "srgb:0.760784,0.254902,0.047059,1",
+              "srgb:0.486275,0.360784,1.000000,1"
+            ],
+            "orientation": {
+              "start": {
+                "x": 0,
+                "y": 0
+              },
+              "stop": {
+                "x": 1,
+                "y": 1
+              }
+            }
+          },
+          "blend-mode": "multiply",
+          "glass": false,
+          "position": {
+            "scale": 1,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "Textura y luz",
+          "image-name": "grain-atmosphere.png",
+          "fill": "automatic",
+          "blend-mode": "normal",
+          "glass": false,
+          "position": {
+            "scale": 0.8165869218500797,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "opacity-specializations": [
+        {
+          "appearance": "base",
+          "value": 0
+        },
+        {
+          "appearance": "dark",
+          "value": 1
+        },
+        {
+          "appearance": "tinted",
+          "value": 0
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  },
+  "fill-specializations": [
+    {
+      "appearance": "base",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.956941,0.865882,0.828471,1",
+          "srgb:0.794510,0.744314,1.000000,1"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0,
+            "y": 0
+          },
+          "stop": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.008,0.008,0.012,1",
+          "srgb:0.008,0.008,0.012,1"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0,
+            "y": 0
+          },
+          "stop": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "tinted",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.008,0.008,0.012,1",
+          "srgb:0.008,0.008,0.012,1"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0,
+            "y": 0
+          },
+          "stop": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      }
+    }
+  ]
+}

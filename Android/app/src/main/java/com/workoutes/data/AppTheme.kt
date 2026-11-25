@@ -7,7 +7,11 @@ enum class AppTheme(val label: String, val hex: String, val secondaryHex: String
     Ultravolt("Ultravolt", "5621B6", "B9EE4A", "F0FFD0"),
     CobaltHeat("Cobalt Heat", "1745A3", "FF985C", "FFF1CB"),
     CherryIce("Cherry Ice", "AE194F", "55D6CF", "D9FFF7"),
-    MidnightGold("Midnight Gold", "1C2D50", "F6C85F", "FFF1C7");
+    MidnightGold("Midnight Gold", "1C2D50", "F6C85F", "FFF1C7"),
+    Aurora("Aurora", "1F6F6B", "9B7BFF", "D9FFE8"),
+    SolarFlare("Solar Flare", "C2410C", "7C5CFF", "EFE6FF"),
+    TropicPunch("Tropic Punch", "0E7C7B", "FF6B8B", "FFE8C2"),
+    MintBerry("Mint Berry", "9C1F6E", "5FE3A1", "E6FFF0");
     fun hex(dark: Boolean) = if (dark) secondaryHex else hex
     fun gradient(@Suppress("UNUSED_PARAMETER") dark: Boolean): List<String> = listOf(hex, secondaryHex, tertiaryHex)
     companion object {
